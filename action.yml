@@ -1,0 +1,6 @@
+# action.yml
+name: 'Flask Server Container'
+description: 'Run the Flask Server for Testing'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

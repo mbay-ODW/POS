@@ -1,0 +1,31 @@
+// Order
+
+// Orders describes an order of a customer for various products.
+
+// issuer: Who was the logged in user who did that
+// terminal: from which terminal id this was done
+// orders: Orders is an array that contains the order groubed by products
+            // Every entry contains of:
+            // id
+            // an product item containing the id of the product, its name that should be printed and its category
+            // an site item containing the id of the site where to get that product as well as the name that should be printed
+            // the actual amount ordered
+// Schema_version: The version of the schema.
+// LastModified: A timestamp indicating when the product was last modified.
+// CreationTime: A timestamp indicating when the product was created.
+
+
+
+{
+    "_id": "the id",
+    "issuer": "HEIKO",
+    "terminal": "Terminal_ID",
+    "orders": [
+        {"id": 1, "product": {"id": "id of the product", "name": "name of the product", "category": "category of the product"}, "site": {"id": "id of the site", "name": "name of the site"}, "amount" : 2},
+        {"id": 2, "product": {"id": "id of the product", "name": "name of the product", "category": "category of the product"}, "site": {"id": "id of the site", "name": "name of the site"}, "amount" : 2}
+                ],
+    "state": {"delieverd": true , "lastModified": "2022-02-11 13:53:00+00:00"},
+    "schemaVersion": "1.0",
+    "creationTime": "2022-02-11 13:53:00+00:00",
+    "lastModified": "2022-02-11 13:53:00+00:00"
+}

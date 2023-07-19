@@ -1,0 +1,19 @@
+version: "3.0"
+services:
+  api:
+   build: ./RestAPI
+   hostname: api
+   container_name: RestAPI
+   ports:
+    - 3000:3000
+   deploy:
+      restart_policy:
+         condition: on-failure
+  db:
+    build: ./MongoDB
+    restart: always
+    hostname: mongodb
+    container_name: MongoDB
+    ports:
+     - 27017:27017
+  

@@ -1,0 +1,19 @@
+// Roles
+
+// Roles describe permissons a user can have:
+
+// Name: The name that is shown.
+// Permissions contains an array with the id of permissions
+// Schema_version: The version of the schema.
+// LastModified: A timestamp indicating when the product was last modified.
+// CreationTime: A timestamp indicating when the product was created.
+
+
+{
+    "_id": "ID",
+    "name": "Admin",
+    "permissions": ["id of permission", "id of permission"],
+    "schemaVersion": "1.0",
+    "lastModified": "2022-02-11 13:53:00+00:00",
+    "creationTime": "2022-02-11 13:53:00+00:00"
+}

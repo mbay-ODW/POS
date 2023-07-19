@@ -1,0 +1,33 @@
+// Products
+
+// Product describes a physical piece from one certain manufacturer.
+
+// Category: This is a string that defines the category the product belongs to.
+// Name: The name that is shown.
+// Shortname: This is a string containing the shortname of the product.
+// Active: A boolean value indicating if the product is currently in use.
+// Stock: This is an object containing the current stock of the product and an array containing the stock of the last 30 days.
+// Thresholds: This is an array containing objects with the warning, critical and info thresholds of the product.
+// Schema_version: The version of the schema.
+// LastModified: A timestamp indicating when the product was last modified.
+// CreationTime: A timestamp indicating when the product was created.
+
+
+{
+"_id": "id",
+"category": "A", // A category to cluster the articles later
+"name": "Blasfahsfkjasf", // Name that is shown
+"shortname": "yvbxp", // A short name that is displayed
+"site": { // The site where you can get that product
+    "id": "asda",  // the id for the db entry
+    "lastModified": "2022-02-11 13:53:00+00:00" //when was this last modified
+        }, 
+"active": true, // If this product is currently in use
+"stock": {"current": 10}, // Stock of the particular product currently
+"price": {"current": 5},
+"image": "Base64",
+"thresholds": {"warning": 35,"critical": 49,"info": 42}, //Thresholds that alarms in varios severities if stock value is breached
+"schemaVersion": "1.0", // scheme_version
+"lastModified": "2022-02-11 13:53:00+00:00", // When was product last modified
+"creationTime": "2022-02-11 13:53:00+00:00" // When was product created
+}

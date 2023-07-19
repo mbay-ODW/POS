@@ -1,0 +1,22 @@
+// Settings
+
+// Configuration entries that describe the different settings
+
+// Name: The name that is shown.
+// shortName: A shot name
+// category: The endpoint which is allowed to be used e.g. /orders
+// Schema_version: The version of the schema.
+// LastModified: A timestamp indicating when the product was last modified.
+// CreationTime: A timestamp indicating when the product was created.
+
+
+{
+    "_id": "id",
+    "name": "IP Adress",
+    "shortName": "A short name",
+    "category": "Network",
+    "schemaVersion": "1.0",
+    "settings":[{"key1": "value"},{"key2":"value"}],
+    "lastModified": "2022-02-11 13:53:00+00:00",
+    "creationTime": "2022-02-11 13:53:00+00:00"
+}

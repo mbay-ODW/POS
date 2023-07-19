@@ -2,9 +2,38 @@
 __pycache__/
 *.py[cod]
 *$py.class
+node_modules/
+dist/
+logs
+*.log
+npm-debug.log*
 
 # C extensions
 *.so
+
+# docker
+*.dockerfile
+.docker/
+
+
+# Environment files
+.env
+.DS_Store
+
+# NVM
+.nvm/
+# OS-specific files
+*.DS_Store
+Thumbs.db
+
+# Other
+*.pid
+*.seed
+*.pid.lock
+*.ts
+*.ts.map
+*.lock
+*.sql
 
 # Distribution / packaging
 .Python

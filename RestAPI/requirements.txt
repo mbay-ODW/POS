@@ -1,0 +1,6 @@
+pymongo
+flask
+flask_restful
+flask-expects-json
+requests
+flask-cors

@@ -1,0 +1,41 @@
+openapi: '3.0.2'
+info:
+  title: API Title
+  version: '1.0'
+servers:
+  - url: http://127.0.0.1:3001/v1
+paths:
+  /products:
+    get:
+      responses:
+        '200':
+          description: OK
+    post:
+      responses:
+        '201':
+          description: OK
+  /products/{id}:
+    get:
+      responses:
+        '201':
+          description: OK
+        '404':
+          description: Does not exist
+        '403':
+          description: NOT Allowed
+    put:
+      responses:
+        '201':
+          description: OK
+        '404':
+          description: Does not exist
+        '403':
+          description: NOT Allowed
+    delete:
+      responses:
+          '201':
+            description: OK
+          '404':
+            description: Does not exist
+          '403':
+            description: NOT Allowed

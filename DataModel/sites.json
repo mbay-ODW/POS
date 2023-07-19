@@ -1,0 +1,19 @@
+// Sites
+
+// Sites describe a location where you can buy products
+
+// Name: The name that is shown
+// shortName: A short name for printing
+// Schema_version: The version of the schema
+// LastModified: A timestamp indicating when the product was last modified
+// CreationTime: A timestamp indicating when the product was created
+
+
+{
+    "id": "asfasf",
+    "name": "Kuchentheke",
+    "shortName": "A name for printing",
+    "schemaVersion": "1.0",
+    "lastModified": "2022-02-11 13:53:00+00:00",
+    "creationTime": "2022-02-11 13:53:00+00:00"
+}

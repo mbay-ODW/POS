@@ -1,0 +1,74 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ type }} Product</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    </button>
+  </div>
+    
+  <div class="modal-body">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" class="form-control" formControlName="name" required>
+      </div>
+    
+      <div class="form-group">
+        <label for="shortName">Short Name</label>
+        <input type="text" id="shortName" class="form-control" formControlName="shortName" required>
+      </div>
+    
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" id="category" class="form-control" formControlName="category" required>
+      </div>
+    
+      <div formGroupName="site">
+        <label for="site">Site ID</label>
+        <input type="text" id="site" class="form-control" formControlName="id" required>
+      </div>
+    
+      <div class="form-group">
+        <label for="active">Active</label>
+        <input type="checkbox" id="active" formControlName="active">
+      </div>
+    
+      <div formGroupName="stock">
+        <label for="stock">Current Stock</label>
+        <input type="number" id="stock" class="form-control" formControlName="current" required>
+      </div>
+    
+      <div formGroupName="price">
+        <label for="price">Current Price</label>
+        <input type="number" id="price" class="form-control" formControlName="current" required>
+      </div>
+    
+      <p></p>
+      <div class="form-group">
+        <label for="image">Image</label>
+        <p></p>
+        <input type="file" accept="image/*" (change)="handleFileInput($event)" id="image">
+        <img *ngIf="product.image" [src]="'data:image/png;base64,'+ product.image" alt="Image preview" width="100px" height="100px">
+      </div>
+    
+      <div formGroupName="thresholds">
+        <h4>Thresholds</h4>
+        <div class="form-group">
+          <label for="warning">Warning</label>
+          <input type="number" id="warning" class="form-control" formControlName="warning" required>
+        </div>
+    
+        <div class="form-group">
+          <label for="critical">Critical</label>
+          <input type="number" id="critical" class="form-control" formControlName="critical" required>
+        </div>
+    
+        <div class="form-group">
+          <label for="info">Info</label>
+          <input type="number" id="info" class="form-control" formControlName="info" required>
+        </div>
+      </div>
+    
+      <p></p> <p></p>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>  
+  </div>
+  

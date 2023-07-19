@@ -1,0 +1,19 @@
+// Users
+
+// Users describe a user that is logged in
+
+// Name: The name that is shown.
+// its roles
+// Schema_version: The version of the schema
+// LastModified: A timestamp indicating when the product was last modified
+// CreationTime: A timestamp indicating when the product was created
+
+
+{
+    "id": "ID",
+    "name": "Hans Muster",
+    "roles": ["id of role", "id of role"],
+    "schemaVersion": "1.0",
+    "lastModified": "2022-02-11 13:53:00+00:00",
+    "creationTime": "2022-02-11 13:53:00+00:00"
+}

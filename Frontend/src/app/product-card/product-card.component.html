@@ -1,0 +1,25 @@
+<div class="card">
+  <div class="card-header" style="height: 300px; overflow: hidden;">
+      <!-- Card Header -->
+      <img [src]="'data:image/png;base64,'+ product?.image" class="card-img-top" alt="{{ product?.name }} Image">
+    </div>
+    <div class="card-body">
+      <!-- Card Content -->
+      <h5 class="card-title">{{product?.name}} - {{product?.price?.current}}</h5>
+    </div>
+    <div class="card-footer">
+      <!-- Card Footer -->
+      <small class="text-muted">{{product?.site?.id}}</small>
+    </div>
+    <div class="card-footer text-right">
+      <button class="btn btn-primary m-1" (click)="onEdit()">Edit</button>
+      <button class="btn btn-danger m-1" (click)="onDelete()">Delete</button>
+  </div>
+  </div>  
+
+  <div class="card-footer">
+    <small class="text-muted">
+      Stock: {{ product?.stock?.current }} {{ product?.thresholds?.info }}
+    </small>
+  </div>
+  
