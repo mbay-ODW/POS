@@ -18,15 +18,11 @@
 "category": "A", // A category to cluster the articles later
 "name": "Blasfahsfkjasf", // Name that is shown
 "shortname": "yvbxp", // A short name that is displayed
-"site": { // The site where you can get that product
-    "id": "asda",  // the id for the db entry
-    "lastModified": "2022-02-11 13:53:00+00:00" //when was this last modified
-        }, 
 "active": true, // If this product is currently in use
 "stock": {"current": 10}, // Stock of the particular product currently
 "price": {"current": 5},
 "image": "Base64",
-"thresholds": {"warning": 35,"critical": 49,"info": 42}, //Thresholds that alarms in varios severities if stock value is breached
+"thresholds": {"warning": 35,"info": 42}, //Thresholds that alarms in varios severities if stock value is breached
 "schemaVersion": "1.0", // scheme_version
 "lastModified": "2022-02-11 13:53:00+00:00", // When was product last modified
 "creationTime": "2022-02-11 13:53:00+00:00" // When was product created

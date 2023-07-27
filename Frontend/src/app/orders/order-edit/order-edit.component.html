@@ -1,0 +1,74 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ type }} Order</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    </button>
+  </div>
+  
+  <div class="modal-body">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+        
+      <p></p>
+      <div formGroupName="state">
+        <div class="form-group">
+            <label for="delivered">Delivered</label>
+            <p></p>
+            <div class="checkbox-lg">
+            <input type="checkbox" id="delivered" formControlName="delivered" style="margin-right: 10px; transform: scale(1.5);">
+            </div>
+          </div>
+    </div>
+    
+    <p></p>
+    <div class="form-group">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Product</th>
+            <th scope="col">Amount</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- Loop through the FormArray -->
+          <ng-container formArrayName="orders">
+            <tr *ngFor="let detail of ordersArray.controls; let i = index" [formGroupName]="i">
+              <th scope="row">{{i + 1}}</th>
+              <!-- Use form controls for product and amount -->
+              <td>
+                <input formControlName="id" hidden>
+                <div formGroupName="product">
+                  <input formControlName="id" hidden>
+                  <select formControlName="id">
+                    <option *ngFor="let product of products" [value]="product._id">{{ product.name }}</option>
+                  </select>
+                  
+                </div>
+              </td>
+              <td><input type="number" formControlName="amount"></td>
+              <td>
+                <button class="btn btn-danger" (click)="deleteOrderDetail(i)">
+                  <mat-icon>remove_shopping_cart</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+          <p></p>
+          <button type="button" class="btn btn-success" (click)="addOrderDetail()">
+            +
+          </button>
+        </tbody>
+
+      </table>
+    </div>
+
+      <div class="form-group">
+        <label for="creationTime">creationTime</label>
+        <input type="text" id="creationTime" class="form-control" formControlName="creationTime" required readonly>
+      </div>
+    
+  
+      <button type="submit" class="btn btn-primary">Save <fa-icon [icon]="faFloppyDisk"></fa-icon></button>
+    </form>  
+  </div>
+  

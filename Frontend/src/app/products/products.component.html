@@ -1,8 +1,42 @@
 <div class="container">
-    <div class="row">
-      <div class="col-md-4 mb-3" *ngFor="let product of products">
-        <app-product-card [product]="product" (editProduct)="openEditModal($event)" (deleteProduct)="openDeleteModal($event)"></app-product-card>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <input [(ngModel)]="searchFilter" placeholder="Search...">
+      <button class="btn btn-outline-secondary" type="button" id="button-addon2" (click)="resetFilter()">Reset</button>
     </div>
+  </div>
+  <div>Search Filter: {{searchFilter}}</div>
+<div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let product of filteredProducts">
+
+        <div class="card">
+
+          <div class="card-header">
+            <button type="button" [ngClass]="getStock(product)">
+              Stock <span class="badge text-bg-secondary"><fa-icon [icon]="faArrowTrendUp"></fa-icon> {{ product.stock.current }}</span>
+            </button>
+          </div>
+        
+          <div class="card-header" style="height: 300px; overflow: hidden;">
+              <!-- Card Header -->
+              <img [src]="'data:image/png;base64,'+ product.image" class="card-img-top" alt="{{ product.name }} Image">
+            </div>
+            <div class="card-body">
+              <!-- Card Content -->
+              <h5 class="card-title">{{product.name}} - {{product.price.current.toFixed(2)}}</h5>
+            </div>
+            <div class="card-footer">
+              <!-- Card Footer -->
+              <small class="text-muted">{{product._id}}</small>
+            </div>
+            <div class="card-footer text-right">
+              <button class="btn btn-primary m-1" (click)="openEditModal(product)">Edit <fa-icon [icon]="faPen"></fa-icon></button>
+              <button class="btn btn-danger m-1" (click)="openDeleteModal(product)"><fa-icon [icon]="faTrashCan"></fa-icon></button>
+          </div>
+          </div>      
+    
+      </div>
     </div>
   </div>
 

@@ -16,4 +16,17 @@ services:
     container_name: MongoDB
     ports:
      - 27017:27017
-  
+    deploy:
+      restart_policy:
+         condition: on-failure
+  frontend:
+    build: ./Frontend
+    restart: always
+    hostname: frontend
+    container_name: Frontend
+    ports:
+     - 80:80
+    deploy:
+      restart_policy:
+         condition: on-failure
+

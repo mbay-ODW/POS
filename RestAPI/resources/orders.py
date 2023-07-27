@@ -4,6 +4,7 @@ import logging
 
 class OrdersList(BaseList):
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super
@@ -15,6 +16,7 @@ class OrdersList(BaseList):
 
 class SpecificOrders(SpecificBase):
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super

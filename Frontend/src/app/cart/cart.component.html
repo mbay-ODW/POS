@@ -1,1 +1,18 @@
-<p>cart works!</p>
+<div class="cart">
+    <h2>Your Cart</h2>
+    <div *ngFor="let item of cart | keyvalue">
+        <h3>Product: {{item.value[0].shortName}}</h3>
+        <div *ngIf="item.value.length > 0">
+            <p>Product Name: {{item.value[0].name}}</p>
+            <p>Quantity: {{item.value.length}} -             {{((item.value[0].price.current || 0) * item.value.length).toFixed(2)}} €            </p>
+            <button class="btn btn-danger" (click)="removeFromCart(item.value[0])"><fa-icon [icon]="faTrashCan"></fa-icon></button>
+            <p></p>
+            <hr>
+        </div>
+        
+    </div>
+    <div>
+        Total price: {{ totalPrice.toFixed(2) }} €
+        <button class="btn btn-primary" (click)="checkout()"><fa-icon [icon]="faShoppingCart"></fa-icon> Checkout</button>
+    </div>
+</div>

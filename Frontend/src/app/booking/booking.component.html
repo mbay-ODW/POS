@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <input [(ngModel)]="searchFilter" placeholder="Search...">
+        <button class="btn btn-outline-secondary" type="button" id="button-addon2" (click)="resetFilter()">Reset</button>
+      </div>
+    </div>
+    <div>Search Filter: {{searchFilter}}</div>
+
+
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-md-9">
+
+        <div class="container">
+            <div class="row">
+              <div class="col-md-4 mb-3" *ngFor="let product of filteredProducts">
+                <app-booking-card [product]="product"></app-booking-card>
+                  <div class="card-footer text-right">
+              </div>
+            </div>
+            </div>
+          </div>
+
+      </div>
+      <div class="col-md-3">
+        <app-cart></app-cart>
+      </div>
+    </div>
+  </div>

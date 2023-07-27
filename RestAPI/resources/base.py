@@ -17,7 +17,6 @@ from functools import wraps
 
 class BaseList(Resource):
     logger = logging.getLogger('__main__.' + __name__)
-    logger.setLevel("DEBUG")
     def __init__(self):
         self.Database = Database()
     @log
@@ -63,7 +62,8 @@ class BaseList(Resource):
             # Check if the object was inserted
             if (id.inserted_id) :
                 self.logger.info(f'Document was created.')
-                return make_response(jsonify({"message": "success"}), 201)
+                self.logger.debug(f'Has the following id: {id.inserted_id}')
+                return make_response(jsonify({"message": "success", "id": str(id.inserted_id)}), 201)
             else:
                 self.logger.error(f'Document could have not been written to database.')
                 return make_response(jsonify({"message": "Document was not inserted"}), 500)

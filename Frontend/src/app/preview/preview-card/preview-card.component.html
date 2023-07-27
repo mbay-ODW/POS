@@ -1,0 +1,12 @@
+<div class="card" style="height: 200px; width: 200px; overflow: hidden;">
+    
+      <div class="card-header" style="overflow: hidden;">
+          {{order.creationTime | date:'HH:mm'}}
+        </div>
+        <div class="card-body">
+            <div *ngFor="let detail of order.orders">
+                {{detail.amount}} x {{detail.product.name}}
+              </div>
+          <h5 class="card-title"></h5>
+        </div>
+      </div>  

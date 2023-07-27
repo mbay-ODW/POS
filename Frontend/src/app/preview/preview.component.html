@@ -1,0 +1,13 @@
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="container">
+            <div class="row">
+              <div class="col-md-2 mb-5" *ngFor="let order of orders">
+
+                <app-preview-card [order]="order"></app-preview-card>
+
+            </div>
+            </div>
+
+  </div>
