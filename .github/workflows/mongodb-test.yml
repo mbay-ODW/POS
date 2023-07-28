@@ -22,8 +22,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: FILL Test DB
       run: python testing/populate_db.py
-    - name: FILL Test DB
+    - name: Test products API
       run: python testing/test_products.py
-    - name: FILL Test DB
+    - name: Test orders API
       run: python testing/test_orders.py
 

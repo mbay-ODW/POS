@@ -123,6 +123,8 @@ def test_put_order():
 
 
 def test_delete_order():
+    global product_id
+    global order_id
     product_id = create_product()
 
     payload = {
@@ -139,6 +141,7 @@ def test_delete_order():
     try:
         r = requests.post(url=URL_ORDERS, json=payload)
         data = r.json()
+        order_id = str(data['_id'])
     except:
         data = None
 
@@ -146,12 +149,33 @@ def test_delete_order():
 
     initial_stock = get_product_stock(product_id)
 
+
+    # Check if the order is retrievable from the API before deletion
+    try:
+        r = requests.get(url=URL_ORDERS + order_id)
+        data = r.json()
+    except:
+        data = None
+
+    assert r.status_code == 200
+    assert data["_id"] == order_id
+
     # Delete the order
     r = requests.delete(url=URL_ORDERS + "the id")
     assert r.status_code == 204
 
     updated_stock = get_product_stock(product_id)
     assert updated_stock == initial_stock + 4
+
+    # Check if the order is no longer retrievable from the API after deletion
+    try:
+        r = requests.get(url=URL_ORDERS + order_id)
+        data = r.json()
+    except:
+        data = None
+
+    assert r.status_code == 404
+    assert data is None
 
 
 if __name__ == "__main__":
