@@ -10,8 +10,8 @@ class Database(object):
         self.logger.debug(f'Initializing database object')
         try:
             #self.client = MongoClient(host=['localhost:27021','localhost:27022','localhost:27023',],replicaset='iLager')
-            #self.client = MongoClient(host='localhost:27017', serverSelectionTimeoutMS=1000, socketTimeoutMS=1000)
-            self.client = MongoClient(host='mongodb:27017', serverSelectionTimeoutMS=1000, socketTimeoutMS=1000)
+            self.client = MongoClient(host='localhost:27017', serverSelectionTimeoutMS=1000, socketTimeoutMS=1000)
+            #self.client = MongoClient(host='mongodb:27017', serverSelectionTimeoutMS=1000, socketTimeoutMS=1000)
             #self.client = MongoClient(port=27017, serverSelectionTimeoutMS=1000, socketTimeoutMS=1000)
             self.db=self.client.Test
         except Exception as e:

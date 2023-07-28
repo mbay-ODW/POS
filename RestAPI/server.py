@@ -49,16 +49,6 @@ except Exception as e:
     logger.error(f'Error while adding products resources: {e}')
 
 try:
-    logger.debug('Adding groups resources')
-    from resources.groups import GroupsList
-    from resources.groups import SpecificGroups
-    api.add_resource(GroupsList, '/v1/groups')
-    api.add_resource(SpecificGroups, '/v1/groups/<string:id>')
-    logger.debug('Groups resources added')
-except Exception as e:
-    logger.error(f'Error while adding groups resources: {e}')
-
-try:
     logger.debug('Adding orders resources')
     from resources.orders import OrdersList
     from resources.orders import SpecificOrders
@@ -68,25 +58,6 @@ try:
 except Exception as e:
     logger.error(f'Error while adding orders resources: {e}')
 
-try:
-    logger.debug('Adding permissions resources')
-    from resources.permissions import PermissionsList
-    from resources.permissions import SpecificPermission
-    api.add_resource(PermissionsList, '/v1/permissions')
-    api.add_resource(SpecificPermission, '/v1/permissions/<string:id>')
-    logger.debug('Permissions resources added')
-except Exception as e:
-    logger.error(f'Error while adding permissions resources: {e}')
-
-try:
-    logger.debug('Adding roles resources')
-    from resources.roles import RolesList
-    from resources.roles import SpecificRoles
-    api.add_resource(RolesList, '/v1/roles')
-    api.add_resource(SpecificRoles, '/v1/roles/<string:id>')
-    logger.debug('Roles resources added')
-except Exception as e:
-    logger.error(f'Error while adding roles resources: {e}')
 
 try:
     logger.debug('Adding settings resources')
@@ -97,36 +68,6 @@ try:
     logger.debug('Settings resources added')
 except Exception as e:
     logger.error(f'Error while adding settings resources: {e}')
-
-try:
-    logger.debug('Adding sites resources')
-    from resources.sites import SitesList
-    from resources.sites import SpecificSites
-    api.add_resource(SitesList, '/v1/sites')
-    api.add_resource(SpecificSites, '/v1/sites/<string:id>')
-    logger.debug('Sites resources added')
-except Exception as e:
-    logger.error(f'Error while adding sites resources: {e}')
-
-try:
-    logger.debug('Adding terminals resources')
-    from resources.terminals import TerminalList
-    from resources.terminals import SpecificTerminal
-    api.add_resource(TerminalList, '/v1/terminals')
-    api.add_resource(SpecificTerminal, '/v1/terminals/<string:id>')
-    logger.debug('Terminals resources added')
-except Exception as e:
-    logger.error(f'Error while adding terminals resources: {e}')
-
-try:
-    logger.debug('Adding users resources')
-    from resources.users import UsersList
-    from resources.users import SpecificUsers
-    api.add_resource(UsersList, '/v1/users')
-    api.add_resource(SpecificUsers, '/v1/users/<string:id>')
-    logger.debug('Users resources added')
-except Exception as e:
-    logger.error(f'Error while adding users resources: {e}')
 
 try:
     logger.debug('Adding schema resources')
@@ -142,4 +83,4 @@ except Exception as e:
 
 if __name__ == '__main__':
     logger.info('Starting Server')
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=3001)

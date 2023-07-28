@@ -76,6 +76,7 @@ class BaseList(Resource):
 
 class SpecificBase(Resource):
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     @log
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
