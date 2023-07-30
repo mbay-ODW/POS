@@ -3,13 +3,13 @@ from flask import jsonify, make_response, request, abort
 from bson import Timestamp, ObjectId
 from pymongo.operations import UpdateOne,InsertOne
 from datetime import datetime
-import logging
+from logger import LoggerManager
 import json
+from utils.print import Printing
 
 
 class OrdersList(BaseList):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger = LoggerManager().logger
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super
@@ -32,20 +32,19 @@ class OrdersList(BaseList):
                     query['$set'] = { 'lastModified' : Timestamp(datetime.utcnow(),1)}
                     bulk_operations.append(UpdateOne(filter,query))
                 self.logger.debug(bulk_operations)
+                if not Printing().checkStatus:
+                    return make_response(jsonify({"message": "Printer not ready"}), 500)
                 result = self.Database.db.products.bulk_write(bulk_operations)
                 self.logger.debug(f'Changed {result.modified_count} product stocks')
+                Printing(str(orderId))
                 return make_response(jsonify({"message": "success", "id": str(orderId)}), 201)
             except Exception as e:
                 self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
                 return make_response(jsonify({"message": str(e)}),500)
 
-        
-    
-
 
 class SpecificOrders(SpecificBase):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger = LoggerManager().logger
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super

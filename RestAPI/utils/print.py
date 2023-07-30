@@ -1,8 +1,7 @@
 from escpos.printer import Network, Dummy
-from PIL import Image
-from io import BytesIO
-import logging
-from utils.database import Database
+from escpos import image
+from PIL import Image, ImageOps
+from logger import LoggerManager
 
 
 test = {
@@ -13,26 +12,34 @@ test = {
                 ]
 }
 
-logger = logging.getLogger('__main__.' + __name__)
+logger = LoggerManager().logger
 
 
-def printing(order):
-    try:
-        orderId = str(order['_id'])
-        logger.error(f"Got order with id {orderId} that should be printed")
-        logger.error("Connecting to printer")
-        printer = Network("10.0.1.8")
-        #printer = Dummy()
-        logo_path = "./logo.png"
-        logo_image = Image.open(logo_path)
-        logo_image = logo_image.convert("1")  # Convert to monochrome (1-bit image)
-        for i in order['orders']:
-            printer.image(logo_image)
-            printer.text(f"{i['product']['name']}")
-            printer.text(f"{i['amount']}")
-            printer.barcode(f'{orderId}','EAN13',64,2,'','')
-            printer.cut()
-    except Exception as e:
-        logger.error(f'Got the following error: {e}')
+class Printing():
 
-printing(test)
+    def __init__(self):
+        logger.debug("Connecting to printer")
+        self.printer = Network("10.0.1.180")
+        self.logo = "./logo.png"
+
+
+    def print(self,order):
+        try:
+            self.order = order
+            self.orderId = str(self.order['_id'])
+            logger.debug(f"Got order with id {self.orderId} that should be printed")
+            for i in self.order['orders']:
+                self.printer.image(self.logo)
+                self.printer.text(f"{i['product']['name']}")
+                self.printer.text(f"{i['amount']}")
+                self.printer.barcode('4006381333931', 'EAN13', 64, 2, '', '')
+                self.printer.text("Hallo Nadja, wie geht es dir!")
+                self.printer.cut()
+            return True
+        except Exception as e:
+            logger.error(f'Got the following error: {e}')
+            return False
+
+
+    def checkStatus(self):
+        return self.printer.is_online()

@@ -11,12 +11,12 @@ from pymongo.operations import UpdateOne,InsertOne
 from bson import ObjectId, Timestamp
 from datetime import datetime
 import time
-import logging
+from logger import LoggerManager
 from functools import wraps
 
 
 class BaseList(Resource):
-    logger = logging.getLogger('__main__.' + __name__)
+    logger = LoggerManager().logger
     def __init__(self):
         self.Database = Database()
     @log

@@ -3,10 +3,11 @@ from bson import ObjectId, Timestamp
 import json
 import logging
 from functools import wraps
+from logger import LoggerManager
 
 
 
-logger = logging.getLogger(__name__)
+logger = LoggerManager().logger
 
 def repl_objectid_str(document):
     for key,value in document.items():

@@ -4,9 +4,10 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 import uuid
 from datetime import timedelta, datetime
+import utils.initialize
 
-import logging
-from logging.handlers import RotatingFileHandler
+from logger import LoggerManager
+
 
 import logging
 
@@ -17,26 +18,15 @@ app.config['DEBUG'] = True
 
 # Setting up Logging for the API Server
 version = 'v1'
-logFile = '../Logs/APIServer.log'
-logLevel = logging.DEBUG
 
-# Create the logger object
-logger = logging.getLogger('REST API Flask Server: %s' %(datetime.now()))
-logger.setLevel(logLevel)
-log_formatter = logging.Formatter('%(asctime)s %(threadName)s %(levelname)s %(name)s %(message)s')
+logger = LoggerManager().logger
 
-# Create a console handler
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(log_formatter)
-console_handler.setLevel(logLevel)
-logger.addHandler(console_handler)
 
-# Create a rotating file handler
-rotate_handler = RotatingFileHandler(filename=logFile, maxBytes=10000000, backupCount=10)
-rotate_handler.setFormatter(log_formatter)
-rotate_handler.setLevel(logLevel)
-logger.addHandler(rotate_handler)
-
+try:
+    logger.info("Checking if database has settings")
+    utils.initialize.start()
+except Exception as e:
+    logger.error(e)
 
 try:
     logger.debug('Adding products resources')

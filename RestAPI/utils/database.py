@@ -1,11 +1,10 @@
 from pymongo import MongoClient
-import logging
-
+from logger import LoggerManager
 class Disconnect(Exception):
     pass
 
 class Database(object):
-    logger = logging.getLogger(__name__)
+    logger = LoggerManager().logger
     def __init__(self):
         self.logger.debug(f'Initializing database object')
         try:

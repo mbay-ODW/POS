@@ -1,8 +1,8 @@
 from resources.base import BaseList, SpecificBase
-import logging
+from logger import LoggerManager
 
 class ProductsList(BaseList):
-    logger = logging.getLogger(__name__)
+    logger = LoggerManager().logger
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super
@@ -10,7 +10,7 @@ class ProductsList(BaseList):
         self.DatabaseConnector = self.Database.db.products
 
 class SpecificProducts(SpecificBase):
-    logger = logging.getLogger(__name__)
+    logger = LoggerManager().logger
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super

@@ -1,0 +1,35 @@
+
+Database Name:
+  - category: database
+  - description: "Name of the Database within MongoDB that is used."
+  - value: "POS"
+
+Printer Address:
+  - category: printer
+  - description: "The IP Address of the printer that is used for printing bons."
+  - value: "10.0.1.180"
+
+Log Level:
+  - category: debugging
+  - description: "The overall log level used"
+  - value: "DEBUG"
+
+Port:
+  - category: api
+  - description: "port of API that is used"
+  - value: "3001"
+
+URL:
+  - category: api
+  - description: "URL of API that is used"
+  - value: "/v1/"
+
+Logo path:
+  - categeroy: logo
+  - description: "The path of the logo that should be put on the label"
+  - value: "/logo.png"
+
+Schema Version:
+  - categeory: api
+  - description: "The schema version used by the api"
+  - value: "1.0"
