@@ -1,7 +1,7 @@
 from escpos.printer import Network, Dummy
 from escpos import image
 from PIL import Image, ImageOps
-from logger import LoggerManager
+from utils.log import LoggerManager
 
 
 test = {

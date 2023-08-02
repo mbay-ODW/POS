@@ -6,7 +6,7 @@ import uuid
 from datetime import timedelta, datetime
 import utils.initialize
 
-from logger import LoggerManager
+from utils.log import LoggerManager
 
 
 import logging
@@ -20,7 +20,6 @@ app.config['DEBUG'] = True
 version = 'v1'
 
 logger = LoggerManager().logger
-
 
 try:
     logger.info("Checking if database has settings")
@@ -73,4 +72,4 @@ except Exception as e:
 
 if __name__ == '__main__':
     logger.info('Starting Server')
-    app.run(host="0.0.0.0", port=3001)
+    app.run(host="0.0.0.0", port=3000)

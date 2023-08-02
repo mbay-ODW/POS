@@ -3,7 +3,7 @@ from bson import ObjectId, Timestamp
 import json
 import logging
 from functools import wraps
-from logger import LoggerManager
+from utils.log import LoggerManager
 
 
 

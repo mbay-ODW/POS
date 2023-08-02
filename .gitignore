@@ -32,7 +32,6 @@ Thumbs.db
 *.pid
 *.seed
 *.pid.lock
-*.ts
 *.ts.map
 *.lock
 *.sql

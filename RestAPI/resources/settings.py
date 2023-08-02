@@ -1,5 +1,5 @@
 from resources.base import BaseList, SpecificBase
-from logger import LoggerManager
+from utils.log import LoggerManager
 
 
 class SettingsList(BaseList):

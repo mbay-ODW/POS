@@ -11,7 +11,7 @@ from pymongo.operations import UpdateOne,InsertOne
 from bson import ObjectId, Timestamp
 from datetime import datetime
 import time
-from logger import LoggerManager
+from utils.log import LoggerManager
 from functools import wraps
 
 
@@ -24,8 +24,8 @@ class BaseList(Resource):
         try: 
             # Adding start argument or using 0 if none delivered as ?start=0
             start=request.args.get('start', 0)
-            # Adding limit argument or using 50 if none delivered as ?limit=200
-            limit=request.args.get('limit', 50)
+            # Adding limit argument or using 50 if none delivered as ?pageSize=200
+            pageSize=request.args.get('pageSize', 200)
             # Adding arguments from field to the projection. ?fields=test,test2,test3 will be seen as three fields that will be used.
             fields=request.args.get('fields','')
             projection = {}
@@ -36,11 +36,16 @@ class BaseList(Resource):
             sortBy=request.args.get('sortBy','_id')
             # Get all documents in collection
             self.logger.debug(f'Requesting all documents from the database')
-            entries = self.DatabaseConnector.find({},projection).limit(int(limit)).skip(int(start)).sort(sortBy)
+            entries = self.DatabaseConnector.find({},projection).limit(int(pageSize)).skip(int(start)).sort(sortBy)
+            print(entries)
             self.logger.debug(f'Preparing the documents for beeing able to be returned via body')
             documents = [prep_document_for_response(x) for x in entries]
             self.logger.debug(f'The following documents have been processed and are returned: {documents}')
-            return make_response(jsonify(documents), 200)
+            response = {}
+            response['data'] = documents
+            total_count = self.DatabaseConnector.count_documents({})
+            response['total'] = total_count
+            return make_response(jsonify(response), 200)
         except Exception as e:
             self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
             return make_response(jsonify({"message": str(e)}),500)
@@ -75,8 +80,7 @@ class BaseList(Resource):
         self.Database.close_connection()
 
 class SpecificBase(Resource):
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger = LoggerManager().logger
     @log
     def __init__(self):
         self.logger.debug(f'Starting init of {__name__}.')

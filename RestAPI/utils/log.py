@@ -2,7 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
-class LoggerManager:
+class LoggerManager():
     def __init__(self, log_level=logging.DEBUG, log_file="app.log"):
         self.log_level = log_level
         self.log_file = log_file

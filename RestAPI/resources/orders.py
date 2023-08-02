@@ -3,7 +3,7 @@ from flask import jsonify, make_response, request, abort
 from bson import Timestamp, ObjectId
 from pymongo.operations import UpdateOne,InsertOne
 from datetime import datetime
-from logger import LoggerManager
+from utils.log import LoggerManager
 import json
 from utils.print import Printing
 

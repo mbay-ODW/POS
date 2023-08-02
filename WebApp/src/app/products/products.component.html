@@ -1,0 +1,49 @@
+<div class="grid-container">
+  <mat-grid-list [cols]="cols | async" rowHeight="400" gutterSize="10">
+    <mat-grid-tile *ngFor="let product of products">
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-card-title-group>
+            <mat-card-title>Fass {{ product._id }}</mat-card-title>
+            <mat-card-subtitle>Zuletzt bearbeitet {{ product.name }}</mat-card-subtitle>
+            <img mat-card-lg-image [src]="'data:image/png;base64,'+ product.image" alt="Description of image">
+          </mat-card-title-group>
+          <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="openEditModal(product)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="openDeleteModal(product)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </mat-card-header>
+        <br>
+        <mat-card-content>
+          <table class="card-content">
+            <tr><br></tr> 
+            <tr>
+            </tr>
+            <tr>
+              <td><span class="label">Name:</span></td>
+              <td><span class="text">{{ product.name }}</span> L</td>
+            </tr>
+            <tr>
+              <td><span class="label">Stock:</span></td>
+              <td><span class="text">{{ product.stock.current }}</span></td>
+            </tr>
+            <tr>
+              <br>
+            </tr>
+          </table>
+        </mat-card-content>
+        <mat-card-actions>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

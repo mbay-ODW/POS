@@ -25,11 +25,11 @@ URL:
   - value: "/v1/"
 
 Logo path:
-  - categeroy: logo
+  - category: logo
   - description: "The path of the logo that should be put on the label"
   - value: "/logo.png"
 
 Schema Version:
-  - categeory: api
+  - category: api
   - description: "The schema version used by the api"
   - value: "1.0"

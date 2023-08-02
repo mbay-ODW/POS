@@ -1,0 +1,67 @@
+<form [formGroup]="form">
+
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field>
+        <mat-label>Label</mat-label>
+        <input matInput formControlName="label">
+      </mat-form-field>
+
+    <p></p>
+
+    <mat-form-field>
+        <mat-label>Category</mat-label>
+        <input type="text" matInput [formControl]="categoryControl" [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+          <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
+            {{category}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    
+    <mat-slide-toggle formControlName="active">Active</mat-slide-toggle>
+
+    <div formGroupName="stock">
+      <mat-form-field>
+        <mat-label>Current Stock</mat-label>
+        <input matInput formControlName="current">
+      </mat-form-field>
+    </div>
+    <div formGroupName="price">
+      <mat-form-field>
+        <mat-label>Current Price</mat-label>
+        <input type="number" matInput formControlName="current">
+      </mat-form-field>
+    </div>
+    <div formGroupName="thresholds">
+      <mat-form-field>
+        <mat-label>Warning Threshold</mat-label>
+        <input matInput formControlName="warning">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Info Threshold</mat-label>
+        <input matInput formControlName="info">
+      </mat-form-field>
+    </div>
+    <img [src]="imagePreview ? imagePreview : editingProduct?.image" alt="Product Image" />
+    <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" />
+    <button mat-button (click)="fileInput.click()">Change Image</button>    
+    
+    <p></p>
+
+    <mat-form-field>
+      <mat-label>Last Modified</mat-label>
+      <input matInput formControlName="lastModified" readonly>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Creation Time</mat-label>
+      <input matInput formControlName="creationTime" readonly>
+    </mat-form-field>
+    <p></p>
+    <button mat-button (click)="onSave()">Save</button>
+    <button mat-button (click)="onCancel()">Cancel</button>
+  </form>
+  

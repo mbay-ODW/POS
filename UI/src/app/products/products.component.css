@@ -1,0 +1,119 @@
+    .product-card-actions {
+    padding: 10px; /* Adjust padding inside the actions area */
+  }
+
+  .product-card img {
+    /* Center the image */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 90%;
+    height: 150px; /* You can adjust this value */
+    object-fit: cover;
+  }
+
+  .product-card-content {
+    /* Align text to the left */
+    text-align: left;
+    padding-left: 10px; /* Add padding to align with other content */
+  }
+
+  .more-options-button {
+    margin-left: auto;
+  }
+
+
+  .loading-container {
+    position: relative; /* to contain the absolute-positioned spinner */
+  }
+  
+  mat-progress-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Optional: add a z-index if needed */
+  }
+
+
+  .product-card,
+  .add-product-card {
+    /* Set the same width and height as other cards */
+    width: 300px;
+    min-height: 400px;
+    /* Add a background color or other styling as needed */
+    background-color: #f0f0f0;
+    /* Center content */
+    display: flex;
+    align-items: right;
+    justify-content: center;
+    cursor: pointer; /* Change cursor to indicate it's clickable */
+    margin: 15px;
+  }
+
+  .add-product-card:hover {
+    background-color: #e0e0e0; /* color when hovered */
+  }
+  
+  .add-product-content {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .add-product-button {
+    font-size: 48px; /* Adjust the size as needed */
+  }
+  
+  .add-product-icon {
+    /* Style the plus icon as needed */
+    color: #000; /* Example color */
+}
+  
+  .product-grid {
+    display: flex;
+    flex-wrap: wrap; /* Allow the cards to wrap to new lines */
+    justify-content: flex-start; /* Align cards to the start of the container */
+  }
+
+
+  .more-options-button {
+    /* Right-align the dropdown menu */
+    margin-left: auto;
+  }
+
+  .badge-container {
+    position: absolute; /* Position the badge relative to the card */
+    top: 0;
+    right: 0;
+    z-index: 1; /* Optional, to ensure the badge appears above other content */
+  }
+
+  .product-badge {
+    margin: -5px; /* Adjust this to position the badge as desired */
+  }
+
+  .paginator-container {
+    position: fixed;
+    bottom: 0; /* You can adjust this to place it at the desired position */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: white; /* You may want to add a background to ensure visibility */
+    z-index: 1000; /* This ensures that it stays above other content */
+  }
+
+
+  .spinner-container {
+    position: fixed;
+    bottom: 0; /* You can adjust this to place it at the desired position */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: white; /* You may want to add a background to ensure visibility */
+    z-index: 1000; /* This ensures that it stays above other content */
+  }

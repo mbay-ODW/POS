@@ -1,0 +1,41 @@
+<div class="grid-container">
+  <mat-grid-list [cols]="cols | async" rowHeight="400" gutterSize="10">
+    <mat-grid-tile *ngFor="let product of products">
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-card-title-group>
+            <mat-card-title>Product {{ product.name }}</mat-card-title>
+            <mat-card-subtitle>Zuletzt bearbeitet {{ product.lastModified | date:'dd.MM.yyyy' }}</mat-card-subtitle>
+            <img mat-card-lg-image [src]="'data:image/png;base64,'+ product.image" alt="{{ product.name }}">
+          </mat-card-title-group>
+        </mat-card-header>
+        <br>
+        <mat-card-content>
+          <table class="card-content">
+            <tr><br></tr> 
+            <tr>
+            </tr>
+            <tr>
+              <td><span class="label">Kapazität:</span></td>
+            </tr>
+            <tr>
+              <td><span class="label">Material:</span></td>
+            </tr>
+            <tr>
+              <td><span class="label">Aktuelle Charge:</span></td>
+            </tr>
+            <tr>
+              <td><span class="label">Letzte Intensivreinigung:</span></td>
+            </tr>
+            <tr>
+              <td><span class="label">Zuletzt bearbeitet:</span></td>
+            </tr>
+            <tr>
+              <br>
+            </tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

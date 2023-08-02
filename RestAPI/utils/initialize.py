@@ -3,7 +3,7 @@ import yaml
 from datetime import datetime
 from utils.database import Database
 from bson import ObjectId, Timestamp
-from logger import LoggerManager
+from utils.log import LoggerManager
 
 
 logger = LoggerManager().logger
@@ -15,7 +15,6 @@ def read_config(filename):
 
 def check_and_create_entries(config):
     try:
-        logger.debug("TEST")
         client = Database()
         DatabaseConnector = client.db.settings
         for section_name, entries in config.items():

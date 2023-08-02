@@ -16,28 +16,28 @@ services:
     container_name: MongoDB
     ports:
      - 27017:27017
-  frontend:
-    build: ./Frontend
-    restart: always
-    hostname: frontend
-    container_name: Frontend
-    ports:
-     - 80:80
-    deploy:
-      restart_policy:
-         condition: on-failure
-  mongo-express:
-    image: mongo-express
-    container_name: mexpress
-    environment:
-      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
-      - ME_CONFIG_BASICAUTH_USERNAME=mexpress
-      - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
-    links:
-      - db
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
+  # frontend:
+  #   build: ./Frontend
+  #   restart: always
+  #   hostname: frontend
+  #   container_name: Frontend
+  #   ports:
+  #    - 80:80
+  #   deploy:
+  #     restart_policy:
+  #        condition: on-failure
+  # mongo-express:
+  #   image: mongo-express
+  #   container_name: mexpress
+  #   environment:
+  #     - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
+  #     - ME_CONFIG_BASICAUTH_USERNAME=mexpress
+  #     - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
+  #   links:
+  #     - db
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8081:8081"
 
 
 volumes:

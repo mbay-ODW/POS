@@ -1,0 +1,55 @@
+<div class="product-grid">
+<mat-card *ngFor="let product of products" class="product-card">
+  <div class="badge-container">
+    <mat-icon matBadge="{{ product.stock.current }}" [matBadgeColor]="getBadgeColor(product)" class="product-badge">shopping_basket</mat-icon>
+  </div>
+    <mat-card-header>
+        <mat-card-title>{{ product.name }}</mat-card-title>
+        <mat-card-subtitle>{{ product.label }}</mat-card-subtitle>
+        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More options" class="more-options-button">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="editProduct(product._id!)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit</span>
+          </button>
+          <button mat-menu-item (click)="deleteProduct(product._id!)">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+        </mat-menu>
+      </mat-card-header>
+    <img mat-card-image [src]="product.image" alt="{{ product.name }}">
+    <mat-card-content>
+      <p>Price: {{ product.price.current }}</p>
+      <p>Stock: {{ product.stock.current }}</p>
+      <p *ngIf="product.thresholds.warning">Warning Threshold: {{ product.thresholds.warning }}</p>
+      <p *ngIf="product.thresholds.info">Info Threshold: {{ product.thresholds.info }}</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button>View Details</button>
+    </mat-card-actions>
+  </mat-card>
+
+  
+  <mat-card class="add-product-card" (click)="editProduct()">
+    <div class="add-product-content">
+      <mat-icon class="add-product-icon">add</mat-icon>
+    </div>
+  </mat-card>
+  
+</div>
+
+<div class="paginator-container">
+<mat-paginator [length]="totalProducts"
+               [pageSize]="pageSize"
+               [pageSizeOptions]="[5, 10, 25, 100]"
+               (page)="onPageChange($event)">
+</mat-paginator>
+</div>
+
+<div class="spinner-container">
+<mat-spinner *ngIf="isLoading"></mat-spinner>
+</div>
+

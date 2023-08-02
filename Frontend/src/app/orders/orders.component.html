@@ -22,6 +22,7 @@
             <i *ngIf="sortType === 'orders' && sortReverse" class="fa fa-arrow-up"></i>
             <i *ngIf="sortType === 'orders' && !sortReverse" class="fa fa-arrow-down"></i>
           </th>
+          <th scope="col">Sum</th>
           <th scope="col">Actions</th>
         </tr>
       </thead>
@@ -36,7 +37,8 @@
               Amount: {{detail.amount}}
             </div>
           </td>
-          
+          <td>{{totalAmountSum}}</td>
+        
           <td>
             <button class="btn btn-warning me-2" (click)="openEditModal(order)">Edit  <fa-icon [icon]="faPen"></fa-icon></button>
             <button class="btn btn-info me-2" (click)="openPrintModal(order)">Print  <fa-icon [icon]="faPrint"></fa-icon></button>

@@ -1,0 +1,27 @@
+<mat-dialog-content>
+    <h2 mat-dialog-title>{{ type }} Product</h2>
+  
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" formControlName="name" required>
+      </mat-form-field>
+  
+      <!-- Repeat this structure for other form fields -->
+  
+
+  
+      <mat-checkbox formControlName="active">Active</mat-checkbox>
+  
+      <!-- Use mat-slider or mat-slide-toggle if you need slider or toggle switch -->
+  
+      <!-- Use nested form groups as needed -->
+  
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" type="submit">Save</button>
+  </mat-dialog-actions>
+  
