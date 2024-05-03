@@ -1,0 +1,33 @@
+.orders-container {
+    width: 100%;
+    overflow: auto;
+    margin: 20px 0;
+  }
+  
+
+  .paginator-container {
+    position: fixed;
+    bottom: 0; /* You can adjust this to place it at the desired position */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: white; /* You may want to add a background to ensure visibility */
+    z-index: 1000; /* This ensures that it stays above other content */
+  }
+
+
+  .spinner-container {
+    position: fixed;
+    bottom: 0; /* You can adjust this to place it at the desired position */
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    background: white; /* You may want to add a background to ensure visibility */
+    z-index: 1000; /* This ensures that it stays above other content */
+  }
+
+  .mat-row:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* You can adjust the color as needed */
+}

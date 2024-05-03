@@ -1,1 +1,65 @@
-<p>orders works!</p>
+<div class="orders-container">
+    <mat-table [dataSource]="orders" matSort>
+      <!-- Order ID Column -->
+      <ng-container matColumnDef="orderId">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Order ID </mat-header-cell>
+        <mat-cell *matCellDef="let order"> {{order._id}} </mat-cell>
+      </ng-container>
+  
+      <!-- Order Details Column -->
+      <ng-container matColumnDef="orderDetails">
+        <mat-header-cell *matHeaderCellDef> Order Details </mat-header-cell>
+        <mat-cell *matCellDef="let order">
+            <table>
+                <tr *ngFor="let detail of order.orders">
+                  <td>{{ detail.amount }}</td> x
+                    <td>{{ detail.product.name }}</td>
+                </tr>
+            </table>
+        </mat-cell>
+    </ng-container>
+      
+      
+      <!-- Creation Time Column -->
+      <ng-container matColumnDef="creationTime">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Creation Time </mat-header-cell>
+        <mat-cell *matCellDef="let order"> {{order.creationTime | date}} </mat-cell>
+      </ng-container>
+      
+         <!-- Actions Column -->
+         <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef> Actions </mat-header-cell>
+            <mat-cell *matCellDef="let order">
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="editOrder(order._id)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Edit</span>
+                      </button>
+                    <button mat-menu-item (click)="deleteOrder(order._id)">
+                        <mat-icon>delete</mat-icon>
+                        <span>Delete</span>
+                    </button>
+                </mat-menu>
+            </mat-cell>
+        </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </div>
+  
+
+  <div class="paginator-container">
+    <mat-paginator [length]="totalProducts"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="[5, 10, 25, 100]"
+                   (page)="onPageChange($event)">
+    </mat-paginator>
+    </div>
+    
+    <div class="spinner-container">
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    </div>

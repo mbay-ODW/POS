@@ -1,0 +1,75 @@
+version : "3.9"
+secrets:
+   DATABASE_CERT_FILE:
+      file: "/home/docker/secrets/mongodb/DEV_X509_CERT"
+services:
+   redis-testing:
+      image: redis:latest
+      hostname: redis
+      restart: always
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default-testing
+   webapplication-testing:
+      build:
+         context: ./UI
+         dockerfile: Dockerfile_Testing
+      restart: always
+      hostname: webapplication-testing
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default-testing
+         - traefik
+      labels:
+         - traefik.enable=true
+         - traefik.docker.network=traefik
+         - traefik.http.routers.testing-klienten.rule=Host(`testing-pos.vfr-wuerzberg.de`)
+         - traefik.http.routers.testing-klienten.entrypoints=websecure
+         - traefik.http.routers.testing-klienten.middlewares=error-pages-middleware,middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file
+   api-testing:
+      build: ./RestAPI
+      hostname: api-testing
+      restart: always
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      secrets: [DATABASE_CERT_FILE]
+      environment:
+         - DATABASE_CERT_FILE=/run/secrets/DATABASE_CERT_FILE
+      env_file:
+         - testing.env
+      networks:
+         - default-testing
+         - traefik
+         - ldap
+      labels:
+         - "traefik.enable=true"
+         - "traefik.docker.network=traefik"
+                  # Router for OPTIONS requests
+         - "traefik.http.routers.testing-api-options.rule=Host(`testing-api.vfr-wuerzberg.de`) && Method(`OPTIONS`)"
+         - "traefik.http.routers.testing-api-options.entrypoints=websecure"
+         - traefik.http.routers.testing-api.middlewares=middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file   
+
+         - "traefik.http.routers.testing-api.rule=Host(`testing-api.vfr-wuerzberg.de`)"
+         - "traefik.http.routers.testing-api.entrypoints=websecure"
+         - traefik.http.routers.testing-api.middlewares=error-pages-middleware,middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file
+networks:
+   default-testing:
+      driver: bridge
+   traefik:
+      external: true
+   ldap:
+      external: true

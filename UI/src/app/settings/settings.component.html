@@ -1,1 +1,25 @@
-<p>settings works!</p>
+<div class="setting-grid">
+    <mat-card *ngFor="let setting of settings" class="setting-card">
+      <mat-card-header>
+          <mat-card-title>{{ setting.name }}</mat-card-title>
+          <mat-card-subtitle>{{ setting.category }}</mat-card-subtitle>
+          <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="More options" class="more-options-button">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="editSetting(setting._id!)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit</span>
+            </button>
+            <button mat-menu-item (click)="deleteSetting(setting._id!)">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ setting.description }}</p>
+        <p>Value: {{ setting.value }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>

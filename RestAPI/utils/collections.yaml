@@ -1,0 +1,14 @@
+Orders:
+  - type: standard
+  - description: "Orders collection"
+  - name: "orders"
+
+Products:
+  - type: standard
+  - description: "Products collection"
+  - name: "products"
+
+Settings:
+  - type: standard
+  - description: "Settings collection"
+  - name: "settings"

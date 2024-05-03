@@ -28,7 +28,7 @@ export class ProductEditComponent implements OnInit{
 
   ngOnInit(): void {
     this.form.patchValue(this.data.product);
-    this.isActive = this.data.product?.active || false; // Handle the case when the product is null
+    this.isActive = this.data.product?.active || true; // Handle the case when the product is null
     this.editingProduct = this.data.product;
     this.filteredCategories = this.categoryControl.valueChanges
     .pipe(

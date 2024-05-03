@@ -76,6 +76,7 @@
     display: flex;
     flex-wrap: wrap; /* Allow the cards to wrap to new lines */
     justify-content: flex-start; /* Align cards to the start of the container */
+    padding-bottom: 70px; /* Such that there is space at the bottom between pageination and the last card row
   }
 
 

@@ -3,7 +3,7 @@ import { ProductsService } from '../services/products.service'; // Adjust the pa
 import { Product } from '../interfaces/product'; // Adjust the path accordingly
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteComponent } from '../dialogs/delete/delete.component';
-import  { NotificationService } from '../services/notification.service';
+import { NotificationService } from '../services/notification.service';
 import { ProductEditComponent } from './product-edit/product-edit.component';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
@@ -143,9 +143,5 @@ getBadgeColor(product: Product): 'primary' | 'accent' | 'warn' {
     return 'primary';
   }
 }
-
-
-
-
 
 }

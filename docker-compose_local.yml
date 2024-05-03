@@ -1,0 +1,39 @@
+version : "3.7"
+services:
+   redis:
+      image: redis:latest
+      restart: always
+      hostname: redis
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default-local
+   webapplication-local:
+      build:
+         context: ./UI
+         dockerfile: Dockerfile_Local
+      restart: always
+      hostname: webapplication-local
+      networks:
+         - default-local
+      ports:
+         - 80:80
+   api-local:
+      build: ./RestAPI
+      hostname: api-local
+      restart: always
+      env_file:
+         - local.env
+      volumes:
+         - ./dev-X509-cert.pem:/dev-X509-cert.pem
+      ports:
+         - 3000:3000
+      networks:
+         - default-local
+networks:
+   default-local:
+      driver: bridge

@@ -1,31 +1,85 @@
-import sys
-from flask import Flask,jsonify
-from flask_restful import Api, Resource
+from flask import Flask
+from flask_restx import Api
 from flask_cors import CORS
-import uuid
-from datetime import timedelta, datetime
-import utils.initialize
+import os
+import flask_monitoringdashboard as dashboard
+
+# Setting up Logging for the API Server
+version = "v1"
+environments = os.getenv("ENV_FILE", default="../.env")
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(environments)
+except Exception as e:
+    print(e)
+environments = os.getenv("ENV_FILE", default="../.env")
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(environments)
+except Exception as e:
+    print(e)
 
 from utils.log import LoggerManager
 
-
-import logging
-
-app = Flask(__name__)
-api = Api(app,catch_all_404s=True)
-CORS(app)
-app.config['DEBUG'] = True
-
-# Setting up Logging for the API Server
-version = 'v1'
-
 logger = LoggerManager().logger
 
+import utils.initialize
+
+# Creating app
 try:
-    logger.info("Checking if database has settings")
+    logger.info("Creating Flask App")
+
+    app = Flask(__name__)
+    cors = CORS(
+        app,
+        supports_credentials=True,
+        methods=["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
+        origins=[
+            "http://localhost:4200",
+        ],
+    )
+    app.config["DEBUG"] = False
+
+    caching = bool(os.getenv("CACHING", default=False))
+    if caching:
+        logger.debug("Adding cache")
+        from utils.cache import CacheManager
+
+        cache = CacheManager.get_cache(app)
+        # Initialize Cache with your app
+        cache.init_app(app)
+
+    api = Api(app, catch_all_404s=True)
+except Exception as e:
+    logger.error(e)
+    quit()
+
+
+try:
+    logger.info("Adding http limiter to all RestAPI endpoints")
+    from utils.limiter import limiter
+    limiter.init_app(app)
+except Exception as e:
+    logger.error(e)
+
+try:
+    logger.info("Checking database and its settings")
     utils.initialize.start()
 except Exception as e:
     logger.error(e)
+    quit()
+
+# Adding Health endpoint
+try:
+    logger.debug("Adding health endpoint resources")
+    from resources.health import Healthendpoint
+
+    api.add_resource(Healthendpoint, f"/api/health")
+    logger.debug("Settings healthendpoint added")
+except Exception as e:
+    logger.error(f"Error while adding healthendpoint resource: {e}")
 
 try:
     logger.debug('Adding products resources')
@@ -59,17 +113,17 @@ except Exception as e:
     logger.error(f'Error while adding settings resources: {e}')
 
 try:
-    logger.debug('Adding schema resources')
-    from resources.schema import SchemasList
-    from resources.schema import SpecificSchemas
-    api.add_resource(SchemasList, '/v1/schemas')
-    api.add_resource(SpecificSchemas, '/v1/schemas/<string:id>')
-    logger.debug('Schema resources added')
+    logger.info("Adding dashboard for flask monitoring")
+    dashboard.config.init_from(envvar='FLASK_MONITORING_DASHBOARD_CONFIG')
+    dashboard.bind(app)
 except Exception as e:
-    logger.error(f'Error while adding schema resources: {e}')
+    logger.error(e)
 
-
-
-if __name__ == '__main__':
-    logger.info('Starting Server')
-    app.run(host="0.0.0.0", port=3000)
+if __name__ == "__main__":
+    try:
+        logger.info("Starting Server")
+        app.run(host="0.0.0.0", port=3000, debug=False)
+    except Exception as e:
+        logger.error(e)
+        # Quit the whole application
+        quit()

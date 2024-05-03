@@ -14,12 +14,12 @@ export class ProductsService {
   constructor(private http: HttpClient) { }
 
 
-  getProducts(page: number, pageSize: number): Observable<{ data: Product[], total: number }> {
+  getProducts(page?: number, pageSize?: number): Observable<{ data: Product[], total: number }> {
     let params = new HttpParams();
 
     if (page != null && pageSize != null) {
       const start = page * pageSize;
-      params = params.set('start', start.toString());
+      params = params.set('skip', start.toString());
       params = params.set('pageSize', pageSize.toString());
     }
 

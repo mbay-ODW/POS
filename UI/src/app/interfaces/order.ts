@@ -1,12 +1,8 @@
-export interface OrderProduct {
-    id: string;
-    name: string;
-  }
-  
-  
+import { Product } from "./product";
+
   export interface OrderDetails {
     id: string;
-    product: OrderProduct;
+    product: Product;
     amount: number;
   }
   

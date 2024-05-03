@@ -1,44 +1,76 @@
-version: "3.0"
+version : "3.9"
+secrets:
+   DATABASE_CERT_FILE:
+      file: "/home/docker/secrets/mongodb/X509_CERT"
+
 services:
-  api:
-   build: ./RestAPI
-   hostname: api
-   container_name: RestAPI
-   ports:
-    - 3000:3000
-   deploy:
-      restart_policy:
-         condition: on-failure
-  db:
-    build: ./MongoDB
-    restart: always
-    hostname: mongodb
-    container_name: MongoDB
-    ports:
-     - 27017:27017
-  # frontend:
-  #   build: ./Frontend
-  #   restart: always
-  #   hostname: frontend
-  #   container_name: Frontend
-  #   ports:
-  #    - 80:80
-  #   deploy:
-  #     restart_policy:
-  #        condition: on-failure
-  # mongo-express:
-  #   image: mongo-express
-  #   container_name: mexpress
-  #   environment:
-  #     - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
-  #     - ME_CONFIG_BASICAUTH_USERNAME=mexpress
-  #     - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
-  #   links:
-  #     - db
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8081:8081"
+   redis:
+      image: redis:latest
+      hostname: redis
+      restart: always
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default
+   webapplication:
+      build: ./UI
+      restart: always
+      hostname: webapplication
+      deploy:
+         mode: replicated
+         replicas: 2
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default
+         - traefik
+      labels:
+         - traefik.enable=true
+         - traefik.docker.network=traefik
+         - traefik.http.routers.klienten.rule=Host(`pos.vfr-wuerzberg.de`)
+         - traefik.http.routers.klienten.entrypoints=websecure
+         - traefik.http.routers.klienten.middlewares=error-pages-middleware,middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file
+   api:
+      build: ./RestAPI
+      hostname: api
+      restart: always
+      deploy:
+         mode: replicated
+         replicas: 2
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      secrets: [DATABASE_CERT_FILE]
+      environment:
+         - DATABASE_CERT_FILE=/run/secrets/DATABASE_CERT_FILE
+      env_file:
+         - .env
+      networks:
+         - default
+         - traefik
+         - ldap
+      labels:
+         - "traefik.enable=true"
+         - "traefik.docker.network=traefik"
+                  # Router for OPTIONS requests
+         - "traefik.http.routers.api-options.rule=Host(`api.vfr-wuerzberg.de`) && Method(`OPTIONS`)"
+         - "traefik.http.routers.api-options.entrypoints=websecure"
+         - traefik.http.routers.api.middlewares=middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file   
 
-
-volumes:
-  db:
+         - "traefik.http.routers.api.rule=Host(`api.vfr-wuerzberg.de`)"
+         - "traefik.http.routers.api.entrypoints=websecure"
+         - traefik.http.routers.api.middlewares=error-pages-middleware,middlewares-rate-limit@file,middlewares-authelia@file,middlewares-secure-headers@file
+networks:
+   default:
+      driver: bridge
+   traefik:
+      external: true

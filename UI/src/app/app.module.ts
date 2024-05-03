@@ -26,7 +26,16 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { OrderEditComponent } from './orders/order-edit/order-edit.component';
+import { SettingEditComponent } from './settings/setting-edit/setting-edit.component';
+import { CartComponent } from './cart/cart.component';
+import { BookingComponent } from './booking/booking.component';
+import { NavigationComponent } from './navigation/navigation.component';
+import { SearchComponent } from './search/search.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 
 
@@ -39,6 +48,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     DialogsComponent,
     DeleteComponent,
     ProductEditComponent,
+    OrderEditComponent,
+    SettingEditComponent,
+    CartComponent,
+    BookingComponent,
+    NavigationComponent,
+    SearchComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,6 +75,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatAutocompleteModule,
     MatPaginatorModule,
     MatProgressBarModule,
+    MatTableModule,
+    MatSortModule,
+    MatToolbarModule,
+    MatSidenavModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

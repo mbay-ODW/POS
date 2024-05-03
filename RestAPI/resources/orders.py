@@ -2,7 +2,7 @@ from resources.base import BaseList, SpecificBase
 from flask import jsonify, make_response, request, abort
 from bson import Timestamp, ObjectId
 from pymongo.operations import UpdateOne,InsertOne
-from datetime import datetime
+from datetime import datetime, timezone
 from utils.log import LoggerManager
 import json
 from utils.print import Printing
@@ -10,14 +10,14 @@ from utils.print import Printing
 
 class OrdersList(BaseList):
     logger = LoggerManager().logger
-    def __init__(self):
+    def __init__(self, api=None, *args, **kwargs):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super
-        super().__init__()
+        super().__init__(api=None, *args, **kwargs)
         self.DatabaseConnector = self.Database.db.orders
     
-    def post(self):
-        incomingRequest = super().post()
+    def post(self, *args, **kwargs):
+        incomingRequest = super().post(api=None, *args, **kwargs)
         bulk_operations = []
         if incomingRequest.status_code in [200,201]:
             try:
@@ -29,7 +29,7 @@ class OrdersList(BaseList):
                     filter = { '_id': ObjectId(product_id) }
                     query = {}
                     query['$inc'] = { 'stock.current': amount }
-                    query['$set'] = { 'lastModified' : Timestamp(datetime.utcnow(),1)}
+                    query['$set'] = { 'lastModified' : datetime.now(timezone.utc)}
                     bulk_operations.append(UpdateOne(filter,query))
                 self.logger.debug(bulk_operations)
                 if not Printing().checkStatus:
@@ -45,13 +45,13 @@ class OrdersList(BaseList):
 
 class SpecificOrders(SpecificBase):
     logger = LoggerManager().logger
-    def __init__(self):
+    def __init__(self, api=None, *args, **kwargs):
         self.logger.debug(f'Starting init of {__name__}.')
         # Use the init of the baseclass additionally with super
-        super().__init__()
+        super().__init__(api=None, *args, **kwargs)
         self.DatabaseConnector = self.Database.db.orders
     
-    def put(self,id):
+    def put(self, *args, **kwargs):
         try:
             newOrder = request.get_json(force=True)
             oldOrder = self.DatabaseConnector.find_one({'_id': ObjectId(id)})
@@ -64,7 +64,7 @@ class SpecificOrders(SpecificBase):
                 filter = { '_id': ObjectId(product_id) }
                 query = {}
                 query['$inc'] = { 'stock.current': amount }
-                query['$set'] = { 'lastModified' : Timestamp(datetime.utcnow(),1)}
+                query['$set'] = { 'lastModified' : datetime.now(timezone.utc)}
                 bulk_operations.append(UpdateOne(filter,query))
             # Now getting the new order, changing the stock of each product
             for i in newOrder['orders']:
@@ -74,13 +74,13 @@ class SpecificOrders(SpecificBase):
                 filter = { '_id': ObjectId(product_id) }
                 query = {}
                 query['$inc'] = { 'stock.current': amount }
-                query['$set'] = { 'lastModified' : Timestamp(datetime.utcnow(),1)}
+                query['$set'] = { 'lastModified' : datetime.now(timezone.utc)}
                 bulk_operations.append(UpdateOne(filter,query))
             self.logger.debug(bulk_operations)
             result = self.Database.db.products.bulk_write(bulk_operations)
             self.logger.debug(f'Changed {result.modified_count} product stocks')
             try:    
-                incomingRequest = super().put(id=id)
+                incomingRequest = super().put(id=id,api=None, *args, **kwargs)
             except Exception as e:
                 return make_response(jsonify({"message": str(e)}),500)
             if incomingRequest.status_code in [200,201]:
@@ -89,7 +89,7 @@ class SpecificOrders(SpecificBase):
                 self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
                 return make_response(jsonify({"message": str(e)}),500)
 
-    def delete(self,id):
+    def delete(self, *args, **kwargs):
         try:
             order = self.DatabaseConnector.find_one({'_id': ObjectId(id)})
             bulk_operations = []
@@ -99,7 +99,7 @@ class SpecificOrders(SpecificBase):
                 filter = { '_id': ObjectId(product_id) }
                 query = {}
                 query['$inc'] = { 'stock.current': amount }
-                query['$set'] = { 'lastModified' : Timestamp(datetime.utcnow(),1)}
+                query['$set'] = { 'lastModified' : datetime.now(timezone.utc)}
                 bulk_operations.append(UpdateOne(filter,query))
                 self.logger.debug(bulk_operations)
             result = self.Database.db.products.bulk_write(bulk_operations)

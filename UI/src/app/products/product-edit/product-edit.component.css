@@ -1,0 +1,26 @@
+.form-field {
+    margin: 20px;
+  }
+
+  
+  .form-section {
+    margin-bottom: 24px; /* or whatever value you prefer */
+  }
+  
+
+  .mat-dialog-container {
+    max-height: 90% !important;
+    overflow-y: auto !important; /* Allows scrolling inside the dialog */
+  }
+
+  .card-container {
+    /* Replace this class with the actual class or ID of your container */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch; /* Makes children stretch to fill width */
+    overflow: auto; /* Optional: allows scrolling if content does overflow */
+    /* Add any padding or margin as needed */
+    margin: 30px;
+  }
+  

@@ -4,6 +4,9 @@ import json
 import logging
 from functools import wraps
 from utils.log import LoggerManager
+from datetime import datetime, timezone, timedelta
+
+from utils.database import Database
 
 
 
@@ -79,3 +82,75 @@ def check_id_is_valid(function):
         except:
             return make_response(jsonify({"message": "Id is not a valid id"}),404) 
     return checked_id
+
+
+def check_product_exist(function):
+    @wraps(function)
+    def checked_document(self, *args, **kwargs):
+        case = kwargs.get("id")
+        ReferencConnector = Database.get_instance().db.products
+        if case is None or not ReferencConnector.find_one(
+            {"_id": ObjectId(case)}, {"_id": 1}
+        ):
+            logger.error("Product does not exist")
+            return make_response(jsonify({"message": "Product does not exist"}), 404)
+        logger.debug("Product does exist")
+        return function(self, *args, **kwargs)
+
+
+def validate_query_params(function):
+    @wraps(function)
+    def validate(self, *args, **kwargs):
+        # creating allowed list of params
+        allowed_params = ['skip','pageSize','start','end','fields','active','sortBy']
+        allowed_fields = ['_id','name','shortName']
+        allowed_sorts = ['_id','date','categeory','shortName']
+        request_params = request.args 
+        logger.debug(f"Validating request parameters: {request.args}")         
+        for i in request_params:
+            try:
+                if i not in allowed_params:
+                    logger.error("Parameter not in allowed list")
+                    return make_response(
+                            jsonify({"message": "Parameter used is not known"}), 400
+                        )
+                elif i == "skip":
+                    skip = request.args.get("skip")
+                    int(skip)
+                elif i== "pageSize":
+                    pageSize = request.args.get("pageSize")
+                    logger.debug(pageSize)
+                    int(pageSize)
+                elif i == "active":
+                    active = request.args.get("active").lower()
+                    if active not in ['true','false','yes','no','1','0']:
+                        logger.error("active parameter not in allowed list")
+                        raise Exception
+                elif i == "start":
+                    start = request.args.get("start")
+                    datetime.strptime(start, "%Y-%m-%d")
+                elif i == "end":
+                    end = request.args.get("end")
+                    datetime.strptime(end, "%Y-%m-%d")
+                elif i == "fields":
+                    fields = request.args.get("fields").split(',')
+                    for i in fields:
+                        if i not in allowed_fields:
+                            logger.error("field parameter not in allowed list")
+                            raise Exception
+                elif i == "sortBy":
+                    sortBy = request.args.get("sortBy")
+                    if sortBy not in allowed_sorts:
+                        logger.error("sortBy parameter not in allowed list")
+                        raise Exception
+                else:
+                    logger.error(f"Unknown parameter i: {i}")
+                    raise Exception
+            except:
+                    logger.error("Parameter is not valid")
+                    return make_response(
+                            jsonify({"message": "Parameter given is not valid"}), 400
+                        )
+        return function(self, *args, **kwargs)
+    logger.debug("Validation successully applied")
+    return validate
