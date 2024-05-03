@@ -31,12 +31,44 @@
             "scripts": []
           },
           "configurations": {
+            "local": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "./src/app/environments/environment.ts",
+                  "with": "./src/app/environments/environment.local.ts"
+                },
+                {
+                  "replace": "./src/app/auth.interceptor.ts",
+                  "with": "./src/app/auth.interceptor.local.ts"
+                }
+              ]
+            },
+            "testing": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "./src/app/environments/environment.ts",
+                  "with": "./src/app/environments/environment.testing.ts"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "4mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -63,8 +95,11 @@
             "production": {
               "buildTarget": "UI:build:production"
             },
-            "development": {
-              "buildTarget": "UI:build:development"
+            "local": {
+              "buildTarget": "UI:build:local"
+            },
+            "testing": {
+              "buildTarget": "UI:build:testing"
             }
           },
           "defaultConfiguration": "development"

@@ -1,6 +1,8 @@
+import { Product } from "./product";
+
   export interface OrderDetails {
     id: string;
-    product: string;
+    product: Product;
     amount: number;
   }
   

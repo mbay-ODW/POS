@@ -85,8 +85,8 @@ try:
     logger.debug('Adding products resources')
     from resources.products import ProductsList
     from resources.products import SpecificProducts
-    api.add_resource(ProductsList, '/v1/products')
-    api.add_resource(SpecificProducts, '/v1/products/<string:id>')
+    api.add_resource(ProductsList, '/api/v1/products')
+    api.add_resource(SpecificProducts, '/api/v1/products/<string:id>')
     logger.debug('Products resources added')
 except Exception as e:
     logger.error(f'Error while adding products resources: {e}')
@@ -95,8 +95,8 @@ try:
     logger.debug('Adding orders resources')
     from resources.orders import OrdersList
     from resources.orders import SpecificOrders
-    api.add_resource(OrdersList, '/v1/orders')
-    api.add_resource(SpecificOrders, '/v1/orders/<string:id>')
+    api.add_resource(OrdersList, '/api/v1/orders')
+    api.add_resource(SpecificOrders, '/api/v1/orders/<string:id>')
     logger.debug('Orders resources added')
 except Exception as e:
     logger.error(f'Error while adding orders resources: {e}')
@@ -106,8 +106,8 @@ try:
     logger.debug('Adding settings resources')
     from resources.settings import SettingsList
     from resources.settings import SpecificSetting
-    api.add_resource(SettingsList, '/v1/settings')
-    api.add_resource(SpecificSetting, '/v1/settings/<string:id>')
+    api.add_resource(SettingsList, '/api/v1/settings')
+    api.add_resource(SpecificSetting, '/api/v1/settings/<string:id>')
     logger.debug('Settings resources added')
 except Exception as e:
     logger.error(f'Error while adding settings resources: {e}')
