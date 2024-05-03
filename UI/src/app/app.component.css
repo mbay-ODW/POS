@@ -1,0 +1,34 @@
+.toolbar a {
+    margin-right: 10px; /* Adjust the margin value to create the desired spacing */
+    margin-left: 10px;
+    text-decoration: none; /* Remove underlines */
+  }
+
+.active-link {
+  color: rgb(255, 0, 0); /* Change the color to red for the active link */
+}
+
+
+.person-menu {
+  margin-left: auto; /* This pushes the button to the right */
+  margin-right: 10px;
+}
+
+.disabled-link {
+  pointer-events: none;
+  color: grey; /* Example color to show it's disabled */
+}
+
+mat-toolbar {
+  /* ... existing styles ... */
+  justify-content: space-between; /* Aligns children to start, center, and end */
+}
+
+.toolbar-logo {
+  /* Additional styles if needed */
+}
+
+.toolbar-spacer {
+  flex: 1; /* This gives equal space on both sides of the logo */
+}
+

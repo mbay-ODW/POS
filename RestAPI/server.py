@@ -103,6 +103,28 @@ except Exception as e:
 
 
 try:
+    logger.debug('Adding stations resources')
+    from resources.stations import StationsList
+    from resources.stations import SpecificStations
+    api.add_resource(StationsList, '/api/v1/stations')
+    api.add_resource(SpecificStations, '/api/v1/stations/<string:id>')
+    logger.debug('Stations resources added')
+except Exception as e:
+    logger.error(f'Error while adding stations resources: {e}')
+
+
+try:
+    logger.debug('Adding categories resources')
+    from resources.categories import CategoriesList
+    from resources.categories import SpecificCategories
+    api.add_resource(CategoriesList, '/api/v1/categories')
+    api.add_resource(SpecificCategories, '/api/v1/categories/<string:id>')
+    logger.debug('Categories resources added')
+except Exception as e:
+    logger.error(f'Error while adding categories resources: {e}')
+
+
+try:
     logger.debug('Adding settings resources')
     from resources.settings import SettingsList
     from resources.settings import SpecificSetting

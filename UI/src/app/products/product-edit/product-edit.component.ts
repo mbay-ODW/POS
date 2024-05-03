@@ -71,7 +71,6 @@ export class ProductEditComponent implements OnInit{
         warning: [0],
         info: [0]
                                 }),
-      schemaVersion: [''],
       lastModified: [''],
       creationTime: ['']
 

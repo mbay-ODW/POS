@@ -12,3 +12,14 @@ Settings:
   - type: standard
   - description: "Settings collection"
   - name: "settings"
+
+Categories:
+  - type: standard
+  - description: "Category collection"
+  - name: "categories"
+
+
+Stations:
+  - type: standard
+  - description: "Station collection"
+  - name: "stations"
