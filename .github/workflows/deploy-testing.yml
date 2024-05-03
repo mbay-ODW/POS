@@ -1,0 +1,24 @@
+name: Deploy to Server for testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - testing
+
+
+jobs:
+  deploy-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Save SSH private key to a file
+        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+
+      - name: Deploy to Server
+        id: deploy
+        run: |
+          chmod 600 private_key.pem
+          ssh -o StrictHostKeyChecking=no -i private_key.pem git@${{ secrets.SSH_SERVER }} -p 5022 "cd /home/git/Testing/POS && docker-compose -f docker-compose_testing.yml -p POS_testing down && git pull && docker-compose -f docker-compose_testing.yml -p POS_testing up --build -d"

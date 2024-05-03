@@ -1,0 +1,39 @@
+name: Testing API
+
+on: [workflow_call]
+
+jobs:
+  Connection_and_API_Testing:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_CERT_FILE: "/dev-X509-cert.pem"
+      DATABASE_HOST: ${{ secrets.MONGO_DB_HOST_DEV }}
+      DATABASE_NAME: ${{ secrets.MONGO_DB_DATABASE_DEV }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: echo Host
+      run: echo $DATABASE_HOST
+    - name: Echo NAME
+      run: echo $DATABASE_NAME
+    - name: update ca
+      run: sudo update-ca-certificates
+    - name: Build the Docker image RestAPI
+      run: docker build --no-cache -t api -f ./RestAPI/Dockerfile ./RestAPI
+    - name: Save MongoDB Cert to a file
+      run: echo "${{ secrets.MONGO_DB_CERT_DEV }}" > dev-X509-cert.pem
+    - name: Change rights of pem
+      run: chmod 600 dev-X509-cert.pem
+    - name: Run the Docker image RestAPI
+      run: docker run -d -p 3000:3000 -v "./dev-X509-cert.pem":"/dev-X509-cert.pem" -e DATABASE_CERT_FILE="$DATABASE_CERT_FILE" -e DATABASE_HOST="$DATABASE_HOST" -e DATABASE_NAME="$DATABASE_NAME" api
+    - name: Setup Python Version
+      uses: actions/setup-python@v2
+      with:
+          python-version: 3.12
+    - name: Install dependencies in os
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest pymongo certifi requests
+    - name: Dump Test database
+      run: python Testing/database/fill_dump_test_database.py
+    - name: Run Testing booking
+      run: pytest Testing/API/bookings.py
