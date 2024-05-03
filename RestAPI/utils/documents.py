@@ -13,13 +13,33 @@ from utils.database import Database
 logger = LoggerManager().logger
 
 def repl_objectid_str(document):
-    for key,value in document.items():
-        if (isinstance(document[key],ObjectId)):
-            object_str = str(document[key])
-            document[key] = object_str
-        elif (isinstance(value, dict)):
-            repl_objectid_str(value)
+    if isinstance(document, dict):
+        for key, value in document.items():
+            if isinstance(value, ObjectId):
+                document[key] = str(value)
+            elif isinstance(value, dict):
+                # Recursively apply the function to dictionaries
+                document[key] = repl_objectid_str(value)
+            elif isinstance(value, list):
+                document[key] = [repl_objectid_str(item) for item in value]
+    elif isinstance(document, list):
+        # Recursively apply the function to list elements
+        document = [repl_objectid_str(item) for item in document]
     return document
+
+def repl_str_objectid(document):
+    try:
+        # Convert fields at the root level
+        for field in ["category"]:
+            if field in document:
+                try:
+                    document[field] = ObjectId(document[field])
+                except Exception as e:
+                    logger.error(f"Problem converting {field} to ObjectId: {e}")
+                    raise Exception(f"Problem converting {field} to ObjectId: {e}")
+        return document, None
+    except Exception as e:
+        return document, e
 
 def repl_timestamp_str(document):
     for key,value in document.items():
@@ -53,6 +73,16 @@ def prep_document_for_response(document):
     document = repl_timestamp_str(document)
     logging.debug(f'Returning document')
     return document
+
+
+
+def prep_document_for_database(document):
+    logger.debug(
+        f"Preparing the following document for transformation of strings into ObjectID´s: {document}"
+    )
+    document,e = repl_str_objectid(document)
+    logger.debug(f"Returning document")
+    return document,e
 
 
 def check_document_exist(function):

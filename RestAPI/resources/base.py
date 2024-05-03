@@ -2,7 +2,7 @@ from dataclasses import field
 from typing import Collection
 from flask_restx import Resource
 from utils.database import Database
-from utils.documents import check_body_is_json
+from utils.documents import check_body_is_json, prep_document_for_database
 from utils.documents import prep_document_for_response
 from utils.documents import log, check_document_exist
 from utils.documents import check_id_is_valid, check_product_exist
@@ -93,6 +93,12 @@ class BaseList(Resource):
             self.logger.debug(f"Adding createdBy to the json object")
             object.update({"createdBy": str(self.username)})
             object.update({"modifiedBy": str(self.username)})
+            object, e = prep_document_for_database(object)
+            if e:
+                self.logger.error(f"Received that error: {e}")
+                return make_response(
+                    jsonify({"message": f"{e}"}), 400
+                )
             self.logger.debug(f'Writing json object to the database.')
             # Remove the "_id" key from the object variable, if it exists
             object.pop("_id", None)
@@ -178,6 +184,12 @@ class SpecificBase(Resource):
             self.username = request.headers.get("Remote-User", "Unknown")
             self.logger.debug(f"Adding createdBy to the json object")
             existing_doc.update({"modifiedBy": str(self.username)})
+            existing_doc, e = prep_document_for_database(existing_doc)
+            if e:
+                self.logger.error(f"Received that error: {e}")
+                return make_response(
+                    jsonify({"message": f"{e}"}), 400
+                )
             # Remove the "_id" key from the object variable, if it exists
             existing_doc.pop("_id", None)
             result = self.DatabaseConnector.replace_one(
