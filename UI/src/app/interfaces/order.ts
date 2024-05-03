@@ -1,8 +1,6 @@
-import { Product } from "./product";
-
   export interface OrderDetails {
     id: string;
-    product: Product;
+    product: string;
     amount: number;
   }
   
@@ -10,7 +8,8 @@ import { Product } from "./product";
     _id?: string;
     orders: OrderDetails[];
     creationTime?: Date;
-    schemaVersion?: string;
     lastModified?: Date;
+    createdBy?: string;
+    modifiedBy?: string;
   }
   

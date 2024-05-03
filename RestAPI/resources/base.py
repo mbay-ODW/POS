@@ -178,11 +178,6 @@ class SpecificBase(Resource):
             self.username = request.headers.get("Remote-User", "Unknown")
             self.logger.debug(f"Adding createdBy to the json object")
             existing_doc.update({"modifiedBy": str(self.username)})
-            if e:
-                self.logger.error(f"Received that error: {e}")
-                return make_response(
-                    jsonify({"message": f"{e}"}), 400
-                )
             # Remove the "_id" key from the object variable, if it exists
             existing_doc.pop("_id", None)
             result = self.DatabaseConnector.replace_one(

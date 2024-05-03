@@ -21,7 +21,8 @@ interface Stock {
     price: Price;
     image?: string;
     thresholds: Threshold;
-    schemaVersion?: string;
     lastModified?: Date;
     creationTime?: Date;
+    createdBy?: string;
+    modifiedBy?: string;
   }

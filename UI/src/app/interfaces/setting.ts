@@ -4,7 +4,8 @@ export interface Setting {
     description: string;
     category: string;
     value: string;
-    schemaVersion?: string;
     lastModified?: Date;
     creationTime?: Date;
+    createdBy?: string;
+    modifiedBy?: string;
 }
