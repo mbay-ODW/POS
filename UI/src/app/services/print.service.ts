@@ -14,8 +14,8 @@ export class PrintService {
   constructor(private http: HttpClient) { }
 
 
-printOrder(order: string): Observable<HttpResponse<Order>>{
-return this.http.post<Order>(`${this.baseUrl}/print/orders/`, order,{observe: 'response'});
+printOrder(order: any, id: string): Observable<HttpResponse<Order>>{
+return this.http.post<Order>(`${this.baseUrl}/print/orders/${id}`,order,{observe: 'response'});
 }
 
 }

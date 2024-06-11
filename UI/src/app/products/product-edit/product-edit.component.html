@@ -61,17 +61,7 @@
       <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" />
       <button mat-button (click)="fileInput.click()">Change Image</button>
     </div>
-    
-    <div class="form-section">
-      <mat-form-field class="form-field">
-        <mat-label>Last Modified</mat-label>
-        <input matInput formControlName="lastModified" readonly>
-      </mat-form-field>
-      <mat-form-field class="form-field">
-        <mat-label>Creation Time</mat-label>
-        <input matInput formControlName="creationTime" readonly>
-      </mat-form-field>
-    </div>
+  
   
     <div class="form-section">
       <button style="margin-right: 10px;" mat-raised-button color="primary" (click)="onSave()">Speichern</button>

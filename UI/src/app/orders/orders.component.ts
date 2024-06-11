@@ -12,6 +12,7 @@ import { OrderEditComponent } from './order-edit/order-edit.component';
 import { OrderViewComponent } from './order-view/order-view.component';
 import { ProductsService } from '../services/products.service';
 import { Product } from '../interfaces/product';
+import { PrintService } from '../services/print.service';
 
 
 
@@ -34,6 +35,7 @@ export class OrdersComponent implements OnInit {
   constructor(
     private orderService: OrdersService,
     private productService: ProductsService,
+    private printService: PrintService,
     private dialog: MatDialog,
     private notification: NotificationService
   ) {}
@@ -157,6 +159,25 @@ export class OrdersComponent implements OnInit {
   viewOrder(id: string): void {
     this.orderService.getOrderById(id).subscribe(orderItem => {
       this.openViewDialog(orderItem);
+    });
+  }
+
+
+  printOrder(id: string): void {
+    this.printService.printOrder("",id).subscribe({
+      next: (response) => {
+        if (response.status === 200 || response.status === 201){
+        this.notification.info("Erfolgreich gedruckt")
+      }
+      else{
+        this.notification.error("Fehler beim Drucken: " + response.statusText)
+      }
+      },
+      error: (error) => {
+        console.error('Failed to get stations', error);
+        this.notification.error('Error getting orders');
+        this.isLoading = false;
+      }
     });
   }
 

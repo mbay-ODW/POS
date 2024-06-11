@@ -41,7 +41,7 @@ class OrdersList(BaseList):
                 result = self.Database.db.products.bulk_write(bulk_operations)
                 self.logger.debug(f'Changed {result.modified_count} product stocks')
                 """Printing(str(orderId))"""
-                return make_response(jsonify({"message": "success", "id": str(orderId)}), 201)
+                return make_response(jsonify({"message": "success", "_id": str(orderId)}), 201)
             except Exception as e:
                 self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
                 return make_response(jsonify({"message": str(e)}),500)
@@ -145,29 +145,17 @@ class PrintSpecificOrder(Resource):
         self.logger.debug(f'Starting init of {__name__}.')
         self.Database = Database.get_instance()
         self.DatabaseConnector = self.Database.db.orders
-        self.PrinterSettings = self.Database.db.setting
-        settings = self.PrinterSettings.find_one({"name":"printer.url"})
-        if len(settings) == 0:
-            self.Printing = Printing("localhost")
-        else:
-            self.Printing = Printing(settings['value'])
+
     
     @log
-    @check_id_is_valid
-    @check_order_exist
     def post(self, *args, **kwargs):
         try:
             id = kwargs.get("id")
             self.logger.debug(f"Received the following order: {id}")
-            order_pipeline = [
-                
-            ]
-            self.logger.debug(f"Thats the pipeline for the order: {order_pipeline}")
-            order_details = list(self.DatabaseConnector.aggregate(order_pipeline))
-            self.logger.debug(f"Received the following order details: {order_details}")
-            #Printing
-            if self.Printing.checkStatus:
-                self.Printing.print(order_details)
+            order = self.DatabaseConnector.find_one({"_id":ObjectId(id)})
+            printer = Printing()
+            if printer.checkStatus:
+                printer.print(order)
             else:
                 return make_response(jsonify("Printer not working"), 500)
             return make_response(jsonify("id"), 200)

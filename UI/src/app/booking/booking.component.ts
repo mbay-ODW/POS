@@ -11,9 +11,11 @@ import { Validators } from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
 import { OrdersService } from '../services/orders.service';
 import { PrintService } from '../services/print.service';
-import { switchMap } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
+import { switchMap, retryWhen, delay, take, concatMap } from 'rxjs/operators';
+import { of, throwError } from 'rxjs';
+
 
 @Component({
   selector: 'app-booking',
@@ -119,18 +121,32 @@ export class BookingComponent implements OnInit{
     this.total = this.cart.reduce((sum, item) => sum + (item.product.price * item.amount), 0);
     return this.total
   }
-
   checkout(): void {
     const order: Order = {
       orders: this.cart,
       total: this.total,
     };
-
+  
     this.orderService.addOrder(order).pipe(
       switchMap((response: HttpResponse<Order>) => {
         if (response.status === 201 && response.body) {
-          this.notificationService.info("Drucke Bestellung")
-          return this.printerService.printOrder(response.body._id!);
+          console.log(response.body);
+          this.notificationService.info("Drucke Bestellung");
+          return this.printerService.printOrder(order, response.body._id!).pipe(
+            retryWhen(errors =>
+              errors.pipe(
+                concatMap((error, index) => {
+                  if (index < 2) {
+                    // Retry up to 2 more times
+                    return of(error).pipe(delay(1000)); // Delay between retries
+                  } else {
+                    // After 3 attempts, throw the error
+                    return throwError(error);
+                  }
+                })
+              )
+            )
+          );
         } else {
           throw new Error('Order creation failed');
         }
@@ -140,6 +156,8 @@ export class BookingComponent implements OnInit{
         if (printResponse.status === 200) {
           this.notificationService.info('Bestellung erfolgreich gedruckt');
           this.reset();
+        } else {
+          throw new Error('Printing failed');
         }
       },
       (error) => {

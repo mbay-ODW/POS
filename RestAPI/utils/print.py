@@ -1,45 +1,51 @@
-from escpos.printer import Network, Dummy
+from escpos.printer import Network, Dummy, Usb, Serial
 from escpos import image
 from PIL import Image, ImageOps
-from utils.log import LoggerManager
+#from utils.log import LoggerManager
 
 
-test = {
+test_order = {
     '_id': "123123",
     "orders": [
-        {"id": 1, "product": {"id": "64c3bcc5f0e76b4c0cb1a0a7", "name": "name of the product"}, "amount" : 0},
-        {"id": 2, "product": {"id": "64c3bcc5f0e76b4c0cb1a0a7", "name": "name of the product"}, "amount" : 2}
+        {"id": 1, "product": {"id": "64c3bcc5f0e76b4c0cb1a0a7", "name": "Kuchen"}, "amount" : 0},
+        {"id": 2, "product": {"id": "64c3bcc5f0e76b4c0cb1a0a7", "name": "Wurst"}, "amount" : 2}
                 ]
 }
 
-logger = LoggerManager().logger
+#logger = LoggerManager().logger
 
 
 class Printing():
 
-    def __init__(self,ip):
-        logger.debug("Connecting to printer")
-        self.printer = Network("10.0.1.180")
-        self.logo = "./logo.png"
+    def __init__(self):
+        self.printer = Usb(0x0456, 0x0808, timeout=10,profile="TM-T88III",out_ep=3)
 
 
     def print(self,order):
         try:
             self.order = order
             self.orderId = str(self.order['_id'])
-            logger.debug(f"Got order with id {self.orderId} that should be printed")
             for i in self.order['orders']:
                 #self.printer.image(self.logo)
-                self.printer.text(f"{i['product']['name']}")
-                self.printer.text(f"{i['amount']}")
-                self.printer.barcode('4006381333931', 'EAN13', 64, 2, '', '')
-                self.printer.text("Hallo Nadja, wie geht es dir!")
+                self.printer.text(f"{i['product']['name']} x ")
+                self.printer.text(f"{i['amount']}\n")
+                self.printer.text("--------------------")
                 self.printer.cut()
             return True
         except Exception as e:
-            logger.error(f'Got the following error: {e}')
+            #logger.error(f'Got the following error: {e}')
+            print(e)
             return False
 
 
     def checkStatus(self):
         return self.printer.is_online()
+    
+
+# if __name__ == "__main__":
+#     test = Printing()
+#     print(test.checkStatus())
+#     if test.checkStatus():
+#         test.print(test_order)
+#     else:
+#         print("Not ready")
