@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ProductsService } from '../services/products.service'; // Adjust the path accordingly
 import { Product } from '../interfaces/product'; // Adjust the path accordingly
 import { MatDialog } from '@angular/material/dialog';
@@ -7,6 +7,9 @@ import { NotificationService } from '../services/notification.service';
 import { ProductEditComponent } from './product-edit/product-edit.component';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
+import { ProductViewComponent } from './product-view/product-view.component';
+import { CategoriesService } from '../services/categories.service';
+import { Category } from '../interfaces/category';
 
 
 @Component({
@@ -15,7 +18,9 @@ import { PageEvent } from '@angular/material/paginator';
   styleUrls: ['./products.component.css']
 })
 export class ProductsComponent implements OnInit {
+  @Input() layoutMode: 'edit' | 'shopping' = 'edit'; // Default to 'edit'
   products: Product[] = [];
+  categories: Category[] = [];
   isLoading: boolean = false;
   totalProducts = 0; // Total number of products
   pageSize = 25; // Default page size
@@ -25,27 +30,30 @@ export class ProductsComponent implements OnInit {
     private productService: ProductsService,
     public matDialog:MatDialog,
     private notification:NotificationService,
+    private categoryService: CategoriesService
     ) { }
 
   ngOnInit(): void {
-    this.getProducts(this.currentPage, this.pageSize);
-
-  }
-
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.getProducts(this.currentPage, this.pageSize);
+    this.getProducts();
+    this.getCategories();
   }
 
 
 
 
-  getProducts(page: number, pageSize: number){
+  getProducts(){
     this.isLoading = true; // Start loading
-    this.productService.getProducts(page, pageSize).subscribe(response => {
+    this.productService.getProducts().subscribe(response => {
       this.products = response.data;
       this.totalProducts = response.total;
+      this.isLoading = false; // Stop loading
+    });
+  }
+
+  getCategories(){
+    this.isLoading = true; // Start loading
+    this.categoryService.getCategories().subscribe(response => {
+      this.categories = response.data;
       this.isLoading = false; // Stop loading
     });
   }
@@ -64,12 +72,12 @@ export class ProductsComponent implements OnInit {
   
   openDialog(product?: any, id?: string): void {
     const dialogConfig = new MatDialogConfig();
-    const categories = this.products.map(p => p.category);
-    dialogConfig.data = { product: product, categories: categories };
-    dialogConfig.maxWidth = '80vw'; // 80% of viewport width
-    dialogConfig.maxHeight = '80vh'; // 80% of viewport height
-    dialogConfig.minHeight = '45vw'; // 45% of viewport width
-    dialogConfig.minWidth = '50vh'; // 50% of viewport height
+    dialogConfig.disableClose = false;
+    dialogConfig.autoFocus = false;
+    dialogConfig.data = { product: product, categories: this.categories };
+    dialogConfig.width = "60%";
+    dialogConfig.maxWidth = '100%';
+    dialogConfig.height= "95%";
   
     const dialogRef = this.matDialog.open(ProductEditComponent, dialogConfig);
   
@@ -80,7 +88,7 @@ export class ProductsComponent implements OnInit {
           // Update existing product
           this.productService.updateProduct(id, result).subscribe(
             () => {
-              this.getProducts(this.currentPage, this.pageSize);
+              this.getProducts();
               this.notification.info("Successfully updated");
               this.isLoading = false; // Stop loading
             },
@@ -93,7 +101,7 @@ export class ProductsComponent implements OnInit {
           // Add new product
           this.productService.addProduct(result).subscribe(
             () => {
-              this.getProducts(this.currentPage, this.pageSize);
+              this.getProducts();
               this.notification.info("Successfully added");
               this.isLoading = false; // Stop loading
             },
@@ -105,6 +113,24 @@ export class ProductsComponent implements OnInit {
         }
       }
     });
+  }
+
+  viewProduct(id: string): void{
+    this.productService.getProductById(id).subscribe(productItem => {
+      this.openViewDialog(productItem);
+    });
+  }
+
+  openViewDialog(productItem?: Product) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = false;
+    dialogConfig.autoFocus = false;
+    dialogConfig.data = { productItem: productItem };
+    dialogConfig.width = "60%";
+    dialogConfig.maxWidth = '100%';
+    dialogConfig.height= "95%";
+    const dialogRef = this.matDialog.open(ProductViewComponent, dialogConfig);
+    dialogRef.afterClosed();
   }
   
   
@@ -119,7 +145,7 @@ export class ProductsComponent implements OnInit {
         this.isLoading = true; // Start loading
         this.productService.deleteProduct(id).subscribe(
           () => {
-            this.getProducts(this.currentPage, this.pageSize);
+            this.getProducts();
             this.notification.info("Successfully deleted")
             this.isLoading = false; // Stop loading
           },

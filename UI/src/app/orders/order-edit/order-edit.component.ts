@@ -1,15 +1,9 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { OrdersService } from '../../services/orders.service';
-import { Observable } from 'rxjs';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Order, OrderDetails } from '../../interfaces/order';
 import { NotificationService } from '../../services/notification.service';
-import { ProductsService } from '../../services/products.service';
 import { Product } from '../../interfaces/product';
-
-
 
 @Component({
   selector: 'app-order-edit',
@@ -17,109 +11,112 @@ import { Product } from '../../interfaces/product';
   styleUrls: ['./order-edit.component.css']
 })
 export class OrderEditComponent implements OnInit {
-  products: Product[] = [];
   form: FormGroup;
-  order: Order[] = [];
-  editingOrder: Order | null = null;
-
+  products: Product[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private ordersService: OrdersService,
     public dialogRef: MatDialogRef<OrderEditComponent>,
-    private   notification: NotificationService,
-    private productsService: ProductsService,
-    @Inject(MAT_DIALOG_DATA) public data: { order: Order },
+    private notification: NotificationService,
+    @Inject(MAT_DIALOG_DATA) public data: { orderItem: Order, products: Product[] }
+  ) {
+    this.products = data.products;
 
-
-    ) {
-      this.form = this.fb.group({
-        creationTime: '', // Add this control
-        orders: this.fb.array([])
-      });
+    this.form = this.fb.group({
+      orders: this.fb.array(data.orderItem && data.orderItem.orders ? this.initOrders(data.orderItem.orders) : []),
+      total: [data.orderItem ? data.orderItem.total : 0, Validators.required]
+    });
   }
 
+  ngOnInit(): void {}
 
-  orderDetails() {
+  private initOrders(orderDetails: OrderDetails[]): FormGroup[] {
+    return orderDetails.map(orderDetail => this.fb.group({
+      product: this.fb.group({
+        id: [orderDetail.product.id, Validators.required],
+        category: [orderDetail.product.category, Validators.required],
+        name: [orderDetail.product.name, Validators.required],
+        price: [orderDetail.product.price, Validators.required],
+      }),
+      amount: [orderDetail.amount, Validators.required],
+    }));
+  }
+
+  get OrderFormArray(): FormArray {
     return this.form.get('orders') as FormArray;
   }
 
-  addOrderDetails(orderDetail?: OrderDetails): void {
-    const indexNumber = this.orderDetails().length + 1; // Get the current length of the order details array and add 1
-    if (orderDetail) {
-      // Existing order detail
-      this.orderDetails().push(this.fb.group({
-        id: indexNumber.toString(),
-        product: this.fb.group({
-          id: orderDetail.product._id,
-          name: orderDetail.product.name
-        }),
-        amount: orderDetail.amount
-      }));
-    } else {
-      // New order detail
-      this.orderDetails().push(this.fb.group({
-        id: indexNumber.toString(), // Use the index number + 1 as the ID
-        product: this.fb.group({
-          id: '',
-          name: ''
-        }),
-        amount: 0
-      }));
+  addOrderDetails(): void {
+    const newOrder = this.fb.group({
+      product: this.fb.group({
+        id: ['', Validators.required],
+        category: [''],
+        name: [''],
+        price: [0],
+      }),
+      amount: [0],
+    });
+    this.OrderFormArray.push(newOrder);
+  }
+
+  removeOrderDetails(index: number): void {
+    this.OrderFormArray.removeAt(index);
+  }
+
+  onProductSelect(event: any, index: number): void {
+  const selectedProductId = event.value;
+  const selectedProduct = this.products.find(product => product._id === selectedProductId);
+  if (selectedProduct) {
+    const orderDetailFormGroup = this.OrderFormArray.at(index).get('product') as FormGroup;
+    if (orderDetailFormGroup) {
+      orderDetailFormGroup.patchValue({
+        id: selectedProduct._id,
+        category: selectedProduct.category,
+        name: selectedProduct.name,
+        price: selectedProduct.price.current,
+      });
     }
   }
-  
-  
-
-// Remove an OrderDetails at the specified index
-removeOrderDetails(index: number): void {
-  this.orderDetails().removeAt(index);
 }
 
-ngOnInit(): void {
-  this.productsService.getProducts().subscribe(response => {
-    this.products = response.data;
-  });
-
-  this.form.patchValue({
-    creationTime: this.data.order.creationTime,
-  });
-
-  this.editingOrder = this.data.order;
-  if (this.editingOrder?.orders) {
-    this.editingOrder.orders.forEach(orderDetail => this.addOrderDetails(orderDetail));
+  getTotalPrice(): number {
+    return this.OrderFormArray.controls.reduce((sum, control) => {
+      const orderDetail = control.value;
+      return sum + (orderDetail.product.price * orderDetail.amount);
+    }, 0);
   }
-}
-
-
 
   onSave(): void {
     if (this.form.valid) {
-      const order: Order = this.form.value;
+      const formValue = this.form.value;
+      const totalPrice = this.getTotalPrice(); // Calculate total price
 
+      const order: Order = {
+        orders: formValue.orders.map((orderDetail: any) => {
+          const product = this.products.find(p => p._id === orderDetail.product.id);
+          if (!product) {
+            throw new Error(`Product with id ${orderDetail.product.id} not found`);
+          }
+          return {
+            product: {
+              id: product._id,
+              category: product.category,
+              name: product.name,
+              price: product.price.current,
+            },
+            amount: orderDetail.amount,
+          };
+        }),
+        total: totalPrice, // Set the total price
+      };
       this.dialogRef.close(order);
     } else {
-      // Handle form validation error
+      this.notification.error("Feld ungültig.");
     }
   }
 
   onCancel(): void {
-    // If you want to navigate away from the form, you can inject Router and navigate
-    // this.router.navigate(['/some-path']);
-  
-    // If you want to reset the form to its initial state
     this.form.reset();
     this.dialogRef.close(false);
   }
-
-  onProductSelected(event: Event, index: number): void {
-    const selectedProductId = (event.target as HTMLSelectElement).value;
-    const selectedProduct = this.products.find(product => product._id === selectedProductId);
-    if (selectedProduct) {
-      this.orderDetails().at(index).get('product.id')?.setValue(selectedProductId);
-      this.orderDetails().at(index).get('product.name')?.setValue(selectedProduct.name);
-    }
-  }  
-  
-
 }

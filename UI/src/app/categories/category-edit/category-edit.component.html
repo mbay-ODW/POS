@@ -1,1 +1,24 @@
-<p>category-edit works!</p>
+<div class="edit-dialog">
+    <form [formGroup]="form">
+      <button mat-icon-button class="close-button" (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+  
+      <div class="form-section" *ngIf="data.categoryItem">
+        ID: {{ data.categoryItem._id }}
+      </div>
+  
+      <div class="form-section">
+        <mat-form-field class="form-field">
+          <mat-label>Name</mat-label>
+          <input type="text" matInput formControlName="name" required>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <button mat-raised-button color="primary" (click)="onSave()">Speichern</button>
+        <button mat-raised-button (click)="onCancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  

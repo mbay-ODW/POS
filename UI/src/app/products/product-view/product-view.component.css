@@ -1,0 +1,37 @@
+/* Adjust the width of the form fields */
+.form-field {
+    margin: 20px;
+    width: 90%; /* Adjust the width as needed */
+    margin-top: 10px;
+    margin-bottom: 0px;
+    padding: 0px;
+  } 
+
+  .view-dialog{
+    padding-right: 10%;
+  }
+
+  .form-section button {
+    margin-right: 10px; /* Adjust the margin value to create the desired spacing */
+}
+
+
+.activity-textarea {
+  height: 250px;
+  margin: 20px;
+  width: 90%;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  padding: 0px;
+}
+
+/* Overrides the text color for disabled mat-form-field components */
+.mat-form-field-disabled .mat-form-field-label,
+.mat-form-field-disabled .mat-input-element {
+    color: rgba(241, 13, 13, 0.87) !important; /* Change the rgba values to your preferred color and opacity */
+}
+
+/* Overrides the text color for disabled mat-slide-toggle components */
+.mat-slide-toggle-content {
+    color: rgba(0, 0, 0, 0.87) !important; /* Change the rgba values to your preferred color and opacity */
+}

@@ -1,1 +1,49 @@
-<p>stations works!</p>
+<div class="mat-elevation-z8">
+    <div class="toolbar" style="display: flex; justify-content: space-between;">
+      <h2>Stationen</h2>
+      <button mat-raised-button color="primary" (click)="editStation()">Station hinzufügen</button>
+      <button mat-button (click)="refresh()"><mat-icon>refresh</mat-icon></button>
+    </div>
+  
+    <mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+
+        <div class="center-content">
+            <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+          </div>
+          
+  
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
+        <mat-cell *matCellDef="let station"> {{ station.name }} </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="categories">
+        <mat-header-cell *matHeaderCellDef mat-sort-header> Kategorien </mat-header-cell>
+        <mat-cell *matCellDef="let station">  {{ getCategoryNamesByIds(station.categories).join(', ') }}</mat-cell>
+      </ng-container>
+  
+
+  
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef> Aktion </mat-header-cell>
+        <mat-cell *matCellDef="let station">
+          <button mat-icon-button color="accent" (click)="editStation(station._id)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="viewStation(station._id)">
+            <mat-icon>info</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteStation(station._id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+          
+        </mat-cell>
+      </ng-container>
+  
+      <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  
+
+  </div>
+  

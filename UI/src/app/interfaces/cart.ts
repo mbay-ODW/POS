@@ -1,8 +1,9 @@
-export interface Setting {
+import { OrderDetails } from "./order";
+
+export interface Cart {
     _id?: string;
-    name: string;
-    description: string;
-    value: string;
+    content: OrderDetails[];
+    sum: number;
     lastModified?: Date;
     creationTime?: Date;
     createdBy?: string;

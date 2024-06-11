@@ -1,1 +1,35 @@
-<p>station-edit works!</p>
+<div class="edit-dialog">
+    <form [formGroup]="form">
+      <button mat-icon-button class="close-button" (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+  
+      <div class="form-section" *ngIf="data.stationItem">
+        ID: {{ data.stationItem._id }}
+      </div>
+  
+      <div class="form-section">
+        <mat-form-field class="form-field">
+          <mat-label>Name</mat-label>
+          <input type="text" matInput formControlName="name" required>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <mat-form-field class="form-field">
+          <mat-label>Kategorien</mat-label>
+          <mat-select formControlName="categories" multiple>
+            <mat-option *ngFor="let category of categoriesList; let i = index" [value]="category._id">
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
+        <button mat-raised-button color="primary" (click)="onSave()">Speichern</button>
+        <button mat-raised-button (click)="onCancel()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  

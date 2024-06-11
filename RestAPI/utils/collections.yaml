@@ -18,8 +18,12 @@ Categories:
   - description: "Category collection"
   - name: "categories"
 
-
 Stations:
   - type: standard
   - description: "Station collection"
   - name: "stations"
+
+Carts:
+  - type: standard
+  - description: "Carts collection"
+  - name: "carts"

@@ -108,6 +108,15 @@
     <button mat-menu-item [routerLink]="'/bookings'">
       Kasse
     </button>
+    <button mat-menu-item [routerLink]="'/stations'">
+      Stationen
+    </button>
+    <button mat-menu-item [routerLink]="'/categories'">
+      Kategorien
+    </button>
+    <button mat-menu-item [routerLink]="'/settings'">
+      Einstellungen
+    </button>
   </mat-menu>
   
 
@@ -119,6 +128,8 @@
   alt="VfR Wuerzberg"
   src="https://vfr-würzberg.de/wp-content/themes/vfr-wuerzberg-wordpress/dist/images/vfr-wuerzberg-logo.svg"
 />
+
+
 <div *ngIf="!isProduction">
 <h1> TEST SYSTEM</h1>
 </div>

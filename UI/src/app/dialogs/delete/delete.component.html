@@ -1,6 +1,6 @@
-<h2 mat-dialog-title>Delete</h2>
-<mat-dialog-content>Are you sure you want to delete this {{ data.type }}?</mat-dialog-content>
+<h2 mat-dialog-title>Löschen</h2>
+<mat-dialog-content>Sind Sie sicher, dass Sie {{ data.type }} löschen wollen?</mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-button (click)="onConfirm()">Confirm</button>
+  <button mat-button (click)="onCancel()">Abbrechen</button>
+  <button mat-button color="warn" (click)="onConfirm()">Bestätigen</button>
 </mat-dialog-actions>

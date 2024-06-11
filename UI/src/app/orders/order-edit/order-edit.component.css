@@ -1,0 +1,40 @@
+.edit-dialog .form-section {
+    margin: 20px; /* Adjust the margin value as needed */
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 0px;
+    padding: auto;
+}
+
+/* Adjust the width of the form fields */
+.edit-dialog .form-field {
+    margin: 20px;
+    width: 90%; /* Adjust the width as needed */
+    margin-top: 10px;
+    margin-bottom: 0px;
+    padding: 0px;
+  } 
+
+  .edit-dialog{
+    padding-right: 10%;
+  }
+
+  .form-section button {
+    margin-right: 10px; /* Adjust the margin value to create the desired spacing */
+}
+
+.order-section {
+  width: 100%;
+  text-align: center;
+}
+
+
+.form-section {
+  flex-grow: 1;
+  margin-right: 10px; /* Adjust as needed for spacing between columns */
+}
+
+.order-section table th {
+  margin: 0 auto; 
+  min-width: 10px;
+}

@@ -17,7 +17,7 @@ logger = LoggerManager().logger
 
 class Printing():
 
-    def __init__(self):
+    def __init__(self,ip):
         logger.debug("Connecting to printer")
         self.printer = Network("10.0.1.180")
         self.logo = "./logo.png"
@@ -29,7 +29,7 @@ class Printing():
             self.orderId = str(self.order['_id'])
             logger.debug(f"Got order with id {self.orderId} that should be printed")
             for i in self.order['orders']:
-                self.printer.image(self.logo)
+                #self.printer.image(self.logo)
                 self.printer.text(f"{i['product']['name']}")
                 self.printer.text(f"{i['amount']}")
                 self.printer.barcode('4006381333931', 'EAN13', 64, 2, '', '')

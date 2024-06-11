@@ -1,14 +1,51 @@
 <div class="booking">
-    <!-- Left Side: Product List -->
-    <div class="products">
-      <h2>Products</h2>
-      <app-products></app-products>
-    </div>
-    
-    <!-- Right Side: Cart -->
-    <div class="cart">
-      <h2>Cart</h2>
-      <app-cart></app-cart>
-      <!-- Display cart items here -->
+
+  <div class="products">
+  
+    <div *ngFor="let category of categories">
+      <h2>{{ category.name }}</h2>
+      <div class="product-list">
+        <ng-container *ngFor="let product of products">
+          <mat-card *ngIf="product.category === category._id" (click)="addToCart(product)">
+            <img mat-card-image [src]="product.image" alt="{{ product.name }}">
+            <mat-card-header>
+              <mat-card-title>{{ product.shortName }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Preis: {{ product.price.current }} €</p>
+              <p>Bestand: <span [ngClass]="getBadgeColor(product)">{{ product.stock.current }}</span></p>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+      </div>
     </div>
   </div>
+    
+    <!-- Right Side: Cart -->
+    <div class="cart" >
+      <h2>Einkausfwagen <button *ngIf="cart.length > 0" mat-raised-button color="warn" (click)="reset()">Leeren</button></h2>
+      
+      <p></p>
+      <table>
+        <tr *ngFor="let item of cart">
+          <td>
+            {{ item.amount }} x {{item.product.name}}
+          </td>
+          <td>
+            <button mat-raised-button color="primary" (click)="decrementItemAmount(item)">
+              <mat-icon>exposure_neg_1</mat-icon>
+            </button>
+          </td>
+          <td>
+            <button mat-raised-button color="primary" (click)="increaseAmount(item)">
+              <mat-icon>exposure_plus_1</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </table>
+
+
+      <p>Anzahl: {{ getTotalAmount() }}</p>
+      <b><p>Gesamtpreis: {{ getTotalPrice()}} €</p></b>
+      <button mat-raised-button color="primary" (click)="checkout()">Checkout</button>
+    </div>

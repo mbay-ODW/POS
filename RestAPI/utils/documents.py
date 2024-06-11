@@ -1,7 +1,6 @@
 from flask import abort, current_app, jsonify, request, make_response
 from bson import ObjectId, Timestamp
 import json
-import logging
 from functools import wraps
 from utils.log import LoggerManager
 from datetime import datetime, timezone, timedelta
@@ -37,6 +36,18 @@ def repl_str_objectid(document):
                 except Exception as e:
                     logger.error(f"Problem converting {field} to ObjectId: {e}")
                     raise Exception(f"Problem converting {field} to ObjectId: {e}")
+        if "orders" in document and isinstance(document["orders"], list):
+            for order in document["orders"]:
+                if "product" in order:
+                    if order["product"] != "":
+                        try:
+                            if "id" in order["product"]:
+                                order["product"]["id"] = ObjectId(order["product"]["id"])
+                            if "category" in order["product"]:
+                                order["product"]["category"] = ObjectId(order["product"]["category"])
+                        except Exception as e:
+                            logger.error(f"Problem converting product 'id' in order to ObjectId: {e}")
+                            raise Exception(f"Problem converting product 'id' in order to ObjectId: {e}")
         return document, None
     except Exception as e:
         return document, e
@@ -54,24 +65,24 @@ def repl_timestamp_str(document):
 def check_body_is_json(function):
     @wraps(function)
     def validated_json(*args, **kwargs):
-        logging.debug(f'Checking that the following data is a valid json object: {request.get_data()}')
+        logger.debug(f'Checking that the following data is a valid json object: {request.get_data()}')
         try:
             json.loads(request.get_data())
-            logging.debug(f'Data is valid json')
+            logger.debug(f'Data is valid json')
             return function(*args, **kwargs)
         except ValueError as err:
-            logging.debug(f'Data is not a valid json, received the following error: {err}')
+            logger.debug(f'Data is not a valid json, received the following error: {err}')
             return make_response(jsonify({"message": "Data is not a valid json"}),400)
     return validated_json
 
 
 def prep_document_for_response(document):
-    logging.debug(f'Preparing the following document for transformation of ObjectID and Timestamps: {document}')
-    logging.debug(f'Preparing the document for objectID transformation.')
+    logger.debug(f'Preparing the following document for transformation of ObjectID and Timestamps: {document}')
+    logger.debug(f'Preparing the document for objectID transformation.')
     document = repl_objectid_str(document)
-    logging.debug(f'Preparing the document for timestamp transformation.')
+    logger.debug(f'Preparing the document for timestamp transformation.')
     document = repl_timestamp_str(document)
-    logging.debug(f'Returning document')
+    logger.debug(f'Returning document')
     return document
 
 
@@ -127,14 +138,27 @@ def check_product_exist(function):
         logger.debug("Product does exist")
         return function(self, *args, **kwargs)
 
+def check_order_exist(function):
+    @wraps(function)
+    def checked_document(self, *args, **kwargs):
+        case = kwargs.get("id")
+        ReferencConnector = Database.get_instance().db.orders
+        if case is None or not ReferencConnector.find_one(
+            {"_id": ObjectId(case)}, {"_id": 1}
+        ):
+            logger.error("Order does not exist")
+            return make_response(jsonify({"message": "Order does not exist"}), 404)
+        logger.debug("Order does exist")
+        return function(self, *args, **kwargs)
+
 
 def validate_query_params(function):
     @wraps(function)
     def validate(self, *args, **kwargs):
         # creating allowed list of params
         allowed_params = ['skip','pageSize','start','end','fields','active','sortBy']
-        allowed_fields = ['_id','name','shortName']
-        allowed_sorts = ['_id','date','categeory','shortName']
+        allowed_fields = ['_id','name','shortName','orders','creationTime','price','category']
+        allowed_sorts = ['_id','date','category','shortName','station']
         request_params = request.args 
         logger.debug(f"Validating request parameters: {request.args}")         
         for i in request_params:

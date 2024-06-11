@@ -6,6 +6,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NotificationService } from 'src/app/services/notification.service';
 import { map, startWith } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { Category } from '../../interfaces/category';
 
 
 
@@ -17,7 +18,7 @@ import { Observable } from 'rxjs';
 export class ProductEditComponent implements OnInit{
   categoryControl = new FormControl();
   filteredCategories!: Observable<string[]>;
-  categories: string[] = []; 
+  categories: Category[] = []; 
   product: Product[] = [];
   form: FormGroup;
   editingProduct: Product | null = null;
@@ -30,36 +31,24 @@ export class ProductEditComponent implements OnInit{
     this.form.patchValue(this.data.product);
     this.isActive = this.data.product?.active || true; // Handle the case when the product is null
     this.editingProduct = this.data.product;
-    this.filteredCategories = this.categoryControl.valueChanges
-    .pipe(
-      startWith(''),
-      map(value => this._filter(value))
-    );
-    // Set the value of the categoryControl
-    if (this.data.product?.category) {
-      this.categoryControl.setValue(this.data.product.category);
-    }
+    
   }
 
-  private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.categories.filter(option => option.toLowerCase().includes(filterValue));
-  }
 
   constructor(
     private fb: FormBuilder,
     private productsService: ProductsService,
     public dialogRef: MatDialogRef<ProductEditComponent>,
     private   notification: NotificationService,
-    @Inject(MAT_DIALOG_DATA) public data: { product: Product, categories : string [] },
+    @Inject(MAT_DIALOG_DATA) public data: { product: Product, categories : Category [] },
   
 
     ) {
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      category: this.categoryControl,
-      label: [''],
-      active: [false],
+      name: [data.product ? data.product.name : '', Validators.required],
+      category: [data.product ? data.product.category : '', Validators.required],
+      shortName: [data.product ? data.product.shortName : '', Validators.required],
+      active: [data.product ? data.product.active : true, Validators.required],
       stock: this.fb.group({
         current: [0, Validators.required],
                           }),
@@ -70,16 +59,12 @@ export class ProductEditComponent implements OnInit{
       thresholds: this.fb.group({
         warning: [0],
         info: [0]
-                                }),
-      lastModified: [''],
-      creationTime: ['']
-
+                                })
     }); 
     this.categories = data.categories;
   }
 
   onSave(): void {
-    console.log(this.form)
     if (this.form.valid) {
       const product: Product = this.form.value;
 

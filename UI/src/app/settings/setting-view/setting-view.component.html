@@ -12,14 +12,21 @@
             <div class="form-section">
                 <mat-form-field class="form-field">
                     <mat-label>Name</mat-label>
-                    <input matInput [value]="data.stationItem.name" readonly>
+                    <input matInput [value]="data.settingItem.name" readonly>
                 </mat-form-field>
             </div>
 
             <div class="form-section">
                 <mat-form-field class="form-field">
-                    <mat-label>Kategorien</mat-label>
-                    <input matInput [value]="data.selectedCategories" readonly>
+                    <mat-label>Beschreibung</mat-label>
+                    <input matInput [value]="data.settingItem.description" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Wert</mat-label>
+                    <input matInput [value]="data.settingItem.value" readonly>
                 </mat-form-field>
             </div>
 
@@ -29,28 +36,28 @@
             <div class="form-section">
                 <mat-form-field class="form-field">
                     <mat-label>Letzte Änderung</mat-label>
-                    <input matInput [value]="data.stationItem.lastModified | date:'medium'" readonly>
+                    <input matInput [value]="data.settingItem.lastModified | date:'medium'" readonly>
                 </mat-form-field>
             </div>
 
             <div class="form-section">
                 <mat-form-field class="form-field">
                     <mat-label>Erzeugt am</mat-label>
-                    <input matInput [value]="data.stationItem.creationTime | date:'medium'" readonly>
+                    <input matInput [value]="data.settingItem.creationTime | date:'medium'" readonly>
                 </mat-form-field>
             </div>
 
             <div class="form-section">
                 <mat-form-field class="form-field">
                     <mat-label>Erzeugt von</mat-label>
-                    <input matInput [value]="data.stationItem.createdBy" readonly>
+                    <input matInput [value]="data.settingItem.createdBy" readonly>
                 </mat-form-field>
             </div>
     
             <div class="form-section">
                 <mat-form-field class="form-field">
                     <mat-label>Letzter Berbeiter </mat-label>
-                    <input matInput [value]="data.stationItem.modifiedBy" readonly>
+                    <input matInput [value]="data.settingItem.modifiedBy" readonly>
                 </mat-form-field>
             </div>
 

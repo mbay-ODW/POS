@@ -1,10 +1,9 @@
-export interface Setting {
+export interface Station {
     _id?: string;
     name: string;
-    description: string;
-    value: string;
-    lastModified?: Date;
+    categories: string[];
     creationTime?: Date;
+    lastModified?: Date;
     createdBy?: string;
     modifiedBy?: string;
 }

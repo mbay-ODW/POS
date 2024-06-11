@@ -16,23 +16,40 @@ export class ProductsService {
   constructor(private http: HttpClient) { }
 
 
-  getProducts(page?: number, pageSize?: number): Observable<{ data: Product[], total: number }> {
+  getProducts(queryParams: string= ''): Observable<{ data: Product[], total: number }> {
+    return this.http.get<{ data: Product[], total: number }>(`${this.baseUrl}/products${queryParams}`);
+  }
+
+  getProductsByCategoryId(category: string): Observable<{ data: Product[], total: number }> {
     let params = new HttpParams();
 
-    if (page != null && pageSize != null) {
-      const start = page * pageSize;
-      params = params.set('skip', start.toString());
-      params = params.set('pageSize', pageSize.toString());
+    if (category != null ) {
+      params = params.set('category', category.toString());
     }
-
-    return this.http.get<{ data: Product[], total: number }>(`${this.baseUrl}/products`, { params });
+    return this.http.get<{ data: Product[], total: number }>(`${this.baseUrl}/products${params}`);
   }
+
+  getProductsByStationId(station: string): Observable<{ data: Product[], total: number }> {
+    let params = new HttpParams();
+
+    if (station != null ) {
+      params = params.set('station', station.toString());
+    }
+    return this.http.get<{ data: Product[], total: number }>(`${this.baseUrl}/products${params}`);
+  }
+
   getProductById(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.baseUrl}/products/${id}`);
   }
+  
   addProduct(product: Product): Observable<Product> {
     return this.http.post<Product>(`${this.baseUrl}/products`, product);
   }
+
+  patchProduct(id: string, string: any) {
+    return this.http.patch<Product>(`${this.baseUrl}/products/${id}`, string);
+  }
+
   updateProduct(id: string, product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.baseUrl}/products/${id}`, product);
   }

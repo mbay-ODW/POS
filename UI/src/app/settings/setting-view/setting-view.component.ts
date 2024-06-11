@@ -1,27 +1,27 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Category } from 'src/app/interfaces/category';
+import { Setting } from 'src/app/interfaces/setting';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
-  selector: 'app-category-view',
-  templateUrl: './category-view.component.html',
-  styleUrl: './category-view.component.css'
+  selector: 'app-setting-view',
+  templateUrl: './setting-view.component.html',
+  styleUrl: './setting-view.component.css'
 })
-export class CategoryViewComponent {
+export class SettingViewComponent {
+
 
   ngOnInit(): void {
   }
 
   constructor(
-    public dialogRef: MatDialogRef<CategoryViewComponent>,
+    public dialogRef: MatDialogRef<SettingViewComponent>,
     private notificationService: NotificationService,
-    @Inject(MAT_DIALOG_DATA) public data: { categoryItem: Category },
+    @Inject(MAT_DIALOG_DATA) public data: { settingItem: Setting },
   ) {}
 
   onClose(): void {
     this.dialogRef.close(false);
   }
-
 
 }

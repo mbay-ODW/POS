@@ -110,7 +110,7 @@ class BaseList(Resource):
                 if caching:
                     self.logger.debug("Cache cleared")
                     cache.clear()
-                return make_response(jsonify({"message": "success", "id": str(id.inserted_id)}), 201)
+                return make_response(jsonify({"message": "success", "_id": str(id.inserted_id)}), 201)
             else:
                 self.logger.error(f'Document could have not been written to database.')
                 return make_response(jsonify({"message": "Document was not inserted"}), 500)
@@ -127,10 +127,7 @@ class SpecificBase(Resource):
     @log
     def __init__(self, api=None, *args, **kwargs):
         self.logger.debug(f'Starting init of {__name__}.')
-        self.logger.debug("BEFORE")
         self.Database = Database.get_instance()
-        self.logger.debug("AFTER")
-
     @log
     @check_id_is_valid
     @check_document_exist

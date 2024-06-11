@@ -23,7 +23,7 @@ private baseUrl = environment.baseUrl;
       // withCredentials is needed to pass authelia with own token
       withCredentials: true,
       setHeaders: {
-        'Remote-User': "mbayram@drk-odw.de",
+        'Remote-User': "mbayram@test.de",
         'Remote-Groups': "admin,xyz",
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',

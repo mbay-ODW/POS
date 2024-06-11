@@ -3,12 +3,15 @@ import { Order } from '../interfaces/order';
 import { OrdersService } from '../services/orders.service';
 import { NotificationService } from '../services/notification.service';
 import { MatDialog } from '@angular/material/dialog';
-import { PageEvent } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { DeleteComponent } from '../dialogs/delete/delete.component';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { OrderEditComponent } from './order-edit/order-edit.component';
+import { OrderViewComponent } from './order-view/order-view.component';
+import { ProductsService } from '../services/products.service';
+import { Product } from '../interfaces/product';
 
 
 
@@ -19,127 +22,195 @@ import { OrderEditComponent } from './order-edit/order-edit.component';
 })
 
 export class OrdersComponent implements OnInit {
-  @ViewChild(MatSort) sort!: MatSort;
-  orders = new MatTableDataSource<Order>();
+  displayedColumns: string[] = ['orderDetails', 'total','creationTime','actions'];
+  dataSource = new MatTableDataSource<Order>();
   isLoading: boolean = false;
-  totalProducts = 0; // Total number of products
-  pageSize = 25; // Default page size
-  currentPage = 0; // Current page index
-  dataSource: MatTableDataSource<Order> | undefined;
-  displayedColumns: string[] = ['orderId', 'orderDetails' ,'creationTime', 'actions'];
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
+  orders: Order[] = [];
+  products: Product[] = [];
 
   constructor(
-    private ordersService: OrdersService,
-    public matDialog:MatDialog,
-    private notification:NotificationService,
-    ) { }
+    private orderService: OrdersService,
+    private productService: ProductsService,
+    private dialog: MatDialog,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void {
-    this.getOrders(this.currentPage, this.pageSize);
-
+    this.getOrders();
+    this.getProducts();
   }
 
-  ngAfterViewInit(): void {
-    this.orders.sort = this.sort;
+  ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator;
   }
 
-
-  onPageChange(event: PageEvent): void {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.getOrders(this.currentPage, this.pageSize);
-  }
-
-
-  getOrders(page: number, pageSize: number) {
-    this.isLoading = true; // Start loading
-    this.ordersService.getOrders(page, pageSize).subscribe(response => {
-      this.orders.data = response.data; // <-- Set the data without overwriting the whole MatTableDataSource instance
-      this.totalProducts = response.total;
-      this.isLoading = false; // Stop loading
+  getOrders(): void {
+    this.isLoading = true;
+    this.orderService.getOrders().subscribe({
+      next: (response) => {
+        this.dataSource.data = response.data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Failed to get stations', error);
+        this.notification.error('Error getting orders');
+        this.isLoading = false;
+      }
     });
+  }
+
+  getProducts(): void {
+    this.isLoading = true;
+    let queryParams = '?';
+    queryParams = queryParams + 'fields=name,shortName,creationTime,category,price'
+    this.productService.getProducts(queryParams).subscribe({
+      next: (response) => {
+        this.products = response.data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Failed to get stations', error);
+        this.notification.error('Error getting orders');
+        this.isLoading = false;
+      }
+    });
+  }
+
+
+  editOrder(id?: string): void {
+    if (id) {
+      this.orderService.getOrderById(id).subscribe(orderItem => {
+        this.openDialog(orderItem, id);
+      });
+    } else {
+      // That's the case for creating a new order
+      this.openDialog();
+    }
+  }
+
+  openDialog(order?: Order, id?: string): void {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    dialogConfig.width = "60%";
+    dialogConfig.maxWidth = '100%';
+    dialogConfig.height = "95%";
+    dialogConfig.data = { orderItem: order, products: this.products };
+
+    const dialogRef = this.dialog.open(OrderEditComponent, dialogConfig);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.isLoading = true;
+        if (id) {
+          this.orderService.updateOrder(id, result).subscribe(
+            (response) => {
+              if (response.status === 200 || response.status === 201){
+              // Update was done
+              this.getOrders();
+              this.notification.info("Erfolgreich bearbeitet")
+              }
+              else{
+              this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
+              console.error(response)
+              }
+              this.isLoading = false;
+              this.getOrders()
+            },
+            error => {
+              // No update
+              this.notification.error(error.error.message)
+              console.error(error)
+              this.isLoading = false;
+            }
+          )
+        } else {
+          // Add a new station
+          this.orderService.addOrder(result).subscribe(
+            (response) => {
+              if (response.status === 200 || response.status === 201){
+              this.getOrders();
+              this.notification.info("Erfolgreich erzeugt")
+              this.isLoading = false;
+              }
+              else{
+                this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
+                console.error(response)
+              }
+              this.isLoading = false;
+              this.getOrders();
+            },
+            error => {
+              this.notification.error(error.error.message)
+              console.error(error)
+              this.isLoading = false;
+            }
+          )
+        }
+      }
+    });
+  }
+
+  viewOrder(id: string): void {
+    this.orderService.getOrderById(id).subscribe(orderItem => {
+      this.openViewDialog(orderItem);
+    });
+  }
+
+  openViewDialog(orderItem?: Order) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = false;
+    dialogConfig.autoFocus = false;
+    dialogConfig.data = { orderItem: orderItem};
+    dialogConfig.width = "60%";
+    dialogConfig.maxWidth = '100%';
+    dialogConfig.height = "95%";
+    const dialogRef = this.dialog.open(OrderViewComponent, dialogConfig);
+    dialogRef.afterClosed();
+  }
+
+  refresh(): void{
+      this.getOrders()
+  }
+
+  getProductNameById(id: string): string{
+    let name= this.products.find(productItem => productItem._id === id);
+    return name? name.name: 'Unbekannt';
   }
 
 
   deleteOrder(id: string): void {
-    const type = "order";
-    const dialogRef = this.matDialog.open(DeleteComponent,{data: {type}});
-    
-  
+    const type = "diese Bestellung";
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.disableClose = false;
+    dialogConfig.autoFocus = true;
+    dialogConfig.data = { type };
+    const dialogRef = this.dialog.open(DeleteComponent, dialogConfig);
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.isLoading = true; // Start loading
-        this.ordersService.deleteOrder(id).subscribe(
-          () => {
-            this.getOrders(this.currentPage, this.pageSize);
-            this.notification.info("Successfully deleted")
-            this.isLoading = false; // Stop loading
+        this.orderService.deleteOrder(id).subscribe(
+          (response) => {
+            if (response.status === 204) {
+            this.notification.info("Bestellung erfolgreich gelöscht.")
+            }
+            else{
+              this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
+              console.error(response) 
+            }
+            this.isLoading = false;
+            this.getOrders();
           },
           error => {
-            this.notification.error("Error in deletion: " + error.message)
-            this.isLoading = false; // Stop loading
+            this.notification.error(error.error.message)
+            console.error(error)
           }
-        );
+        )
       }
-    });
-
-}
-
-editOrder(id?: string): void {
-  if (id) {
-    this.ordersService.getOrderById(id).subscribe(order => {
-      this.openDialog(order, id);
-    });
-  } else {
-    // Thats the case for creating a new product
-    this.openDialog();
+    })
   }
-}
-
-openDialog(order?: any, id?: string): void {
-  const dialogConfig = new MatDialogConfig();
-  dialogConfig.data = { order: order };
-  dialogConfig.maxWidth = '80vw'; // 80% of viewport width
-  dialogConfig.maxHeight = '80vh'; // 80% of viewport height
-  dialogConfig.minHeight = '45vw'; // 45% of viewport width
-  dialogConfig.minWidth = '50vh'; // 50% of viewport height
-
-  const dialogRef = this.matDialog.open(OrderEditComponent, dialogConfig);
-  
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.isLoading = true; // Start loading
-      if (id) {
-        // Update existing product
-        this.ordersService.updateOrder(id, result).subscribe(
-          () => {
-            this.getOrders(this.currentPage, this.pageSize);
-            this.notification.info("Successfully updated");
-            this.isLoading = false; // Stop loading
-          },
-          error => {
-            this.notification.error("Error in update: " + error);
-            this.isLoading = false; // Stop loading
-          }
-        );
-      } else {
-        // Add new product
-        this.ordersService.addOrder(result).subscribe(
-          () => {
-            this.getOrders(this.currentPage, this.pageSize);
-            this.notification.info("Successfully added");
-            this.isLoading = false; // Stop loading
-          },
-          error => {
-            this.notification.error("Error in add: " + error);
-            this.isLoading = false; // Stop loading
-          }
-        );
-      }
-    }
-  });
-}
-
-
 }

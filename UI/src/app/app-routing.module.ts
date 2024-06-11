@@ -6,6 +6,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { BookingComponent } from './booking/booking.component';
 import { HomeComponent } from './home/home.component';
 import { PreviewComponent } from './preview/preview.component';
+import { CategoriesComponent } from './categories/categories.component';
+import { StationsComponent } from './stations/stations.component';
 
 const routes: Routes = [
   {path: "products", component: ProductsComponent},
@@ -14,6 +16,8 @@ const routes: Routes = [
   {path: "bookings", component: BookingComponent},
   {path: "home", component: HomeComponent},
   {path: "preview", component: PreviewComponent},
+  {path: "categories", component: CategoriesComponent},
+  {path: "stations", component: StationsComponent},
 ];
 
 @NgModule({

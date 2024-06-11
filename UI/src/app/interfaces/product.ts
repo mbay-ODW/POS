@@ -15,7 +15,7 @@ interface Stock {
     _id?: string;
     category: string;
     name: string;
-    label: string;
+    shortName: string;
     active: boolean;
     stock: Stock;
     price: Price;

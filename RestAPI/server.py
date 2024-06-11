@@ -92,11 +92,23 @@ except Exception as e:
     logger.error(f'Error while adding products resources: {e}')
 
 try:
+    logger.debug('Adding carts resources')
+    from resources.carts import CartsList
+    from resources.carts import SpecificCarts
+    api.add_resource(CartsList, '/api/v1/carts')
+    api.add_resource(SpecificCarts, '/api/v1/carts/<string:id>')
+    logger.debug('Carts resources added')
+except Exception as e:
+    logger.error(f'Error while adding carts resources: {e}')
+
+try:
     logger.debug('Adding orders resources')
     from resources.orders import OrdersList
     from resources.orders import SpecificOrders
+    from resources.orders import PrintSpecificOrder
     api.add_resource(OrdersList, '/api/v1/orders')
     api.add_resource(SpecificOrders, '/api/v1/orders/<string:id>')
+    api.add_resource(PrintSpecificOrder, '/api/v1/print/orders/<string:id>')
     logger.debug('Orders resources added')
 except Exception as e:
     logger.error(f'Error while adding orders resources: {e}')

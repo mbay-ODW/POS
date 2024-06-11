@@ -1,10 +1,8 @@
-export interface Setting {
+export interface Category {
     _id?: string;
     name: string;
-    description: string;
-    value: string;
-    lastModified?: Date;
     creationTime?: Date;
+    lastModified?: Date;
     createdBy?: string;
     modifiedBy?: string;
 }

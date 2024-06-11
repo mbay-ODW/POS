@@ -12,20 +12,21 @@
   
       <mat-form-field class="form-field">
           <mat-label>Label</mat-label>
-          <input matInput formControlName="label">
+          <input matInput formControlName="shortName">
       </mat-form-field>
     </div>
   
     <div class="form-section">
-      <mat-form-field class="form-field">
-          <mat-label>Category</mat-label>
-          <input type="text" matInput [formControl]="categoryControl" [matAutocomplete]="auto">
-          <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let category of filteredCategories | async" [value]="category">
-              {{category}}
+
+        <mat-form-field class="form-field">
+          <mat-label>category</mat-label>
+          <mat-select formControlName="category" required>
+            <mat-option *ngFor="let category of categories" [value]="category._id">
+              {{ category.name }} 
             </mat-option>
-          </mat-autocomplete>
+          </mat-select>
         </mat-form-field>
+
       
       <mat-slide-toggle formControlName="active">Active</mat-slide-toggle>
     </div>
@@ -73,8 +74,11 @@
     </div>
   
     <div class="form-section">
-      <button mat-button (click)="onSave()">Save</button>
+      <button style="margin-right: 10px;" mat-raised-button color="primary" (click)="onSave()">Speichern</button>
+      <button mat-raised-button color="warning" (click)="onCancel()">Abbrechen</button>
     </div>
+
+
   
   </form>
   

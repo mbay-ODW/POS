@@ -1,3 +1,4 @@
+<div class="edit-dialog">
 <form [formGroup]="form">
 
     <button mat-icon-button class="close-button" (click)="onCancel()">
@@ -5,33 +6,44 @@
       </button>
 
 
-    <mat-form-field>
-      <input matInput placeholder="Creation Time" formControlName="creationTime" readonly>
-    </mat-form-field>
-  
-    <div formArrayName="orders">
-      <div *ngFor="let orderDetail of orderDetails().controls; let i = index" [formGroupName]="i">
-        <div style="display: flex; align-items: center;">
-          <mat-form-field style="flex: 1;">
-            <input matInput placeholder="Product ID" formControlName="id" readonly>
-          </mat-form-field>
-          <div formGroupName="product"> <!-- Add this wrapper -->
-            <mat-form-field style="flex: 2;">
-              <select matNativeControl placeholder="Product Name" formControlName="id" (change)="onProductSelected($event, i)">
-                <option *ngFor="let product of products" [value]="product._id">{{product.label}}</option>
-              </select>
+      <div class="order-section">
+        <h2><mat-label>Bestellungen</mat-label></h2> 
+         <p></p>
+       <div formArrayName="orders">
+         <table>
+         <div *ngFor="let orderDetails of OrderFormArray.controls; let i = index" [formGroupName]="i">
+         <tr>
+           <th>
+            <mat-form-field class="activity-field">
+              <mat-label>Produkt</mat-label>
+              <mat-select formGroupName="product" formControlName="id"  (selectionChange)="onProductSelect($event, i)">
+                <mat-option *ngFor="let product of products" [value]="product._id">
+                  {{product.name}}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
-          </div> <!-- End wrapper -->
-          <mat-form-field style="flex: 1;">
-            <input matInput placeholder="Amount" formControlName="amount" type="number">
-          </mat-form-field>
-          <button mat-button (click)="removeOrderDetails(i)">Remove</button>
-        </div>
-      </div>
-    </div>
-    
-    
-    <button mat-button type="button" (click)="addOrderDetails()">Add Product</button>
-    <button mat-button (click)="onSave()">Save</button>
-</form>
-  
+           </th>
+           <th>
+            <mat-form-field class="form-field">
+              <mat-label>Anzahl</mat-label>
+              <input type="number" matInput formControlName="amount">
+            </mat-form-field>
+          </th>
+           <th>
+             <button mat-raised-button color="warn" (click)="removeOrderDetails(i)"><mat-icon>delete</mat-icon></button>
+           </th>
+         </tr>
+         </div>
+       </table>
+       <div class="add-details-button">
+       <button mat-raised-button color="primary" (click)="addOrderDetails()"><mat-icon>add_circle</mat-icon>Produkt</button>
+     </div>
+     </div>
+   </div>
+   <p></p>
+   <div class="form-section">
+    <button mat-raised-button color="primary" (click)="onSave()">Speichern</button>
+    <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
+  </div>
+  </form>
+</div>

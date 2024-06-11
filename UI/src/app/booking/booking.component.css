@@ -1,0 +1,137 @@
+.booking {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.products {
+  flex: 2;
+  margin-right: 20px;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.product-list mat-card {
+  width: 150px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.product-list mat-card:hover {
+  transform: scale(1.05);
+}
+
+.product-list mat-card img {
+  width: 80%;
+  height: 60px;
+  object-fit: contain;
+}
+
+.cart {
+  flex: 1;
+  margin-left: 20px;
+}
+
+.product-card-actions {
+  padding: 10px;
+}
+
+.product-card-content {
+  text-align: left;
+  padding-left: 10px;
+}
+
+.more-options-button {
+  margin-left: auto;
+}
+
+.loading-container {
+  position: relative;
+}
+
+mat-progress-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.product-card,
+.add-product-card {
+  width: 150px;
+  min-height: 200px;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 15px;
+}
+
+.add-product-card:hover {
+  background-color: #e0e0e0;
+}
+
+.add-product-content {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.add-product-button {
+  font-size: 48px;
+}
+
+.add-product-icon {
+  color: #000;
+}
+
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding-bottom: 70px;
+}
+
+.more-options-button {
+  margin-left: auto;
+}
+
+.badge-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.product-badge {
+  margin: -5px;
+}
+
+.paginator-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  background: white;
+  z-index: 1000;
+}
+
+.spinner-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  background: white;
+  z-index: 1000;
+}

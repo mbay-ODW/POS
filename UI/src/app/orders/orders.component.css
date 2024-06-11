@@ -31,3 +31,11 @@
   .mat-row:hover {
     background-color: rgba(0, 0, 0, 0.1); /* You can adjust the color as needed */
 }
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

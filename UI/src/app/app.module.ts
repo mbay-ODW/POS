@@ -35,10 +35,20 @@ import { SettingEditComponent } from './settings/setting-edit/setting-edit.compo
 import { CartComponent } from './cart/cart.component';
 import { BookingComponent } from './booking/booking.component';
 import { NavigationComponent } from './navigation/navigation.component';
-import { SearchComponent } from './search/search.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ProductViewComponent } from './products/product-view/product-view.component';
+import { CategoriesComponent } from './categories/categories.component';
+import { StationsComponent } from './stations/stations.component';
+import { PreviewComponent } from './preview/preview.component';
+import { SettingViewComponent } from './settings/setting-view/setting-view.component';
+import { CategoryEditComponent } from './categories/category-edit/category-edit.component';
+import { CategoryViewComponent } from './categories/category-view/category-view.component';
+import { StationEditComponent } from './stations/station-edit/station-edit.component';
+import { StationViewComponent } from './stations/station-view/station-view.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatListModule } from '@angular/material/list';
 
 
 
@@ -56,7 +66,17 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
     CartComponent,
     BookingComponent,
     NavigationComponent,
-    SearchComponent,
+    ProductViewComponent,
+    CategoriesComponent,
+    StationsComponent,
+    PreviewComponent,
+    SettingViewComponent,
+    CategoriesComponent,
+    CategoryEditComponent,
+    CategoryViewComponent,
+    StationsComponent,
+    StationEditComponent,
+    StationViewComponent,
   ],
   imports: [
     BrowserModule,
@@ -82,6 +102,11 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
     MatSortModule,
     MatToolbarModule,
     MatSidenavModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    MatListModule,
+    
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
   bootstrap: [AppComponent]

@@ -1,1 +1,94 @@
-<p>product-view works!</p>
+<button mat-icon-button class="close-button" (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+<div align="center">
+    <mat-card class="view-card">
+        <mat-card-header>
+            <!-- Header Content -->
+        </mat-card-header>
+        <mat-card-content>
+            
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Name</mat-label>
+                    <input matInput value="{{data.productItem.name}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Label</mat-label>
+                    <input matInput value="{{data.productItem.shortName}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Kategorie</mat-label>
+                    <input matInput value="{{data.productItem.category}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Bestand</mat-label>
+                    <input type=number matInput value="{{data.productItem.stock.current}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Preis</mat-label>
+                    <input type=number matInput value="{{data.productItem.price.current}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Warnung</mat-label>
+                    <input type=number matInput value="{{data.productItem.thresholds.warning}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Info</mat-label>
+                    <input type=number matInput value="{{data.productItem.thresholds.info}}" readonly>
+                </mat-form-field>
+            </div>
+
+            <!-- Other Diary Fields -->
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Letzte Änderung</mat-label>
+                    <input matInput [value]="data.productItem.lastModified | date:'medium'" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Erzeugt am</mat-label>
+                    <input matInput [value]="data.productItem.creationTime | date:'medium'" readonly>
+                </mat-form-field>
+            </div>
+
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Erzeugt von</mat-label>
+                    <input matInput [value]="data.productItem.createdBy" readonly>
+                </mat-form-field>
+            </div>
+    
+            <div class="form-section">
+                <mat-form-field class="form-field">
+                    <mat-label>Letzter Berbeiter </mat-label>
+                    <input matInput [value]="data.productItem.modifiedBy" readonly>
+                </mat-form-field>
+            </div>
+
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button color="warn" (click)="onClose()">Schließen</button>
+        </mat-card-actions>
+    </mat-card>
+</div>

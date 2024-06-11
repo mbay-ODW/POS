@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../environments/environment';
@@ -23,14 +23,14 @@ export class SettingsService {
   getSettingById(id: string): Observable<Setting> {
     return this.http.get<Setting>(`${this.baseUrl}/settings/${id}`);
   }
-  addSetting(product: Setting): Observable<Setting> {
-    return this.http.post<Setting>(`${this.baseUrl}/settings`, product);
+  addSetting(product: Setting): Observable<HttpResponse<Setting>> {
+    return this.http.post<Setting>(`${this.baseUrl}/settings`, product,{observe: 'response'});
   }
-  updateSetting(id: string, product: Setting): Observable<Setting> {
-    return this.http.put<Setting>(`${this.baseUrl}/settings/${id}`, product);
+  updateSetting(id: string, product: Setting): Observable<HttpResponse<Setting>> {
+    return this.http.put<Setting>(`${this.baseUrl}/settings/${id}`, product,{observe: 'response'});
   }
-  deleteSetting(id: string): Observable<Setting> {
-    return this.http.delete<Setting>(`${this.baseUrl}/settings/${id}`);
+  deleteSetting(id: string): Observable<HttpResponse<Setting>> {
+    return this.http.delete<Setting>(`${this.baseUrl}/settings/${id}`,{observe: 'response'});
   }
 
 }
