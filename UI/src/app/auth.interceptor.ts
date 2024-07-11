@@ -35,16 +35,10 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401) {
           // If a 401 Unauthorized response was received, handle token expiration
           this.notificationService.error("Nicht eingelogt:" + error.message)
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 3000);
         } else if( error.status == 403){
           this.notificationService.error("Nicht erlaubt:" + error.message)
         } else if ( error.status == 0){
           this.notificationService.error("Server nicht erreichbar:" + error.message)
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 3000);
         }
         return throwError(error); // Re-throw the error for further handling
       })

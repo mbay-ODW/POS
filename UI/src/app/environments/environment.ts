@@ -1,4 +1,4 @@
   export const environment = {
     production: true,
-    baseUrl: 'https://api.vfr-wuerzberg.de/api/v1'
+    baseUrl: 'http://localhost:3000/api/v1'
   };

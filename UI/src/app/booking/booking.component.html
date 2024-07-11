@@ -46,6 +46,6 @@
 
 
       <p>Anzahl: {{ getTotalAmount() }}</p>
-      <b><p>Gesamtpreis: {{ getTotalPrice()}} €</p></b>
+      <b><p>Gesamtpreis: {{ getTotalPrice() | number:'1.2-2' }} €</p></b>
       <button mat-raised-button color="primary" (click)="checkout()">Checkout</button>
     </div>

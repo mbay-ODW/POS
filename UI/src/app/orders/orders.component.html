@@ -33,7 +33,7 @@
       
     <ng-container matColumnDef="total">
       <mat-header-cell *matHeaderCellDef mat-sort-header> Kosten </mat-header-cell>
-      <mat-cell *matCellDef="let order"> {{order.total}} €</mat-cell>
+      <mat-cell *matCellDef="let order"> {{ order.total | number:'1.2-2' }} €</mat-cell>
     </ng-container>  
 
       <!-- Creation Time Column -->

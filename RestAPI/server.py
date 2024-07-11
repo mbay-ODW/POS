@@ -37,7 +37,8 @@ try:
         supports_credentials=True,
         methods=["GET", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"],
         origins=[
-            "http://localhost:4200",
+            "http://localhost",
+            "*",
         ],
     )
     app.config["DEBUG"] = False

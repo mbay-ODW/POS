@@ -1,3 +1,4 @@
+import time
 from utils.database import Database
 from resources.base import BaseList, SpecificBase
 from flask import jsonify, make_response, request, abort
@@ -154,10 +155,10 @@ class PrintSpecificOrder(Resource):
             self.logger.debug(f"Received the following order: {id}")
             order = self.DatabaseConnector.find_one({"_id":ObjectId(id)})
             printer = Printing()
-            if printer.checkStatus:
-                printer.print(order)
-            else:
-                return make_response(jsonify("Printer not working"), 500)
+            time.sleep(0.5)
+            printer.print(order)
+            
+                #return make_response(jsonify("Printer not working"), 500)
             return make_response(jsonify("id"), 200)
         except Exception as e:
                 self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')

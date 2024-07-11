@@ -36,19 +36,10 @@ private baseUrl = environment.baseUrl;
         if (error.status === 401) {
           // If a 401 Unauthorized response was received, handle token expiration
           this.notificationService.error("Nicht eingelogt:" + error.message)
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 3000); // 3000 milliseconds delay
         } else if( error.status == 403){
           this.notificationService.error("Nicht erlaubt:" + error.message)
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 3000); // 3000 milliseconds delay
         } else if ( error.status == 404){
           this.notificationService.error("Server nicht erreichbar:" + error.message)
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 3000); // 3000 milliseconds delay
         }
         return throwError(error); // Re-throw the error for further handling
       })

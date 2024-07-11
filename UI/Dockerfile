@@ -23,7 +23,7 @@ FROM nginx:1.25.1-alpine as runtime-image
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the built application from the build stage
-COPY --from=build-step /app/dist/webapplication /usr/share/nginx/html/
+COPY --from=build-step /app/dist/ui /usr/share/nginx/html/
 
 # Expose the default Nginx port (80)
 EXPOSE 80
