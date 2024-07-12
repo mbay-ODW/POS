@@ -18,7 +18,7 @@ logger = LoggerManager().logger
 class Printing():
 
     def __init__(self):
-        self.printer = Usb(0x0456, 0x0808, timeout=60,profile="TM-T88III",out_ep=3)
+        self.printer = Usb(idVendor=0x0456, idProduct=0x0808, timeout=60,profile='TM-T88III',out_ep=0x03,in_ep=0x81)
 
 
     def print(self,order):
@@ -42,6 +42,10 @@ class Printing():
 
     def checkStatus(self):
         return self.printer.is_online()
+    
+
+    def __del__(self):
+        pass
     
 
 # if __name__ == "__main__":
