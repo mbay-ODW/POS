@@ -23,9 +23,7 @@ services:
       networks:
          - default-local
    webapplication-local:
-      build:
-         context: ./UI
-         dockerfile: Dockerfile_Local
+      image: ui:latest
       restart: always
       hostname: webapplication-local
       networks:
