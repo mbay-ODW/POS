@@ -1,7 +1,7 @@
 from escpos.printer import Network, Dummy, Usb, Serial
 from escpos import image
 from PIL import Image, ImageOps
-#from utils.log import LoggerManager
+from utils.log import LoggerManager
 
 
 test_order = {
@@ -12,7 +12,7 @@ test_order = {
                 ]
 }
 
-#logger = LoggerManager().logger
+logger = LoggerManager().logger
 
 
 class Printing():
@@ -23,7 +23,9 @@ class Printing():
 
     def print(self,order):
         try:
+            logger.debug("Printing oder")
             self.order = order
+            logger.debug(self.order)
             self.orderId = str(self.order['_id'])
             for i in self.order['orders']:
                 #self.printer.image(self.logo)
