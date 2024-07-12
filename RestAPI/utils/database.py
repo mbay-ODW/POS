@@ -34,7 +34,7 @@ class Database(object):
                 host = os.getenv("DATABASE_HOST", default="mongodb+srv://localhost:27017")
                 cert = os.getenv("DATABASE_CERT_FILE", default="../dev-X509-cert.pem")
                 self.client = MongoClient(
-                    host="mongodb://mongodb:27017",
+                    host="mongodb://localhost:27017",
                     server_api=ServerApi("1"),
                     serverSelectionTimeoutMS=1000,
                     socketTimeoutMS=1000,

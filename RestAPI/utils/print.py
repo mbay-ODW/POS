@@ -33,6 +33,7 @@ class Printing():
                 self.printer.text(f"{i['amount']}\n")
                 self.printer.text("--------------------")
                 self.printer.cut()
+            self.printer.close()
             return True
         except Exception as e:
             #logger.error(f'Got the following error: {e}')
