@@ -34,9 +34,9 @@ class Database(object):
                 host = os.getenv("DATABASE_HOST", default="mongodb+srv://localhost:27017")
                 cert = os.getenv("DATABASE_CERT_FILE", default="../X509-cert.pem")
                 self.client = MongoClient(
-                    host="mongodb://mongodb:27017",
-                    #tls=True,
-                    #tlsCertificateKeyFile=f"{cert}",
+                    #host=f"{host}?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority",
+                    tls=True,
+                    tlsCertificateKeyFile=f"{cert}",
                     server_api=ServerApi("1"),
                     serverSelectionTimeoutMS=1000,
                     socketTimeoutMS=1000,
