@@ -1,7 +1,7 @@
 version : "3.7"
 services:
    mongodb:
-      image: mongo
+      image: mongo:latest
       restart: always
       hostname: mongodb
       ports:
@@ -23,7 +23,9 @@ services:
       networks:
          - default-local
    webapplication-local:
-      image: ui:latest
+      build:
+         context: ./UI
+         dockerfile: Dockerfile_Local
       restart: always
       hostname: webapplication-local
       networks:
@@ -36,7 +38,7 @@ services:
       restart: always
       privileged: true
       devices:
-         - "/dev/usb/lp0:/dev/usb/lp0"
+         -/dev/ttyUSB0:/dev/ttyUSB0
       env_file:
          - local.env
       volumes:
