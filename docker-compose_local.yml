@@ -1,5 +1,15 @@
 version : "3.7"
 services:
+   mongodb:
+      image: mongo
+      restart: always
+      hostname: mongodb
+      ports:
+         - 27017:27017
+      volumes:
+         - ./Database:/data/db
+      networks:
+         - default-local
    redis:
       image: redis:latest
       restart: always
