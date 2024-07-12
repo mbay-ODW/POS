@@ -20,6 +20,8 @@ services:
             delay: 10s
             max_attempts: 5
             window: 120s
+      volumes:
+         -/dev/ttyUSB0:/dev/ttyUSB0
       networks:
          - default-local
    webapplication-local:
@@ -36,6 +38,7 @@ services:
       build: ./RestAPI
       hostname: api-local
       restart: always
+      privileged: true
       env_file:
          - local.env
       volumes:

@@ -18,7 +18,7 @@ test_order = {
 class Printing():
 
     def __init__(self):
-        self.printer = Usb(0x0456, 0x0808, timeout=10,profile="TM-T88III",out_ep=3)
+        self.printer = Usb(0x0456, 0x0808, timeout=60,profile="TM-T88III",out_ep=3)
 
 
     def print(self,order):
