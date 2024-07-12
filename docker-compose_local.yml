@@ -1,15 +1,5 @@
 version : "3.7"
 services:
-   mongodb:
-      image: andresvidal/rpi3-mongodb3
-      restart: always
-      hostname: mongodb
-      ports:
-         - 27017:27017
-      volumes:
-         - ./Database:/data/db
-      networks:
-         - default-local
    redis:
       image: redis:latest
       restart: always
