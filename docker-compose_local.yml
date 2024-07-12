@@ -20,8 +20,6 @@ services:
             delay: 10s
             max_attempts: 5
             window: 120s
-      volumes:
-         -/dev/ttyUSB0:/dev/ttyUSB0
       networks:
          - default-local
    webapplication-local:
@@ -39,6 +37,8 @@ services:
       hostname: api-local
       restart: always
       privileged: true
+      devices:
+         -/dev/ttyUSB0:/dev/ttyUSB0
       env_file:
          - local.env
       volumes:
