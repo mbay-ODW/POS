@@ -64,13 +64,17 @@ export class BookingComponent implements OnInit {
   }
 
   get visibleCategories(): Category[] {
-    if (!this.selectedStation) return this.categories;
-    return this.categories.filter(c => this.selectedStation!.categories.includes(c._id!));
+    const list = this.selectedStation
+      ? this.categories.filter(c => this.selectedStation!.categories.includes(c._id!))
+      : this.categories;
+    return [...list].sort((a, b) => a.name.localeCompare(b.name, 'de'));
   }
 
   get visibleProducts(): Product[] {
-    if (!this.selectedStation) return this.products;
-    return this.products.filter(p => this.selectedStation!.categories.includes(p.category));
+    const list = this.selectedStation
+      ? this.products.filter(p => this.selectedStation!.categories.includes(p.category))
+      : this.products;
+    return [...list].sort((a, b) => a.name.localeCompare(b.name, 'de'));
   }
 
   getCategoryNameById(id: string): string {
