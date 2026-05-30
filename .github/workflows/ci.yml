@@ -8,82 +8,65 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  OWNER: ${{ github.repository_owner }}
 
 jobs:
-  # ─────────────────────────────────────────────
   test-backend:
     name: Backend Unit Tests (pytest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r RestAPI/requirements.txt
           pip install -r RestAPI/tests/requirements-test.txt
-
       - name: Run pytest
         run: pytest RestAPI/tests/ -v --tb=short
 
-  # ─────────────────────────────────────────────
   test-frontend:
     name: Frontend Build Check (ng build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
           cache-dependency-path: UI/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
+        working-directory: UI
+      - run: npm run build
         working-directory: UI
 
-      - name: Build Angular app
-        run: npm run build
-        working-directory: UI
-
-  # ─────────────────────────────────────────────
   build-and-push:
     name: Build & Push Docker Images (multi-arch)
     runs-on: ubuntu-latest
-    # Only push on push to main, not on PRs
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [test-backend, test-frontend]
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up QEMU (for cross-arch emulation)
-        uses: docker/setup-qemu-action@v3
+      - name: Lowercase image owner
+        run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── REST API ──────────────────────────────
-      - name: Extract API metadata
+      - name: API metadata
         id: meta-api
         uses: docker/metadata-action@v5
         with:
@@ -92,14 +75,11 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=sha-
 
-      - name: Build and push API image
+      - name: Build and push API
         uses: docker/build-push-action@v5
         with:
           context: ./RestAPI
           file: ./RestAPI/Dockerfile
-          # amd64: Mac Intel / server
-          # arm64: Raspberry Pi 4 (64-bit OS), Apple M1
-          # arm/v7: Raspberry Pi 3 (32-bit OS) / Pi 4 (32-bit OS)
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
@@ -107,8 +87,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── Angular UI ────────────────────────────
-      - name: Extract UI metadata
+      - name: UI metadata
         id: meta-ui
         uses: docker/metadata-action@v5
         with:
@@ -117,7 +96,7 @@ jobs:
             type=raw,value=latest
             type=sha,prefix=sha-
 
-      - name: Build and push UI image
+      - name: Build and push UI
         uses: docker/build-push-action@v5
         with:
           context: ./UI

@@ -46,12 +46,16 @@ class LoggerManager:
         console_handler.setLevel(self.log_level)
         logger.addHandler(console_handler)
 
-        # Create a rotating file handler
-        rotate_handler = RotatingFileHandler(
-            filename=self.log_file, maxBytes=10000000, backupCount=10
-        )
-        rotate_handler.setFormatter(log_formatter)
-        rotate_handler.setLevel(self.log_level)
-        logger.addHandler(rotate_handler)
+        # Create a rotating file handler (optional — skip if directory missing)
+        try:
+            os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
+            rotate_handler = RotatingFileHandler(
+                filename=self.log_file, maxBytes=10000000, backupCount=10
+            )
+            rotate_handler.setFormatter(log_formatter)
+            rotate_handler.setLevel(self.log_level)
+            logger.addHandler(rotate_handler)
+        except Exception:
+            pass
 
         return logger

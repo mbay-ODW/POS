@@ -7,10 +7,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  OWNER: ${{ github.repository_owner }}
 
 jobs:
-  # ─────────────────────────────────────────────
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
@@ -38,7 +36,6 @@ jobs:
       - run: npm run build
         working-directory: UI
 
-  # ─────────────────────────────────────────────
   build-and-push:
     name: Build & Push versioned Docker Images
     runs-on: ubuntu-latest
@@ -46,15 +43,14 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Lowercase image owner
+        run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -63,7 +59,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ── REST API ──────────────────────────────
       - name: API image metadata
         id: meta-api
         uses: docker/metadata-action@v5
@@ -87,7 +82,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── Angular UI ────────────────────────────
       - name: UI image metadata
         id: meta-ui
         uses: docker/metadata-action@v5
@@ -111,23 +105,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ─────────────────────────────────────────────
   github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [build-and-push]
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history for changelog
+          fetch-depth: 0
+
+      - name: Lowercase image owner
+        run: echo "OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Generate release notes
-        id: notes
         run: |
-          # Vorheriges Tag ermitteln
           PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | sed -n '2p')
           CURR_TAG=${GITHUB_REF_NAME}
 
@@ -141,7 +134,6 @@ jobs:
           echo "### Plattformen" >> notes.md
           echo "\`linux/amd64\` · \`linux/arm64\` (Raspberry Pi 4, Apple M1) · \`linux/arm/v7\` (Raspberry Pi 3)" >> notes.md
           echo "" >> notes.md
-
           if [ -n "$PREV_TAG" ]; then
             echo "## Änderungen seit \`${PREV_TAG}\`" >> notes.md
             echo "" >> notes.md
