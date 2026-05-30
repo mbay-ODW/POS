@@ -4,7 +4,8 @@ from flask_cors import CORS
 import os
 import flask_monitoringdashboard as dashboard
 import eventlet
-eventlet.monkey_patch()
+if not os.getenv("TESTING"):
+    eventlet.monkey_patch()
 
 # Setting up Logging for the API Server
 version = "v1"
