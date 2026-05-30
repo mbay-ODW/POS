@@ -13,9 +13,10 @@ import { Category } from '../interfaces/category';
 import { CategoriesService } from '../services/categories.service';
 
 @Component({
-  selector: 'app-stations',
-  templateUrl: './stations.component.html',
-  styleUrl: './stations.component.css'
+    selector: 'app-stations',
+    templateUrl: './stations.component.html',
+    styleUrl: './stations.component.css',
+    standalone: false
 })
 export class StationsComponent implements OnInit {
   displayedColumns: string[] = ['name', 'categories', 'actions'];
@@ -52,7 +53,7 @@ export class StationsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to get stations', error);
-        this.notification.error('Error getting stations');
+        this.notification.error('Fehler beim Laden der Stationen');
         this.isLoading = false;
       }
     });
@@ -67,7 +68,7 @@ export class StationsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to get stations', error);
-        this.notification.error('Error getting stations');
+        this.notification.error('Fehler beim Laden der Stationen');
         this.isLoading = false;
       }
     });

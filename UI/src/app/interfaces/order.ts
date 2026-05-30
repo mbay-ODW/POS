@@ -8,6 +8,7 @@
     _id?: string;
     orders: OrderDetails[];
     total: number;
+    station_id?: string;
     creationTime?: Date;
     lastModified?: Date;
     createdBy?: string;
@@ -19,5 +20,6 @@
     id?: string;
     category: string;
     name: string;
+    shortName?: string;
     price: number;
   }

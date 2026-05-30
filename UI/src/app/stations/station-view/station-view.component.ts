@@ -4,9 +4,10 @@ import { Station } from 'src/app/interfaces/station';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
-  selector: 'app-station-view',
-  templateUrl: './station-view.component.html',
-  styleUrl: './station-view.component.css'
+    selector: 'app-station-view',
+    templateUrl: './station-view.component.html',
+    styleUrl: './station-view.component.css',
+    standalone: false
 })
 export class StationViewComponent {
 

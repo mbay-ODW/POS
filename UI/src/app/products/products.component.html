@@ -30,8 +30,8 @@
     <mat-card-content>
       <p>Preis: {{ product.price.current }}</p>
       <p>Bestand: {{ product.stock.current }}</p>
-      <p *ngIf="product.thresholds.warning">Warning Threshold: {{ product.thresholds.warning }}</p>
-      <p *ngIf="product.thresholds.info">Info Threshold: {{ product.thresholds.info }}</p>
+      <p *ngIf="product.thresholds.warning">Warnschwelle: {{ product.thresholds.warning }}</p>
+      <p *ngIf="product.thresholds.info">Informationsschwelle: {{ product.thresholds.info }}</p>
     </mat-card-content>
   </mat-card>
 

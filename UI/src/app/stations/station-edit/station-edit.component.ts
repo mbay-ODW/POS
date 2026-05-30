@@ -7,9 +7,10 @@ import { NotificationService } from 'src/app/services/notification.service';
 import { StationsService } from 'src/app/services/stations.service';
 
 @Component({
-  selector: 'app-station-edit',
-  templateUrl: './station-edit.component.html',
-  styleUrl: './station-edit.component.css'
+    selector: 'app-station-edit',
+    templateUrl: './station-edit.component.html',
+    styleUrl: './station-edit.component.css',
+    standalone: false
 })
 export class StationEditComponent {
 
@@ -31,8 +32,9 @@ export class StationEditComponent {
     @Inject(MAT_DIALOG_DATA) public data: { stationItem: Station, categories: Category[] },
   ){
     this.form = this.fb.group({
-      name: [data.stationItem && data.stationItem.name ? data.stationItem.name : '' , Validators.required], 
+      name: [data.stationItem && data.stationItem.name ? data.stationItem.name : '', Validators.required],
       categories: this.initCategories(data.stationItem && data.stationItem.categories ? data.stationItem.categories : []),
+      vorlauf: [data.stationItem && data.stationItem.vorlauf != null ? data.stationItem.vorlauf : 15, [Validators.required, Validators.min(1)]],
     });
     this.categoriesList = data.categories;
    }

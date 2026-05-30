@@ -17,9 +17,10 @@ import { PrintService } from '../services/print.service';
 
 
 @Component({
-  selector: 'app-orders',
-  templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css']
+    selector: 'app-orders',
+    templateUrl: './orders.component.html',
+    styleUrls: ['./orders.component.css'],
+    standalone: false
 })
 
 export class OrdersComponent implements OnInit {

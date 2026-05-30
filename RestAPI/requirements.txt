@@ -11,9 +11,11 @@ cffi
 PyJWT
 flask_limiter
 fpdf2
-gunicorn
+gunicorn<22
 python-dotenv
 get-docker-secret
 flask-caching
 redis
 flask_monitoringdashboard
+flask-socketio
+eventlet

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-order-print',
-  templateUrl: './order-print.component.html',
-  styleUrl: './order-print.component.css'
+    selector: 'app-order-print',
+    templateUrl: './order-print.component.html',
+    styleUrl: './order-print.component.css',
+    standalone: false
 })
 export class OrderPrintComponent {
 

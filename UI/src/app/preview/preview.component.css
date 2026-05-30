@@ -1,0 +1,155 @@
+/* ── Config Screen ── */
+.config-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #121212;
+}
+
+.config-card {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  color: #fff;
+  max-width: 520px;
+  width: 100%;
+}
+
+.config-card h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.config-subtitle {
+  color: #aaa;
+  margin-bottom: 32px;
+}
+
+.station-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.station-btn {
+  font-size: 1.1rem;
+  padding: 16px 24px;
+  height: auto !important;
+  line-height: 1.6 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.vorlauf-hint {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.config-hint {
+  margin-top: 24px;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* ── TV Screen ── */
+.tv-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0d0d0d;
+  color: #f0f0f0;
+  font-family: 'Roboto', sans-serif;
+}
+
+.tv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: #1a1a2e;
+  border-bottom: 3px solid #1976d2;
+}
+
+.tv-station-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #90caf9;
+}
+
+.tv-station-name mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.tv-meta {
+  font-size: 1rem;
+  color: #888;
+  display: flex;
+  gap: 8px;
+}
+
+.config-btn {
+  color: #555;
+}
+
+.tv-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  border-left: 6px solid #1976d2;
+}
+
+.item-name {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.item-amount {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #90caf9;
+  min-width: 64px;
+  text-align: right;
+}
+
+.no-orders {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+  gap: 16px;
+}
+
+.no-orders mat-icon {
+  font-size: 5rem;
+  width: 5rem;
+  height: 5rem;
+  color: #2e7d32;
+}
+
+.no-orders p {
+  font-size: 1.5rem;
+}

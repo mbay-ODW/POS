@@ -1,0 +1,160 @@
+<div class="stats-page">
+
+  <!-- ── Filter Bar ─────────────────────────────────────────── -->
+  <mat-card class="filter-card">
+    <form [formGroup]="filterForm" class="filter-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Von</mat-label>
+        <input matInput type="date" formControlName="from">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Bis</mat-label>
+        <input matInput type="date" formControlName="to">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Station</mat-label>
+        <mat-select formControlName="station_id">
+          <mat-option value="">Alle Stationen</mat-option>
+          <mat-option *ngFor="let s of stations" [value]="s._id">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="load()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon> Laden
+      </button>
+    </form>
+  </mat-card>
+
+  <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+
+  <ng-container *ngIf="data && !isLoading">
+
+    <!-- ── Summary Cards ────────────────────────────────────── -->
+    <div class="summary-row">
+      <mat-card class="summary-card">
+        <mat-icon color="primary">receipt_long</mat-icon>
+        <div class="summary-value">{{ data.summary.total_orders }}</div>
+        <div class="summary-label">Bestellungen</div>
+      </mat-card>
+      <mat-card class="summary-card">
+        <mat-icon color="primary">euro</mat-icon>
+        <div class="summary-value">{{ data.summary.total_revenue | number:'1.2-2' }} €</div>
+        <div class="summary-label">Umsatz</div>
+      </mat-card>
+      <mat-card class="summary-card">
+        <mat-icon color="primary">shopping_basket</mat-icon>
+        <div class="summary-value">{{ data.products.length }}</div>
+        <div class="summary-label">Produkte verkauft</div>
+      </mat-card>
+    </div>
+
+    <!-- ── Charts Row ────────────────────────────────────────── -->
+    <div class="charts-row">
+
+      <mat-card class="chart-card">
+        <mat-card-header><mat-card-title>Top Produkte (Menge)</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <canvas #donutCanvas></canvas>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card wide">
+        <mat-card-header><mat-card-title>Bestellungen nach Uhrzeit</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <canvas #hourCanvas></canvas>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ── Zeitverlauf ───────────────────────────────────────── -->
+    <mat-card class="chart-card full" *ngIf="data.orders_by_day.length > 0">
+      <mat-card-header><mat-card-title>Bestellungen im Zeitverlauf</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <canvas #dayCanvas></canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ── Heatmap ───────────────────────────────────────────── -->
+    <mat-card class="chart-card full" *ngIf="heatmapCells.length > 0">
+      <mat-card-header><mat-card-title>Auslastungs-Heatmap (Wochentag × Stunde)</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="heatmap-container">
+          <div class="heatmap-grid">
+            <div class="hm-corner"></div>
+            <div class="hm-hour-label" *ngFor="let h of hours">{{ h }}</div>
+            <ng-container *ngFor="let wd of [0,1,2,3,4,5,6]">
+              <div class="hm-day-label">{{ weekdays[wd] }}</div>
+              <div
+                *ngFor="let h of hours"
+                class="hm-cell"
+                [style.background]="heatmapColor((getCell(wd, h)?.level) ?? 0)"
+                [matTooltip]="weekdays[wd] + ' ' + h + ':00 — ' + ((getCell(wd,h)?.count) ?? 0) + ' Bestellungen'">
+              </div>
+            </ng-container>
+          </div>
+          <div class="heatmap-legend">
+            <span>wenig</span>
+            <div class="legend-gradient"></div>
+            <span>viel</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ── Stationen Tabelle ─────────────────────────────────── -->
+    <mat-card class="chart-card full" *ngIf="data.stations.length > 0">
+      <mat-card-header><mat-card-title>Auswertung nach Station</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="data.stations" class="full-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Station</th>
+            <td mat-cell *matCellDef="let s">{{ s.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="order_count">
+            <th mat-header-cell *matHeaderCellDef>Bestellungen</th>
+            <td mat-cell *matCellDef="let s">{{ s.order_count }}</td>
+          </ng-container>
+          <ng-container matColumnDef="total_revenue">
+            <th mat-header-cell *matHeaderCellDef>Umsatz</th>
+            <td mat-cell *matCellDef="let s">{{ s.total_revenue | number:'1.2-2' }} €</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name','order_count','total_revenue']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name','order_count','total_revenue']"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ── Produkte Tabelle ──────────────────────────────────── -->
+    <mat-card class="chart-card full">
+      <mat-card-header><mat-card-title>Alle Produkte im Zeitraum</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="data.products" class="full-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Produkt</th>
+            <td mat-cell *matCellDef="let p">{{ p.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="total_amount">
+            <th mat-header-cell *matHeaderCellDef>Menge</th>
+            <td mat-cell *matCellDef="let p">{{ p.total_amount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="total_revenue">
+            <th mat-header-cell *matHeaderCellDef>Umsatz</th>
+            <td mat-cell *matCellDef="let p">{{ p.total_revenue | number:'1.2-2' }} €</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['name','total_amount','total_revenue']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name','total_amount','total_revenue']"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+
+  <div class="empty-state" *ngIf="data && !isLoading && data.summary.total_orders === 0">
+    <mat-icon>bar_chart</mat-icon>
+    <p>Keine Daten für den gewählten Zeitraum</p>
+  </div>
+
+</div>

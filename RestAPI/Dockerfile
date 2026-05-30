@@ -19,4 +19,4 @@ RUN mkdir /Logs
 EXPOSE 3000
 
 # Define the entry point and command to run your application
-CMD ["gunicorn","--workers", "1","--bind","0.0.0.0:3000","wsgi:app"]
+CMD ["gunicorn","--worker-class","eventlet","--workers","1","--bind","0.0.0.0:3000","wsgi:app"]

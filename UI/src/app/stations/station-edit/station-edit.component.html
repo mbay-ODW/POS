@@ -27,8 +27,16 @@
       </div>
 
       <div class="form-section">
+        <mat-form-field class="form-field">
+          <mat-label>Vorlauf (Minuten)</mat-label>
+          <input type="number" matInput formControlName="vorlauf" min="1">
+          <mat-hint>Wie viele Minuten rückwirkend soll der TV-Screen Bestellungen anzeigen?</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="form-section">
         <button mat-raised-button color="primary" (click)="onSave()">Speichern</button>
-        <button mat-raised-button (click)="onCancel()">Cancel</button>
+        <button mat-raised-button (click)="onCancel()">Abbrechen</button>
       </div>
     </form>
   </div>

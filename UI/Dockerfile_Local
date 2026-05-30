@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:20-alpine as build-step
+FROM node:20-slim as build-step
 
 # Create and set the working directory
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the application for production
-RUN node --max_old_space_size=2048 ./node_modules/@angular/cli/bin/ng build --configuration=local
+RUN npm run build --configuration=local
 
 # Stage 2: Create a lightweight runtime image
 FROM nginx:1.25.1-alpine as runtime-image

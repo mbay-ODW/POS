@@ -6,9 +6,10 @@ import { NotificationService } from '../../services/notification.service';
 import { Product } from '../../interfaces/product';
 
 @Component({
-  selector: 'app-order-edit',
-  templateUrl: './order-edit.component.html',
-  styleUrls: ['./order-edit.component.css']
+    selector: 'app-order-edit',
+    templateUrl: './order-edit.component.html',
+    styleUrls: ['./order-edit.component.css'],
+    standalone: false
 })
 export class OrderEditComponent implements OnInit {
   form: FormGroup;

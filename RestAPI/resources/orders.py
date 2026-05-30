@@ -11,16 +11,42 @@ from utils.documents import log
 from utils.documents import check_id_is_valid, check_order_exist
 import json
 from utils.print import Printing
+from urllib.parse import urlencode
 
 
 class OrdersList(BaseList):
     logger = LoggerManager().logger
     def __init__(self, api=None, *args, **kwargs):
         self.logger.debug(f'Starting init of {__name__}.')
-        # Use the init of the baseclass additionally with super
         super().__init__(api=None, *args, **kwargs)
         self.DatabaseConnector = self.Database.db.orders
-    
+
+    @log
+    def get(self, *args, **kwargs):
+        try:
+            query_filter = {}
+            station_id = request.args.get("station_id")
+            if station_id:
+                query_filter["station_id"] = station_id
+            since = request.args.get("since")
+            if since:
+                since_dt = datetime.fromisoformat(since.replace("Z", "+00:00"))
+                query_filter["creationTime"] = {"$gte": since_dt}
+            skip = int(request.args.get("skip", 0))
+            page_size = request.args.get("pageSize")
+            sort_by = request.args.get("sortBy", "creationTime")
+            entries = self.DatabaseConnector.find(query_filter)
+            if page_size is not None:
+                entries = entries.limit(int(page_size)).skip(skip)
+            entries = entries.sort(sort_by, -1)
+            from utils.documents import prep_document_for_response
+            documents = [prep_document_for_response(x) for x in entries]
+            total_count = self.DatabaseConnector.count_documents(query_filter)
+            return make_response(jsonify({"data": documents, "total": total_count}), 200)
+        except Exception as e:
+            self.logger.error(f'Orders GET error: {e}')
+            return make_response(jsonify({"message": str(e)}), 500)
+
     def post(self, *args, **kwargs):
         incomingRequest = super().post(api=None, *args, **kwargs)
         bulk_operations = []
@@ -41,7 +67,11 @@ class OrdersList(BaseList):
                     return make_response(jsonify({"message": "Printer not ready"}), 500)"""
                 result = self.Database.db.products.bulk_write(bulk_operations)
                 self.logger.debug(f'Changed {result.modified_count} product stocks')
-                """Printing(str(orderId))"""
+                try:
+                    from utils.socketio_instance import socketio
+                    socketio.emit('new_order', {'_id': str(orderId)}, broadcast=True)
+                except Exception as se:
+                    self.logger.warning(f'SocketIO emit failed: {se}')
                 return make_response(jsonify({"message": "success", "_id": str(orderId)}), 201)
             except Exception as e:
                 self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
@@ -153,13 +183,36 @@ class PrintSpecificOrder(Resource):
         try:
             id = kwargs.get("id")
             self.logger.debug(f"Received the following order: {id}")
-            order = self.DatabaseConnector.find_one({"_id":ObjectId(id)})
+            order = self.DatabaseConnector.find_one({"_id": ObjectId(id)})
+
+            # Resolve station name
+            station_name = None
+            station_id = order.get('station_id')
+            if station_id:
+                try:
+                    station = self.Database.db.stations.find_one({"_id": ObjectId(station_id)})
+                    if station:
+                        station_name = station.get('name')
+                except Exception:
+                    pass
+
+            # Resolve category names
+            category_ids = list({
+                item['product'].get('category', '')
+                for item in order.get('orders', [])
+                if item['product'].get('category')
+            })
+            categories = {}
+            if category_ids:
+                for cat in self.Database.db.categories.find(
+                    {"_id": {"$in": [ObjectId(cid) for cid in category_ids]}}
+                ):
+                    categories[str(cat['_id'])] = cat['name']
+
             printer = Printing()
             time.sleep(0.5)
-            printer.print(order)
-            
-                #return make_response(jsonify("Printer not working"), 500)
+            printer.print(order, categories=categories, station_name=station_name)
             return make_response(jsonify("id"), 200)
         except Exception as e:
-                self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
-                return make_response(jsonify({"message": str(e)}),500)
+            self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
+            return make_response(jsonify({"message": str(e)}), 500)

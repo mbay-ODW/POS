@@ -11,9 +11,10 @@ import { Category } from '../../interfaces/category';
 
 
 @Component({
-  selector: 'app-product-edit',
-  templateUrl: './product-edit.component.html',
-  styleUrls: ['./product-edit.component.css']
+    selector: 'app-product-edit',
+    templateUrl: './product-edit.component.html',
+    styleUrls: ['./product-edit.component.css'],
+    standalone: false
 })
 export class ProductEditComponent implements OnInit{
   categoryControl = new FormControl();

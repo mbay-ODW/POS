@@ -19,7 +19,7 @@
     <div class="form-section">
 
         <mat-form-field class="form-field">
-          <mat-label>category</mat-label>
+          <mat-label>Kategorie</mat-label>
           <mat-select formControlName="category" required>
             <mat-option *ngFor="let category of categories" [value]="category._id">
               {{ category.name }} 
@@ -28,29 +28,29 @@
         </mat-form-field>
 
       
-      <mat-slide-toggle formControlName="active">Active</mat-slide-toggle>
+      <mat-slide-toggle formControlName="active">Aktiv</mat-slide-toggle>
     </div>
   
     <div class="form-section">
       <div formGroupName="stock">
         <mat-form-field class="form-field">
-          <mat-label>Current Stock</mat-label>
+          <mat-label>Aktueller Bestand</mat-label>
           <input type="number" matInput formControlName="current">
         </mat-form-field>
       </div>
       <div formGroupName="price">
         <mat-form-field class="form-field">
-          <mat-label>Current Price</mat-label>
+          <mat-label>Aktueller Preis</mat-label>
           <input type="number" matInput formControlName="current">
         </mat-form-field>
       </div>
       <div formGroupName="thresholds">
         <mat-form-field class="form-field">
-          <mat-label>Warning Threshold</mat-label>
+          <mat-label>Warnschwelle</mat-label>
           <input type="number" matInput formControlName="warning">
         </mat-form-field>
         <mat-form-field class="form-field">
-          <mat-label>Info Threshold</mat-label>
+          <mat-label>Informationsschwelle</mat-label>
           <input type="number" matInput formControlName="info">
         </mat-form-field>
       </div>
@@ -59,7 +59,7 @@
     <div class="form-section">
       <img [src]="imagePreview ? imagePreview : editingProduct?.image" alt="Product Image" />
       <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" />
-      <button mat-button (click)="fileInput.click()">Change Image</button>
+      <button mat-button (click)="fileInput.click()">Bild ändern</button>
     </div>
   
   

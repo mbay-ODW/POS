@@ -31,14 +31,19 @@ class Database(object):
         attempts = 0
         while attempts < self.MAX_RECONNECT_ATTEMPTS:
             try:
-                host = os.getenv("DATABASE_HOST", default="mongodb+srv://localhost:27017")
-                cert = os.getenv("DATABASE_CERT_FILE", default="../dev-X509-cert.pem")
-                self.client = MongoClient(
-                    host="mongodb://localhost:27017",
-                    server_api=ServerApi("1"),
-                    serverSelectionTimeoutMS=1000,
-                    socketTimeoutMS=1000,
-                )
+                host = os.getenv("DATABASE_HOST", default="mongodb://mongodb:27017")
+                is_atlas = host.startswith("mongodb+srv://")
+                kwargs = {
+                    "host": host,
+                    "serverSelectionTimeoutMS": 5000,
+                    "socketTimeoutMS": 5000,
+                }
+                if is_atlas:
+                    cert = os.getenv("DATABASE_CERT_FILE")
+                    kwargs["server_api"] = ServerApi("1")
+                    if cert:
+                        kwargs["tlsCertificateKeyFile"] = cert
+                self.client = MongoClient(**kwargs)
                 self.db = self.client[db_name]
                 break
             except ConnectionFailure as e:

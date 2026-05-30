@@ -11,9 +11,10 @@ import { SettingViewComponent } from './setting-view/setting-view.component';
 import { DeleteComponent } from '../dialogs/delete/delete.component';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.css']
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    styleUrls: ['./settings.component.css'],
+    standalone: false
 })
 export class SettingsComponent implements OnInit {
   displayedColumns: string[] = ['name', 'description', 'value', 'actions'];
@@ -47,7 +48,7 @@ export class SettingsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to get settings', error);
-        this.notification.error('Error getting settings');
+        this.notification.error('Fehler beim Laden der Einstellungen');
         this.isLoading = false;
       }
     });

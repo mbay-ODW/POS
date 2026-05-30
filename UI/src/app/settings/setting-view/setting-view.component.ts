@@ -4,9 +4,10 @@ import { Setting } from 'src/app/interfaces/setting';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
-  selector: 'app-setting-view',
-  templateUrl: './setting-view.component.html',
-  styleUrl: './setting-view.component.css'
+    selector: 'app-setting-view',
+    templateUrl: './setting-view.component.html',
+    styleUrl: './setting-view.component.css',
+    standalone: false
 })
 export class SettingViewComponent {
 

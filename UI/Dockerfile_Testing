@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:20-alpine as build-step
+FROM node:20-slim as build-step
 
 # Create and set the working directory
 WORKDIR /app

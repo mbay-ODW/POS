@@ -46,6 +46,12 @@ class BaseList(Resource):
                     self.logger.debug(cache.get(self.cache_key))
                     return cache.get(self.cache_key)
                 self.logger.debug("Data is not in cache") 
+            # Merge active filter from query param into self.filter
+            active_param = request.args.get("active")
+            query_filter = dict(self.filter)
+            if active_param is not None:
+                query_filter["active"] = active_param.lower() == "true"
+
             # Adding start argument or using 0 if none delivered as ?start=0
             skip = int(request.args.get("skip", 0))
             # Adding limit argument or using 50 if none delivered its unlimited
@@ -61,7 +67,7 @@ class BaseList(Resource):
             # Adding sorting argument or fields to be used sorting for, if none delivered id will be used. Example: ?sortBy=group,name
             sortBy = request.args.get("sortBy", "_id")
             self.logger.debug(f'Requesting all documents from the database')
-            entries = self.DatabaseConnector.find(self.filter, projection)
+            entries = self.DatabaseConnector.find(query_filter, projection)
             if pageSize is not None:
                 entries = entries.limit(int(pageSize)).skip(int(skip))
             entries = entries.sort(sortBy, -1)

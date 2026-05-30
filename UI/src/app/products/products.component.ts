@@ -13,9 +13,10 @@ import { Category } from '../interfaces/category';
 
 
 @Component({
-  selector: 'app-products',
-  templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css']
+    selector: 'app-products',
+    templateUrl: './products.component.html',
+    styleUrls: ['./products.component.css'],
+    standalone: false
 })
 export class ProductsComponent implements OnInit {
   @Input() layoutMode: 'edit' | 'shopping' = 'edit'; // Default to 'edit'
@@ -89,11 +90,11 @@ export class ProductsComponent implements OnInit {
           this.productService.updateProduct(id, result).subscribe(
             () => {
               this.getProducts();
-              this.notification.info("Successfully updated");
+              this.notification.info("Erfolgreich aktualisiert");
               this.isLoading = false; // Stop loading
             },
             error => {
-              this.notification.error("Error in update: " + error);
+              this.notification.error("Fehler beim Aktualisieren: " + error);
               this.isLoading = false; // Stop loading
             }
           );
@@ -102,11 +103,11 @@ export class ProductsComponent implements OnInit {
           this.productService.addProduct(result).subscribe(
             () => {
               this.getProducts();
-              this.notification.info("Successfully added");
+              this.notification.info("Erfolgreich hinzugefügt");
               this.isLoading = false; // Stop loading
             },
             error => {
-              this.notification.error("Error in add: " + error);
+              this.notification.error("Fehler beim Hinzufügen: " + error);
               this.isLoading = false; // Stop loading
             }
           );
@@ -146,7 +147,7 @@ export class ProductsComponent implements OnInit {
         this.productService.deleteProduct(id).subscribe(
           () => {
             this.getProducts();
-            this.notification.info("Successfully deleted")
+            this.notification.info("Erfolgreich gelöscht")
             this.isLoading = false; // Stop loading
           },
           error => {

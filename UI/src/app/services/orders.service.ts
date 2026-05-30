@@ -20,13 +20,13 @@ export class OrdersService {
     return this.http.get<Order>(`${this.baseUrl}/orders/${id}`);
   }
   
-  getOrdersByStationId(station: string): Observable<{ data: Order[], total: number }> {
-    let params = new HttpParams();
-
-    if (station != null ) {
-      params = params.set('station', station.toString());
+  getOrdersByStationId(stationId: string, vorlaufMinutes?: number): Observable<{ data: Order[], total: number }> {
+    let params = new HttpParams().set('station_id', stationId);
+    if (vorlaufMinutes != null) {
+      const since = new Date(Date.now() - vorlaufMinutes * 60 * 1000).toISOString();
+      params = params.set('since', since);
     }
-    return this.http.get<{ data: Order[], total: number }>(`${this.baseUrl}/orders${params}`);
+    return this.http.get<{ data: Order[], total: number }>(`${this.baseUrl}/orders`, { params });
   }
 
   addOrder(order: Order): Observable<HttpResponse<Order>> {

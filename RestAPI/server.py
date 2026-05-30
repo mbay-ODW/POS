@@ -3,6 +3,8 @@ from flask_restx import Api
 from flask_cors import CORS
 import os
 import flask_monitoringdashboard as dashboard
+import eventlet
+eventlet.monkey_patch()
 
 # Setting up Logging for the API Server
 version = "v1"
@@ -53,6 +55,8 @@ try:
         cache.init_app(app)
 
     api = Api(app, catch_all_404s=True)
+    from utils.socketio_instance import socketio
+    socketio.init_app(app)
 except Exception as e:
     logger.error(e)
     quit()
@@ -138,6 +142,14 @@ except Exception as e:
 
 
 try:
+    logger.debug('Adding statistics resource')
+    from resources.statistics import Statistics
+    api.add_resource(Statistics, '/api/v1/statistics')
+    logger.debug('Statistics resource added')
+except Exception as e:
+    logger.error(f'Error while adding statistics resource: {e}')
+
+try:
     logger.debug('Adding settings resources')
     from resources.settings import SettingsList
     from resources.settings import SpecificSetting
@@ -157,8 +169,8 @@ except Exception as e:
 if __name__ == "__main__":
     try:
         logger.info("Starting Server")
-        app.run(host="0.0.0.0", port=3000, debug=False)
+        from utils.socketio_instance import socketio
+        socketio.run(app, host="0.0.0.0", port=3000, debug=False)
     except Exception as e:
         logger.error(e)
-        # Quit the whole application
         quit()

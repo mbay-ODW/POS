@@ -1,0 +1,4 @@
+pytest
+pytest-flask
+mongomock
+pytest-mock

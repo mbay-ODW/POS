@@ -6,9 +6,10 @@ import { NotificationService } from 'src/app/services/notification.service';
 import { SettingsService } from 'src/app/services/settings.service';
 
 @Component({
-  selector: 'app-setting-edit',
-  templateUrl: './setting-edit.component.html',
-  styleUrls: ['./setting-edit.component.css']
+    selector: 'app-setting-edit',
+    templateUrl: './setting-edit.component.html',
+    styleUrls: ['./setting-edit.component.css'],
+    standalone: false
 })
 export class SettingEditComponent {
 

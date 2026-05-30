@@ -1,1 +1,53 @@
-<p>preview works!</p>
+<!-- Config screen -->
+<div class="config-screen" *ngIf="isConfiguring">
+  <div class="config-card">
+    <h1>Vorlauf-Anzeige</h1>
+    <p class="config-subtitle">Station für diesen TV-Bildschirm wählen</p>
+    <div class="station-list">
+      <button
+        *ngFor="let station of stations"
+        mat-raised-button
+        color="primary"
+        class="station-btn"
+        (click)="selectStation(station)">
+        <mat-icon>storefront</mat-icon>
+        {{ station.name }}
+        <span class="vorlauf-hint">Vorlauf: {{ station.vorlauf ?? 15 }} Min</span>
+      </button>
+    </div>
+    <p class="config-hint">Der Vorlauf-Wert kann in den Stations-Einstellungen angepasst werden.</p>
+  </div>
+</div>
+
+<!-- TV Display -->
+<div class="tv-screen" *ngIf="!isConfiguring && selectedStation">
+
+  <header class="tv-header">
+    <div class="tv-station-name">
+      <mat-icon>storefront</mat-icon>
+      {{ selectedStation.name }}
+    </div>
+    <div class="tv-meta">
+      <span>Vorlauf: {{ vorlauf }} Min</span>
+      <span *ngIf="lastUpdated">· {{ lastUpdated | date:'HH:mm:ss' }}</span>
+    </div>
+    <button mat-icon-button class="config-btn" (click)="showConfig()" title="Station wechseln">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </header>
+
+  <div class="tv-content" *ngIf="aggregatedItems.length > 0; else noOrders">
+    <div class="item-row" *ngFor="let item of aggregatedItems">
+      <span class="item-name">{{ item.name }}</span>
+      <span class="item-amount">{{ item.amount }}</span>
+    </div>
+  </div>
+
+  <ng-template #noOrders>
+    <div class="no-orders">
+      <mat-icon>check_circle_outline</mat-icon>
+      <p>Keine offenen Bestellungen im Vorlauf</p>
+    </div>
+  </ng-template>
+
+</div>

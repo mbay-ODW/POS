@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MAT_DATE_LOCALE } from '@angular/material/core'
 import { AuthInterceptor } from './auth.interceptor';
 
@@ -49,68 +49,64 @@ import { StationEditComponent } from './stations/station-edit/station-edit.compo
 import { StationViewComponent } from './stations/station-view/station-view.component';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { StatisticsComponent } from './statistics/statistics.component';
 
 
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    ProductsComponent,
-    SettingsComponent,
-    OrdersComponent,
-    DialogsComponent,
-    DeleteComponent,
-    ProductEditComponent,
-    OrderEditComponent,
-    SettingEditComponent,
-    CartComponent,
-    BookingComponent,
-    NavigationComponent,
-    ProductViewComponent,
-    CategoriesComponent,
-    StationsComponent,
-    PreviewComponent,
-    SettingViewComponent,
-    CategoriesComponent,
-    CategoryEditComponent,
-    CategoryViewComponent,
-    StationsComponent,
-    StationEditComponent,
-    StationViewComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    MatCardModule,
-    HttpClientModule,
-    MatIconModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatSlideToggleModule,
-    MatBadgeModule,
-    MatAutocompleteModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatTableModule,
-    MatSortModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    ReactiveFormsModule,
-    MatListModule,
-    
-  ],
-  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },{ provide: MAT_DATE_LOCALE, useValue: 'de-DE' }],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        ProductsComponent,
+        SettingsComponent,
+        OrdersComponent,
+        DialogsComponent,
+        DeleteComponent,
+        ProductEditComponent,
+        OrderEditComponent,
+        SettingEditComponent,
+        CartComponent,
+        BookingComponent,
+        NavigationComponent,
+        ProductViewComponent,
+        CategoriesComponent,
+        StationsComponent,
+        PreviewComponent,
+        SettingViewComponent,
+        CategoriesComponent,
+        CategoryEditComponent,
+        CategoryViewComponent,
+        StationsComponent,
+        StationEditComponent,
+        StationViewComponent,
+        StatisticsComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        MatCardModule,
+        MatIconModule,
+        MatMenuModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatSlideToggleModule,
+        MatBadgeModule,
+        MatAutocompleteModule,
+        MatPaginatorModule,
+        MatProgressBarModule,
+        MatTableModule,
+        MatSortModule,
+        MatToolbarModule,
+        MatSidenavModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        ReactiveFormsModule,
+        MatListModule,
+        MatTooltipModule], providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }, { provide: MAT_DATE_LOCALE, useValue: 'de-DE' }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
 
 

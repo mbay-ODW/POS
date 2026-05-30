@@ -6,9 +6,10 @@ import { CategoriesService } from 'src/app/services/categories.service';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
-  selector: 'app-category-edit',
-  templateUrl: './category-edit.component.html',
-  styleUrl: './category-edit.component.css'
+    selector: 'app-category-edit',
+    templateUrl: './category-edit.component.html',
+    styleUrl: './category-edit.component.css',
+    standalone: false
 })
 export class CategoryEditComponent {
 

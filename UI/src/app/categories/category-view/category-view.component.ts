@@ -4,9 +4,10 @@ import { Category } from 'src/app/interfaces/category';
 import { NotificationService } from 'src/app/services/notification.service';
 
 @Component({
-  selector: 'app-category-view',
-  templateUrl: './category-view.component.html',
-  styleUrl: './category-view.component.css'
+    selector: 'app-category-view',
+    templateUrl: './category-view.component.html',
+    styleUrl: './category-view.component.css',
+    standalone: false
 })
 export class CategoryViewComponent {
 
