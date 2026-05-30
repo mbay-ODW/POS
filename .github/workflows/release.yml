@@ -1,0 +1,156 @@
+name: Release — Tag, Docker Images, GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+
+jobs:
+  # ─────────────────────────────────────────────
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r RestAPI/requirements.txt -r RestAPI/tests/requirements-test.txt
+      - run: pytest RestAPI/tests/ -v --tb=short
+
+  test-frontend:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: UI/package-lock.json
+      - run: npm ci
+        working-directory: UI
+      - run: npm run build
+        working-directory: UI
+
+  # ─────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push versioned Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── REST API ──────────────────────────────
+      - name: API image metadata
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/pos-api
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push API
+        uses: docker/build-push-action@v5
+        with:
+          context: ./RestAPI
+          file: ./RestAPI/Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── Angular UI ────────────────────────────
+      - name: UI image metadata
+        id: meta-ui
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.OWNER }}/pos-ui
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+
+      - name: Build and push UI
+        uses: docker/build-push-action@v5
+        with:
+          context: ./UI
+          file: ./UI/Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.meta-ui.outputs.tags }}
+          labels: ${{ steps.meta-ui.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for changelog
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          # Vorheriges Tag ermitteln
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | sed -n '2p')
+          CURR_TAG=${GITHUB_REF_NAME}
+
+          echo "## Docker Images" >> notes.md
+          echo "" >> notes.md
+          echo "| Image | Tag |" >> notes.md
+          echo "|---|---|" >> notes.md
+          echo "| \`ghcr.io/${{ env.OWNER }}/pos-api\` | \`${CURR_TAG}\` |" >> notes.md
+          echo "| \`ghcr.io/${{ env.OWNER }}/pos-ui\` | \`${CURR_TAG}\` |" >> notes.md
+          echo "" >> notes.md
+          echo "### Plattformen" >> notes.md
+          echo "\`linux/amd64\` · \`linux/arm64\` (Raspberry Pi 4, Apple M1) · \`linux/arm/v7\` (Raspberry Pi 3)" >> notes.md
+          echo "" >> notes.md
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "## Änderungen seit \`${PREV_TAG}\`" >> notes.md
+            echo "" >> notes.md
+            git log ${PREV_TAG}..${CURR_TAG} --pretty=format:"- %s (%h)" --no-merges >> notes.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: notes.md
+          generate_release_notes: false
+          make_latest: true
