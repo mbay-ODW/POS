@@ -49,11 +49,38 @@ def check_and_create_collections(collections):
         logger.error(f"Error occurred: {e}")
 
 
+def create_default_manager():
+    """Create a default manager account if no users exist."""
+    try:
+        import bcrypt
+        from datetime import datetime, timezone
+        client = Database.get_instance()
+        if client.db.users.count_documents({}) == 0:
+            default_password = os.getenv('DEFAULT_MANAGER_PASSWORD', 'manager123')
+            hashed = bcrypt.hashpw(default_password.encode(), bcrypt.gensalt())
+            client.db.users.insert_one({
+                'username': 'manager',
+                'password': hashed,
+                'role': 'manager',
+                'active': True,
+                'creationTime': datetime.now(timezone.utc),
+                'createdBy': 'system',
+            })
+            logger.warning(
+                f"Default manager account created (username: manager, "
+                f"password: {default_password}). "
+                f"Bitte sofort ändern via Benutzerverwaltung!"
+            )
+    except Exception as e:
+        logger.error(f"Could not create default manager: {e}")
+
+
 def start():
     check_and_create_database()
     collections_file = "./utils/collections.yaml"
     collections = read_config(collections_file)
     check_and_create_collections(collections)
+    create_default_manager()
 
 
 if __name__ == "__main__":

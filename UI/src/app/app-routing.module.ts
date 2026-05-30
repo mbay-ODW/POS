@@ -9,17 +9,24 @@ import { PreviewComponent } from './preview/preview.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { StationsComponent } from './stations/stations.component';
 import { StatisticsComponent } from './statistics/statistics.component';
+import { LoginComponent } from './login/login.component';
+import { UsersComponent } from './users/users.component';
+import { AuthGuard } from './guards/auth.guard';
+import { ManagerGuard } from './guards/manager.guard';
 
 const routes: Routes = [
-  {path: "products", component: ProductsComponent},
-  {path: "orders", component: OrdersComponent},
-  {path: "settings", component: SettingsComponent},
-  {path: "bookings", component: BookingComponent},
-  {path: "home", component: HomeComponent},
-  {path: "preview", component: PreviewComponent},
-  {path: "categories", component: CategoriesComponent},
-  {path: "stations", component: StationsComponent},
-  {path: "statistics", component: StatisticsComponent},
+  { path: 'login', component: LoginComponent },
+  { path: 'bookings',   component: BookingComponent,   canActivate: [AuthGuard] },
+  { path: 'preview',    component: PreviewComponent,   canActivate: [AuthGuard] },
+  { path: 'home',       component: HomeComponent,      canActivate: [AuthGuard] },
+  { path: 'statistics', component: StatisticsComponent, canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'products',   component: ProductsComponent,  canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'orders',     component: OrdersComponent,    canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'categories', component: CategoriesComponent, canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'stations',   component: StationsComponent,  canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'settings',   component: SettingsComponent,  canActivate: [AuthGuard, ManagerGuard] },
+  { path: 'users',      component: UsersComponent,     canActivate: [AuthGuard, ManagerGuard] },
+  { path: '', redirectTo: '/bookings', pathMatch: 'full' },
 ];
 
 @NgModule({

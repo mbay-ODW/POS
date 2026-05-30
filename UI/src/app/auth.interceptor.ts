@@ -5,44 +5,38 @@ import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { NotificationService } from './services/notification.service';
 
-import { environment } from './environments/environment';
+const STORAGE_KEY = 'pos_auth';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  name: string | null = null;
-  role: string | null = null;
-  userInfo: any | any;
-  private baseUrl = environment.baseUrl;
-
   constructor(private router: Router, private notificationService: NotificationService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const token = raw ? JSON.parse(raw)?.token : null;
 
-    const noCacheHeaders = {
+    const headers: Record<string, string> = {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
+      'Expires': '0',
     };
-    const authReq = request.clone({
-      // withCredentials is needed to pass authelia with own token
-      withCredentials: true,
-      setHeaders: noCacheHeaders,
-    });
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
+    const authReq = request.clone({ withCredentials: true, setHeaders: headers });
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          // If a 401 Unauthorized response was received, handle token expiration
-          this.notificationService.error("Nicht eingelogt:" + error.message)
-        } else if( error.status == 403){
-          this.notificationService.error("Nicht erlaubt:" + error.message)
-        } else if ( error.status == 0){
-          this.notificationService.error("Server nicht erreichbar:" + error.message)
+          localStorage.removeItem(STORAGE_KEY);
+          this.router.navigate(['/login']);
+          this.notificationService.error('Sitzung abgelaufen – bitte neu anmelden');
+        } else if (error.status === 403) {
+          this.notificationService.error('Keine Berechtigung für diese Aktion');
+        } else if (error.status === 0) {
+          this.notificationService.error('Server nicht erreichbar');
         }
-        return throwError(error); // Re-throw the error for further handling
+        return throwError(error);
       })
     );
   }
-
 }

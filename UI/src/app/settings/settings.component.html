@@ -1,54 +1,131 @@
-<div class="mat-elevation-z8">
-  <div class="toolbar" style="display: flex; justify-content: space-between;">
-    <h2>Einstellungen</h2>
-    <button mat-raised-button color="primary" (click)="editSetting()">Einstellung hinzufügen</button>
-    <button mat-button (click)="refresh()"><mat-icon>refresh</mat-icon></button>
-  </div>
+<mat-tab-group animationDuration="200ms">
 
-  <mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+  <!-- ── Tab 1: Bon-Einstellungen ─────────────────────────────── -->
+  <mat-tab label="Bon-Einstellungen">
+    <div class="bon-tab" *ngIf="!bonLoading; else bonSpinner">
+      <form [formGroup]="bonForm" (ngSubmit)="saveBon()">
 
+        <div class="bon-grid">
 
-  <div class="spinner-container">
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
+          <mat-form-field appearance="outline">
+            <mat-label>Geschäftsname (Bon-Kopf)</mat-label>
+            <input matInput formControlName="name" placeholder="Mein Restaurant">
+            <mat-icon matSuffix>store</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Adresszeile</mat-label>
+            <input matInput formControlName="address" placeholder="Musterstraße 1, 97070 Würzburg">
+            <mat-icon matSuffix>location_on</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Fußzeile</mat-label>
+            <textarea matInput formControlName="footer" rows="2"
+                      placeholder="Danke für Ihren Besuch!"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Papierbreite</mat-label>
+            <mat-select formControlName="paper_width">
+              <mat-option value="58">58 mm</mat-option>
+              <mat-option value="80">80 mm</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Bon-Kopien</mat-label>
+            <input matInput type="number" formControlName="copies" min="1" max="5">
+          </mat-form-field>
+
+          <div class="toggle-row">
+            <mat-slide-toggle formControlName="show_prices">
+              Einzelpreise auf Bon drucken
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Logo Upload -->
+          <div class="logo-section full">
+            <label class="logo-label">Bon-Logo</label>
+            <div class="logo-preview" *ngIf="bonLogoPreview">
+              <img [src]="bonLogoPreview" alt="Logo-Vorschau">
+              <button mat-icon-button color="warn" type="button" (click)="removeLogo()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="logo-upload" *ngIf="!bonLogoPreview">
+              <input type="file" #logoInput accept="image/*"
+                     (change)="onLogoSelected($event)" style="display:none">
+              <button mat-stroked-button type="button" (click)="logoInput.click()">
+                <mat-icon>upload_file</mat-icon> Logo hochladen
+              </button>
+              <span class="hint">Empfohlen: 200×60 px, PNG oder JPG</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="bon-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="bonSaving">
+            <mat-icon>save</mat-icon>
+            {{ bonSaving ? 'Speichere...' : 'Bon-Einstellungen speichern' }}
+          </button>
+        </div>
+      </form>
     </div>
+    <ng-template #bonSpinner><mat-spinner class="center-spinner"></mat-spinner></ng-template>
+  </mat-tab>
 
-    <ng-container matColumnDef="name">
-      <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
-      <mat-cell *matCellDef="let setting"> {{ setting.name }} </mat-cell>
-    </ng-container>
-
-    <ng-container matColumnDef="description">
-      <mat-header-cell *matHeaderCellDef> Beschreibung </mat-header-cell>
-      <mat-cell *matCellDef="let setting"> {{ setting.description }} </mat-cell>
-    </ng-container>
-
-    <ng-container matColumnDef="value">
-      <mat-header-cell *matHeaderCellDef> Wert </mat-header-cell>
-      <mat-cell *matCellDef="let setting"> {{ setting.value }} </mat-cell>
-    </ng-container>
-
-    <ng-container matColumnDef="actions">
-      <mat-header-cell *matHeaderCellDef> Aktion </mat-header-cell>
-      <mat-cell *matCellDef="let setting">
-        <button mat-icon-button color="accent" (click)="editSetting(setting._id)">
-          <mat-icon>edit</mat-icon>
+  <!-- ── Tab 2: Weitere Einstellungen (generisch) ──────────────── -->
+  <mat-tab label="Weitere Einstellungen">
+    <div class="mat-elevation-z0 generic-tab">
+      <div class="toolbar">
+        <button mat-raised-button color="primary" (click)="editSetting()">
+          <mat-icon>add</mat-icon> Einstellung hinzufügen
         </button>
-        <button mat-icon-button color="warn" (click)="viewSetting(setting._id)">
-          <mat-icon>info</mat-icon>
-        </button>
-        <button mat-icon-button color="warn" (click)="deleteSetting(setting._id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-        
-      </mat-cell>
-    </ng-container>
+        <button mat-icon-button (click)="refresh()"><mat-icon>refresh</mat-icon></button>
+      </div>
 
-    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  </mat-table>
+      <mat-spinner *ngIf="isLoading" class="center-spinner"></mat-spinner>
 
-  <div class="center-content">
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-  </div>
-    
-</div>
+      <mat-table [dataSource]="dataSource" matSort *ngIf="!isLoading">
+
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+          <mat-cell *matCellDef="let s">{{ s.name }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <mat-header-cell *matHeaderCellDef>Beschreibung</mat-header-cell>
+          <mat-cell *matCellDef="let s">{{ s.description }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="value">
+          <mat-header-cell *matHeaderCellDef>Wert</mat-header-cell>
+          <mat-cell *matCellDef="let s">{{ s.value }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>Aktionen</mat-header-cell>
+          <mat-cell *matCellDef="let s">
+            <button mat-icon-button color="accent" (click)="editSetting(s._id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="viewSetting(s._id)">
+              <mat-icon>info</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteSetting(s._id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+      </mat-table>
+
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </mat-tab>
+
+</mat-tab-group>

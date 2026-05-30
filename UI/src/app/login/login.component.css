@@ -1,0 +1,45 @@
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 16px;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.4rem;
+}
+
+mat-card-title mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: #1976d2;
+}
+
+mat-card-content {
+  padding-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.login-btn {
+  height: 48px;
+  font-size: 1rem;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

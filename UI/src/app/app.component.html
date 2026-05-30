@@ -93,33 +93,39 @@
 
   <!-- Navigation Links -->
   <mat-menu #menu="matMenu">
-    <button mat-menu-item [routerLink]="'/home'">
-      Home
-    </button>
-    <button mat-menu-item [routerLink]="'/products'">
-      Produkte
-    </button>
-    <button mat-menu-item [routerLink]="'/orders'">
-      Bestellungen
+    <button mat-menu-item [routerLink]="'/bookings'">
+      <mat-icon>point_of_sale</mat-icon> Kasse
     </button>
     <button mat-menu-item [routerLink]="'/preview'">
-      Vorlauf
+      <mat-icon>tv</mat-icon> Vorlauf
     </button>
-    <button mat-menu-item [routerLink]="'/bookings'">
-      Kasse
-    </button>
-    <button mat-menu-item [routerLink]="'/stations'">
-      Stationen
-    </button>
-    <button mat-menu-item [routerLink]="'/categories'">
-      Kategorien
-    </button>
-    <button mat-menu-item [routerLink]="'/settings'">
-      Einstellungen
-    </button>
-    <button mat-menu-item [routerLink]="'/statistics'">
-      <mat-icon>bar_chart</mat-icon> Statistik
-    </button>
+    <!-- Manager only -->
+    <ng-container *ngIf="isManager">
+      <mat-divider></mat-divider>
+      <button mat-menu-item [routerLink]="'/orders'">
+        <mat-icon>receipt_long</mat-icon> Bestellungen
+      </button>
+      <button mat-menu-item [routerLink]="'/statistics'">
+        <mat-icon>bar_chart</mat-icon> Statistik
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item [routerLink]="'/products'">
+        <mat-icon>inventory_2</mat-icon> Produkte
+      </button>
+      <button mat-menu-item [routerLink]="'/categories'">
+        <mat-icon>category</mat-icon> Kategorien
+      </button>
+      <button mat-menu-item [routerLink]="'/stations'">
+        <mat-icon>storefront</mat-icon> Stationen
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item [routerLink]="'/users'">
+        <mat-icon>group</mat-icon> Benutzerverwaltung
+      </button>
+      <button mat-menu-item [routerLink]="'/settings'">
+        <mat-icon>settings</mat-icon> Einstellungen
+      </button>
+    </ng-container>
   </mat-menu>
   
 
@@ -147,14 +153,15 @@
   </button>
 
   <mat-menu #person="matMenu">
+    <div mat-menu-item disabled>
+      <mat-icon>{{ isManager ? 'manage_accounts' : 'person' }}</mat-icon>
+      <span>{{ currentUser }} · {{ isManager ? 'Manager' : 'Personal' }}</span>
+    </div>
+    <mat-divider></mat-divider>
     <button mat-menu-item (click)="onLogout()">
       <mat-icon>exit_to_app</mat-icon>
-      <span>Logout</span>
+      <span>Abmelden</span>
     </button>
-    <div mat-menu-item>
-      <mat-icon>person</mat-icon>
-      <span>Name-rolle</span>
-    </div>
   </mat-menu>
 </mat-toolbar>
 

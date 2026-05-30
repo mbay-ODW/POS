@@ -209,9 +209,12 @@ class PrintSpecificOrder(Resource):
                 ):
                     categories[str(cat['_id'])] = cat['name']
 
+            from utils.settings_reader import get_bon_settings
+            bon_settings = get_bon_settings(self.Database.db)
+
             printer = Printing()
             time.sleep(0.5)
-            printer.print(order, categories=categories, station_name=station_name)
+            printer.print(order, categories=categories, station_name=station_name, bon_settings=bon_settings)
             return make_response(jsonify("id"), 200)
         except Exception as e:
             self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')

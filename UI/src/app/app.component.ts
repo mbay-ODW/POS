@@ -1,22 +1,28 @@
 import { Component } from '@angular/core';
 import { environment } from './environments/environment';
+import { AuthService } from './services/auth.service';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
 export class AppComponent {
-  isProduction: boolean = environment.production;
+  isProduction = environment.production;
   title = 'UI';
 
+  constructor(public auth: AuthService) {}
 
-  onLogout() {
-    // Redirect to an external webpage
-    sessionStorage.removeItem('role');
-    sessionStorage.removeItem('name');
-     window.location.href = 'https://authelia.drk-odw.de/logout';
+  get isManager(): boolean {
+    return this.auth.isManager();
   }
 
+  get currentUser(): string {
+    return this.auth.getUser()?.username ?? '';
+  }
+
+  onLogout(): void {
+    this.auth.logout();
+  }
 }

@@ -19,3 +19,4 @@ redis
 flask_monitoringdashboard
 flask-socketio
 eventlet
+bcrypt

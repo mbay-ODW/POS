@@ -76,6 +76,18 @@ except Exception as e:
     logger.error(e)
     quit()
 
+try:
+    logger.debug('Adding auth + users resources')
+    from resources.auth import Login, Me
+    from resources.users import UsersList, SpecificUser
+    api.add_resource(Login, '/api/v1/auth/login')
+    api.add_resource(Me, '/api/v1/auth/me')
+    api.add_resource(UsersList, '/api/v1/users')
+    api.add_resource(SpecificUser, '/api/v1/users/<string:id>')
+    logger.debug('Auth + users resources added')
+except Exception as e:
+    logger.error(f'Error while adding auth resources: {e}')
+
 # Adding Health endpoint
 try:
     logger.debug("Adding health endpoint resources")
