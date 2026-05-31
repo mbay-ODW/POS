@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# --prefer-binary: nutzt vorcompilierte Wheels wo möglich (schneller für arm64)
+RUN pip install --upgrade pip && pip install --prefer-binary -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
