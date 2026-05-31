@@ -1,11 +1,74 @@
 <mat-tab-group animationDuration="200ms">
 
-  <!-- ── Tab 1: Bon-Einstellungen ─────────────────────────────── -->
-  <mat-tab label="Bon-Einstellungen">
-    <div class="bon-tab" *ngIf="!bonLoading; else bonSpinner">
-      <form [formGroup]="bonForm" (ngSubmit)="saveBon()">
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 1: System
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>tune</mat-icon>&nbsp;System
+    </ng-template>
 
-        <div class="bon-grid">
+    <div class="tab-content" *ngIf="!tabLoading['system']; else spinner">
+      <p class="tab-desc">Globale Darstellung der Webanwendung — Logo und Name erscheinen in der Toolbar.</p>
+      <form [formGroup]="forms['system']" (ngSubmit)="save('system')">
+        <div class="settings-grid">
+
+          <!-- Website-Logo -->
+          <div class="field-group full">
+            <label class="field-label">Website-Logo (Toolbar)</label>
+            <div class="logo-row" *ngIf="systemLogoPreview">
+              <img [src]="systemLogoPreview" class="logo-preview" alt="Logo">
+              <button mat-stroked-button color="warn" type="button" (click)="removeLogo('system')">
+                <mat-icon>delete</mat-icon> Logo entfernen
+              </button>
+            </div>
+            <div class="upload-row" *ngIf="!systemLogoPreview">
+              <input type="file" #sysLogoInput accept="image/*"
+                     (change)="onLogoSelected($event, 'system')" style="display:none">
+              <button mat-stroked-button type="button" (click)="sysLogoInput.click()">
+                <mat-icon>upload_file</mat-icon> Logo hochladen
+              </button>
+              <span class="hint">PNG, SVG oder JPG — empfohlen: 50×50 px</span>
+            </div>
+          </div>
+
+          <!-- Systemname -->
+          <mat-form-field appearance="outline">
+            <mat-label>Systemname (Toolbar-Titel)</mat-label>
+            <input matInput formControlName="name" placeholder="Mein POS">
+            <mat-icon matSuffix>title</mat-icon>
+            <mat-hint>Wird in der Navigationsleiste angezeigt</mat-hint>
+          </mat-form-field>
+
+          <!-- Währung -->
+          <mat-form-field appearance="outline">
+            <mat-label>Währungssymbol</mat-label>
+            <input matInput formControlName="currency" placeholder="€" maxlength="3">
+            <mat-icon matSuffix>euro</mat-icon>
+          </mat-form-field>
+
+        </div>
+        <div class="save-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['system']">
+            <mat-icon>save</mat-icon> {{ tabSaving['system'] ? 'Speichere…' : 'System speichern' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 2: Bon
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>receipt</mat-icon>&nbsp;Bon
+    </ng-template>
+
+    <div class="tab-content" *ngIf="!tabLoading['bon']; else spinner">
+      <p class="tab-desc">Inhalt und Layout des gedruckten Kassenbons.</p>
+      <form [formGroup]="forms['bon']" (ngSubmit)="save('bon')">
+        <div class="settings-grid">
 
           <mat-form-field appearance="outline">
             <mat-label>Geschäftsname (Bon-Kopf)</mat-label>
@@ -15,7 +78,7 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Adresszeile</mat-label>
-            <input matInput formControlName="address" placeholder="Musterstraße 1, 97070 Würzburg">
+            <input matInput formControlName="address" placeholder="Musterstr. 1 · 97070 Würzburg">
             <mat-icon matSuffix>location_on</mat-icon>
           </mat-form-field>
 
@@ -28,35 +91,36 @@
           <mat-form-field appearance="outline">
             <mat-label>Papierbreite</mat-label>
             <mat-select formControlName="paper_width">
-              <mat-option value="58">58 mm</mat-option>
-              <mat-option value="80">80 mm</mat-option>
+              <mat-option value="58">58 mm (Standard-Thermodrucker)</mat-option>
+              <mat-option value="80">80 mm (breiter Drucker)</mat-option>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Bon-Kopien</mat-label>
             <input matInput type="number" formControlName="copies" min="1" max="5">
+            <mat-hint>Anzahl der Ausdrucke je Bestellung</mat-hint>
           </mat-form-field>
 
-          <div class="toggle-row">
+          <div class="toggle-field">
             <mat-slide-toggle formControlName="show_prices">
-              Einzelpreise auf Bon drucken
+              Einzelpreise je Artikel drucken
             </mat-slide-toggle>
           </div>
 
-          <!-- Logo Upload -->
-          <div class="logo-section full">
-            <label class="logo-label">Bon-Logo</label>
-            <div class="logo-preview" *ngIf="bonLogoPreview">
-              <img [src]="bonLogoPreview" alt="Logo-Vorschau">
-              <button mat-icon-button color="warn" type="button" (click)="removeLogo()">
-                <mat-icon>delete</mat-icon>
+          <!-- Bon-Logo -->
+          <div class="field-group full">
+            <label class="field-label">Bon-Logo (oben auf dem Ausdruck)</label>
+            <div class="logo-row" *ngIf="bonLogoPreview">
+              <img [src]="bonLogoPreview" class="logo-preview" alt="Bon-Logo">
+              <button mat-stroked-button color="warn" type="button" (click)="removeLogo('bon')">
+                <mat-icon>delete</mat-icon> Logo entfernen
               </button>
             </div>
-            <div class="logo-upload" *ngIf="!bonLogoPreview">
-              <input type="file" #logoInput accept="image/*"
-                     (change)="onLogoSelected($event)" style="display:none">
-              <button mat-stroked-button type="button" (click)="logoInput.click()">
+            <div class="upload-row" *ngIf="!bonLogoPreview">
+              <input type="file" #bonLogoInput accept="image/*"
+                     (change)="onLogoSelected($event, 'bon')" style="display:none">
+              <button mat-stroked-button type="button" (click)="bonLogoInput.click()">
                 <mat-icon>upload_file</mat-icon> Logo hochladen
               </button>
               <span class="hint">Empfohlen: 200×60 px, PNG oder JPG</span>
@@ -64,68 +128,149 @@
           </div>
 
         </div>
-
-        <div class="bon-actions">
-          <button mat-raised-button color="primary" type="submit" [disabled]="bonSaving">
-            <mat-icon>save</mat-icon>
-            {{ bonSaving ? 'Speichere...' : 'Bon-Einstellungen speichern' }}
+        <div class="save-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['bon']">
+            <mat-icon>save</mat-icon> {{ tabSaving['bon'] ? 'Speichere…' : 'Bon speichern' }}
           </button>
         </div>
       </form>
     </div>
-    <ng-template #bonSpinner><mat-spinner class="center-spinner"></mat-spinner></ng-template>
   </mat-tab>
 
-  <!-- ── Tab 2: Weitere Einstellungen (generisch) ──────────────── -->
-  <mat-tab label="Weitere Einstellungen">
-    <div class="mat-elevation-z0 generic-tab">
-      <div class="toolbar">
-        <button mat-raised-button color="primary" (click)="editSetting()">
-          <mat-icon>add</mat-icon> Einstellung hinzufügen
-        </button>
-        <button mat-icon-button (click)="refresh()"><mat-icon>refresh</mat-icon></button>
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 3: Kasse
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>point_of_sale</mat-icon>&nbsp;Kasse
+    </ng-template>
+
+    <div class="tab-content" *ngIf="!tabLoading['pos']; else spinner">
+      <p class="tab-desc">Verhalten der Kassenseite.</p>
+      <form [formGroup]="forms['pos']" (ngSubmit)="save('pos')">
+        <div class="settings-grid">
+
+          <div class="toggle-field">
+            <mat-slide-toggle formControlName="auto_print">
+              Bon automatisch nach Checkout drucken
+            </mat-slide-toggle>
+            <span class="toggle-hint">Wenn deaktiviert, muss der Druck manuell ausgelöst werden</span>
+          </div>
+
+          <div class="toggle-field">
+            <mat-slide-toggle formControlName="require_station">
+              Station-Auswahl zwingend erforderlich
+            </mat-slide-toggle>
+            <span class="toggle-hint">Verhindert Checkout ohne gewählte Station</span>
+          </div>
+
+        </div>
+        <div class="save-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['pos']">
+            <mat-icon>save</mat-icon> {{ tabSaving['pos'] ? 'Speichere…' : 'Kasse speichern' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 4: Vorlauf
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>tv</mat-icon>&nbsp;Vorlauf
+    </ng-template>
+
+    <div class="tab-content" *ngIf="!tabLoading['preview']; else spinner">
+      <p class="tab-desc">Standard-Werte für die TV-Vorlaufanzeige. Stations-spezifische Vorlaufzeiten werden in der Stationsverwaltung gesetzt.</p>
+      <form [formGroup]="forms['preview']" (ngSubmit)="save('preview')">
+        <div class="settings-grid">
+
+          <mat-form-field appearance="outline">
+            <mat-label>Standard-Vorlaufzeit (Minuten)</mat-label>
+            <input matInput type="number" formControlName="default_vorlauf" min="1" max="120">
+            <mat-icon matSuffix>schedule</mat-icon>
+            <mat-hint>Wie weit zurück soll der TV-Screen Bestellungen anzeigen?</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Aktualisierungsintervall (Sekunden)</mat-label>
+            <input matInput type="number" formControlName="refresh_interval" min="10" max="300">
+            <mat-icon matSuffix>refresh</mat-icon>
+            <mat-hint>Polling-Fallback-Intervall (WebSocket ist primär)</mat-hint>
+          </mat-form-field>
+
+        </div>
+        <div class="save-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['preview']">
+            <mat-icon>save</mat-icon> {{ tabSaving['preview'] ? 'Speichere…' : 'Vorlauf speichern' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 5: Weitere Einstellungen (generisch)
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>list</mat-icon>&nbsp;Weitere
+    </ng-template>
+
+    <div class="generic-tab">
+      <div class="toolbar-row">
+        <p class="tab-desc">Freie Key-Value Einstellungen für benutzerdefinierte Konfigurationen.</p>
+        <div class="toolbar-actions">
+          <button mat-raised-button color="primary" (click)="editSetting()">
+            <mat-icon>add</mat-icon> Hinzufügen
+          </button>
+          <button mat-icon-button (click)="refresh()" matTooltip="Aktualisieren">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
       </div>
 
       <mat-spinner *ngIf="isLoading" class="center-spinner"></mat-spinner>
 
       <mat-table [dataSource]="dataSource" matSort *ngIf="!isLoading">
-
         <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-          <mat-cell *matCellDef="let s">{{ s.name }}</mat-cell>
+          <mat-header-cell *matHeaderCellDef mat-sort-header>Schlüssel</mat-header-cell>
+          <mat-cell *matCellDef="let s"><code>{{ s.name }}</code></mat-cell>
         </ng-container>
-
         <ng-container matColumnDef="description">
           <mat-header-cell *matHeaderCellDef>Beschreibung</mat-header-cell>
           <mat-cell *matCellDef="let s">{{ s.description }}</mat-cell>
         </ng-container>
-
         <ng-container matColumnDef="value">
           <mat-header-cell *matHeaderCellDef>Wert</mat-header-cell>
-          <mat-cell *matCellDef="let s">{{ s.value }}</mat-cell>
+          <mat-cell *matCellDef="let s" class="value-cell">{{ s.value | slice:0:60 }}{{ s.value?.length > 60 ? '…' : '' }}</mat-cell>
         </ng-container>
-
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef>Aktionen</mat-header-cell>
           <mat-cell *matCellDef="let s">
-            <button mat-icon-button color="accent" (click)="editSetting(s._id)">
+            <button mat-icon-button color="accent" (click)="editSetting(s._id)" matTooltip="Bearbeiten">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button (click)="viewSetting(s._id)">
+            <button mat-icon-button (click)="viewSetting(s._id)" matTooltip="Details">
               <mat-icon>info</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="deleteSetting(s._id)">
+            <button mat-icon-button color="warn" (click)="deleteSetting(s._id)" matTooltip="Löschen">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-cell>
         </ng-container>
-
         <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
         <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
       </mat-table>
 
-      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
     </div>
   </mat-tab>
 
 </mat-tab-group>
+
+<ng-template #spinner>
+  <mat-spinner class="center-spinner"></mat-spinner>
+</ng-template>

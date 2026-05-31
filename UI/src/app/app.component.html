@@ -84,6 +84,30 @@
     align-items: center;
   }
 
+  .system-name {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: white;
+    margin: 0 8px;
+  }
+
+  .toolbar-logo {
+    max-height: 40px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .test-badge {
+    background: #f44336;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+
 </style>
 
 <mat-toolbar class="toolbar">
@@ -131,19 +155,17 @@
 
   <span class="toolbar-spacer"></span>
 
-  <img
-  class="toolbar-logo"
-  width="50"
-  alt="VfR Wuerzberg"
-  src="https://vfr-würzberg.de/wp-content/themes/vfr-wuerzberg-wordpress/dist/images/vfr-wuerzberg-logo.svg"
-/>
+  <span class="system-name">{{ systemName }}</span>
 
+  <img *ngIf="systemLogo"
+    class="toolbar-logo"
+    width="50"
+    [src]="systemLogo"
+    [alt]="systemName"
+  />
 
-<div *ngIf="!isProduction">
-<h1> TEST SYSTEM</h1>
-</div>
+  <div *ngIf="!isProduction" class="test-badge">TEST</div>
 
- 
   <span class="toolbar-spacer"></span>
 
   

@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Setting } from '../interfaces/setting';
 import { SettingsService } from '../services/settings.service';
+import { AppSettingsService } from '../services/app-settings.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -13,15 +14,33 @@ import { DeleteComponent } from '../dialogs/delete/delete.component';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-const BON_KEYS = ['bon.name', 'bon.address', 'bon.footer', 'bon.paper_width', 'bon.show_prices', 'bon.copies', 'bon.logo'];
-const BON_DEFAULTS: Record<string, string> = {
-  'bon.name': '',
-  'bon.address': '',
-  'bon.footer': 'Danke für Ihren Besuch!',
-  'bon.paper_width': '58',
-  'bon.show_prices': 'false',
-  'bon.copies': '1',
-  'bon.logo': '',
+interface TabConfig {
+  prefix: string;
+  keys: string[];
+  defaults: Record<string, any>;
+}
+
+const TABS: Record<string, TabConfig> = {
+  system: {
+    prefix: 'system',
+    keys: ['system.logo', 'system.name', 'system.currency'],
+    defaults: { logo: '', name: 'POS System', currency: '€' },
+  },
+  bon: {
+    prefix: 'bon',
+    keys: ['bon.name', 'bon.address', 'bon.footer', 'bon.paper_width', 'bon.show_prices', 'bon.copies', 'bon.logo'],
+    defaults: { name: '', address: '', footer: 'Danke für Ihren Besuch!', paper_width: '58', show_prices: false, copies: 1, logo: '' },
+  },
+  pos: {
+    prefix: 'pos',
+    keys: ['pos.auto_print', 'pos.require_station'],
+    defaults: { auto_print: true, require_station: true },
+  },
+  preview: {
+    prefix: 'preview',
+    keys: ['preview.refresh_interval', 'preview.default_vorlauf'],
+    defaults: { refresh_interval: 60, default_vorlauf: 15 },
+  },
 };
 
 @Component({
@@ -35,36 +54,32 @@ export class SettingsComponent implements OnInit {
   dataSource = new MatTableDataSource<Setting>();
   isLoading = false;
 
-  // Bon settings
-  bonForm: FormGroup;
-  bonLoading = false;
-  bonSaving = false;
+  forms: Record<string, FormGroup> = {};
+  tabLoading: Record<string, boolean> = {};
+  tabSaving: Record<string, boolean> = {};
+  settingIds: Record<string, Record<string, string>> = {};
+
+  systemLogoPreview: string | null = null;
   bonLogoPreview: string | null = null;
-  private bonSettingIds: Record<string, string> = {};
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
 
   constructor(
     private settingsService: SettingsService,
+    private appSettings: AppSettingsService,
     private dialog: MatDialog,
     private notification: NotificationService,
     private fb: FormBuilder,
   ) {
-    this.bonForm = this.fb.group({
-      name: [''],
-      address: [''],
-      footer: [''],
-      paper_width: ['58'],
-      show_prices: [false],
-      copies: [1],
-      logo: [''],
-    });
+    this.forms['system'] = this.fb.group({ logo: [''], name: [''], currency: [''] });
+    this.forms['bon'] = this.fb.group({ logo: [''], name: [''], address: [''], footer: [''], paper_width: ['58'], show_prices: [false], copies: [1] });
+    this.forms['pos'] = this.fb.group({ auto_print: [true], require_station: [true] });
+    this.forms['preview'] = this.fb.group({ refresh_interval: [60], default_vorlauf: [15] });
   }
 
   ngOnInit(): void {
-    this.getSettings();
-    this.loadBonSettings();
+    this.loadAllSettings();
   }
 
   ngAfterViewInit() {
@@ -72,93 +87,108 @@ export class SettingsComponent implements OnInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  // ── Bon Settings ─────────────────────────────────────────────
+  // ── Load all settings once, distribute to tabs ───────────────────────────
 
-  loadBonSettings(): void {
-    this.bonLoading = true;
+  loadAllSettings(): void {
+    Object.keys(TABS).forEach(t => this.tabLoading[t] = true);
+    this.isLoading = true;
+
     this.settingsService.getSettings().subscribe({
       next: (response) => {
         const all: Setting[] = response.data;
-        const patch: Record<string, any> = {};
-        for (const key of BON_KEYS) {
-          const shortKey = key.split('.')[1];
-          const found = all.find(s => s.name === key);
-          if (found) {
-            this.bonSettingIds[key] = found._id!;
-            if (key === 'bon.show_prices') patch[shortKey] = found.value === 'true';
-            else if (key === 'bon.copies') patch[shortKey] = Number(found.value) || 1;
-            else if (key === 'bon.logo') { patch[shortKey] = found.value; this.bonLogoPreview = found.value || null; }
-            else patch[shortKey] = found.value;
-          } else {
-            if (key === 'bon.show_prices') patch[shortKey] = false;
-            else if (key === 'bon.copies') patch[shortKey] = 1;
-            else patch[shortKey] = BON_DEFAULTS[key] || '';
+        this.dataSource.data = all;
+        this.isLoading = false;
+
+        for (const [tab, config] of Object.entries(TABS)) {
+          this.settingIds[tab] = {};
+          const patch: Record<string, any> = { ...config.defaults };
+
+          for (const key of config.keys) {
+            const shortKey = key.split('.')[1];
+            const found = all.find(s => s.name === key);
+            if (found) {
+              this.settingIds[tab][key] = found._id!;
+              if (typeof config.defaults[shortKey] === 'boolean') {
+                patch[shortKey] = found.value === 'true';
+              } else if (typeof config.defaults[shortKey] === 'number') {
+                patch[shortKey] = Number(found.value) || config.defaults[shortKey];
+              } else {
+                patch[shortKey] = found.value;
+              }
+              // logo previews
+              if (key === 'system.logo') this.systemLogoPreview = found.value || null;
+              if (key === 'bon.logo') this.bonLogoPreview = found.value || null;
+            }
           }
+          this.forms[tab].patchValue(patch);
+          this.tabLoading[tab] = false;
         }
-        this.bonForm.patchValue(patch);
-        this.bonLoading = false;
       },
-      error: () => this.bonLoading = false,
+      error: () => {
+        Object.keys(TABS).forEach(t => this.tabLoading[t] = false);
+        this.isLoading = false;
+      },
     });
   }
 
-  saveBon(): void {
-    this.bonSaving = true;
-    const val = this.bonForm.value;
-    const saves$ = BON_KEYS.map(key => {
+  // ── Save a tab ────────────────────────────────────────────────────────────
+
+  save(tab: string): void {
+    this.tabSaving[tab] = true;
+    const config = TABS[tab];
+    const val = this.forms[tab].value;
+
+    const saves$ = config.keys.map(key => {
       const shortKey = key.split('.')[1];
       let value = val[shortKey];
-      if (key === 'bon.show_prices') value = value ? 'true' : 'false';
-      if (key === 'bon.copies') value = String(value);
+      if (typeof value === 'boolean') value = value ? 'true' : 'false';
       const payload: Setting = { name: key, description: key, value: String(value ?? '') };
-      const existingId = this.bonSettingIds[key];
-      if (existingId) {
-        return this.settingsService.updateSetting(existingId, payload).pipe(catchError(() => of(null)));
-      } else {
-        return this.settingsService.addSetting(payload).pipe(catchError(() => of(null)));
-      }
+      const existingId = this.settingIds[tab]?.[key];
+      return (existingId
+        ? this.settingsService.updateSetting(existingId, payload)
+        : this.settingsService.addSetting(payload)
+      ).pipe(catchError(() => of(null)));
     });
+
     forkJoin(saves$).subscribe({
-      next: () => { this.bonSaving = false; this.notification.info('Bon-Einstellungen gespeichert'); this.loadBonSettings(); },
-      error: () => { this.bonSaving = false; this.notification.error('Fehler beim Speichern'); },
+      next: () => {
+        this.tabSaving[tab] = false;
+        this.notification.info('Gespeichert');
+        this.appSettings.load();
+        this.loadAllSettings();
+      },
+      error: () => { this.tabSaving[tab] = false; this.notification.error('Fehler beim Speichern'); },
     });
   }
 
-  onLogoSelected(event: Event): void {
+  // ── Logo helpers ──────────────────────────────────────────────────────────
+
+  onLogoSelected(event: Event, tab: 'system' | 'bon'): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       const b64 = reader.result as string;
-      this.bonLogoPreview = b64;
-      this.bonForm.patchValue({ logo: b64 });
+      if (tab === 'system') this.systemLogoPreview = b64;
+      else this.bonLogoPreview = b64;
+      this.forms[tab].patchValue({ logo: b64 });
     };
     reader.readAsDataURL(file);
   }
 
-  removeLogo(): void {
-    this.bonLogoPreview = null;
-    this.bonForm.patchValue({ logo: '' });
+  removeLogo(tab: 'system' | 'bon'): void {
+    if (tab === 'system') this.systemLogoPreview = null;
+    else this.bonLogoPreview = null;
+    this.forms[tab].patchValue({ logo: '' });
   }
 
-  // ── Generic Settings ─────────────────────────────────────────
+  // ── Generic Settings tab ─────────────────────────────────────────────────
 
-  getSettings(): void {
-    this.isLoading = true;
-    this.settingsService.getSettings().subscribe({
-      next: (r) => { this.dataSource.data = r.data; this.isLoading = false; },
-      error: () => { this.notification.error('Fehler beim Laden'); this.isLoading = false; },
-    });
-  }
-
-  refresh(): void { this.getSettings(); }
+  refresh(): void { this.loadAllSettings(); }
 
   editSetting(id?: string): void {
-    if (id) {
-      this.settingsService.getSettingById(id).subscribe(item => this.openDialog(item, id));
-    } else {
-      this.openDialog();
-    }
+    const load$ = id ? this.settingsService.getSettingById(id) : of(undefined as any);
+    load$.subscribe(item => this.openDialog(item, id));
   }
 
   openDialog(setting?: Setting, id?: string): void {
@@ -168,13 +198,12 @@ export class SettingsComponent implements OnInit {
     });
     ref.afterClosed().subscribe(result => {
       if (!result) return;
-      this.isLoading = true;
       const call = id
         ? this.settingsService.updateSetting(id, result)
         : this.settingsService.addSetting(result);
       call.subscribe({
-        next: () => { this.notification.info('Gespeichert'); this.getSettings(); this.isLoading = false; },
-        error: (e) => { this.notification.error(e.error?.message || 'Fehler'); this.isLoading = false; },
+        next: () => { this.notification.info('Gespeichert'); this.loadAllSettings(); },
+        error: (e) => this.notification.error(e.error?.message || 'Fehler'),
       });
     });
   }
@@ -192,7 +221,7 @@ export class SettingsComponent implements OnInit {
     ref.afterClosed().subscribe(result => {
       if (!result) return;
       this.settingsService.deleteSetting(id).subscribe({
-        next: () => { this.notification.info('Gelöscht'); this.getSettings(); },
+        next: () => { this.notification.info('Gelöscht'); this.loadAllSettings(); },
         error: (e) => this.notification.error(e.error?.message || 'Fehler'),
       });
     });
