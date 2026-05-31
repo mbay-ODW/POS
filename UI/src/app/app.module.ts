@@ -59,6 +59,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
@@ -90,7 +91,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatBadgeModule, MatAutocompleteModule, MatPaginatorModule,
     MatProgressBarModule, MatTableModule, MatSortModule,
     MatToolbarModule, MatSidenavModule, MatSelectModule,
-    MatListModule, MatTooltipModule, MatTabsModule, MatDividerModule,
+    MatListModule, MatTooltipModule, MatTabsModule, MatDividerModule, DragDropModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

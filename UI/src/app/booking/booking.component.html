@@ -1,69 +1,134 @@
 <div class="booking">
 
-  <!-- Station selector -->
-  <div class="station-bar">
-    <mat-form-field appearance="outline">
-      <mat-label>Station wählen</mat-label>
+  <!-- ── Station + Sort Bar ────────────────────────────────────── -->
+  <div class="control-bar">
+
+    <!-- Station -->
+    <mat-form-field appearance="outline" class="station-field">
+      <mat-label>Station</mat-label>
       <mat-select [(value)]="selectedStation" (selectionChange)="onStationChange($event.value)">
         <mat-option *ngFor="let station of stations" [value]="station">
+          <mat-icon>{{ station._id === '__all__' ? 'apps' : 'storefront' }}</mat-icon>
           {{ station.name }}
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <span *ngIf="selectedStation" class="station-badge">
-      <mat-icon>storefront</mat-icon> {{ selectedStation.name }}
-    </span>
-  </div>
 
-  <div class="booking-body">
-  <div class="products">
-    <div *ngFor="let category of visibleCategories">
-      <h2>{{ category.name }}</h2>
-      <div class="product-list">
-        <ng-container *ngFor="let product of visibleProducts">
-          <mat-card *ngIf="product.category === category._id" (click)="addToCart(product)">
-            <img mat-card-image [src]="product.image" alt="{{ product.name }}">
-            <mat-card-header>
-              <mat-card-title>{{ product.shortName }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p>Preis: {{ product.price.current }} €</p>
-              <p>Bestand: <span [ngClass]="getBadgeColor(product)">{{ product.stock.current }}</span></p>
-            </mat-card-content>
-          </mat-card>
-        </ng-container>
-      </div>
-    </div>
-  </div>
+    <!-- Sort Mode -->
+    <mat-form-field appearance="outline" class="sort-field">
+      <mat-label>Sortierung</mat-label>
+      <mat-select [(value)]="sortMode" (selectionChange)="onSortChange($event.value)">
+        <mat-option value="name-asc">Name A → Z</mat-option>
+        <mat-option value="name-desc">Name Z → A</mat-option>
+        <mat-option value="price-asc">Preis aufsteigend</mat-option>
+        <mat-option value="price-desc">Preis absteigend</mat-option>
+        <mat-option value="custom">
+          <mat-icon>drag_indicator</mat-icon> Eigene Reihenfolge
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-  <!-- Cart -->
-  <div class="cart">
-    <h2>Warenkorb
-      <button *ngIf="cart.length > 0" mat-raised-button color="warn" (click)="reset()">Leeren</button>
-    </h2>
-
-    <table>
-      <tr *ngFor="let item of cart">
-        <td>{{ item.amount }} x {{ item.product.name }}</td>
-        <td>
-          <button mat-raised-button color="primary" (click)="decrementItemAmount(item)">
-            <mat-icon>exposure_neg_1</mat-icon>
-          </button>
-        </td>
-        <td>
-          <button mat-raised-button color="primary" (click)="increaseAmount(item)">
-            <mat-icon>exposure_plus_1</mat-icon>
-          </button>
-        </td>
-      </tr>
-    </table>
-
-    <p>Anzahl: {{ getTotalAmount() }}</p>
-    <b><p>Gesamtpreis: {{ getTotalPrice() | number:'1.2-2' }} €</p></b>
-    <button mat-raised-button color="primary" [disabled]="cart.length === 0 || !selectedStation" (click)="checkout()">
-      Checkout
+    <!-- Drag Toggle -->
+    <button mat-icon-button
+            [class.drag-active]="dragEnabled"
+            (click)="toggleDrag()"
+            [matTooltip]="dragEnabled ? 'Sortieren beenden' : 'Kacheln verschieben'">
+      <mat-icon>{{ dragEnabled ? 'done' : 'drag_indicator' }}</mat-icon>
     </button>
-    <p *ngIf="!selectedStation" class="warn-text">Bitte zuerst eine Station wählen</p>
+
+    <span *ngIf="dragEnabled" class="drag-hint">
+      Kacheln verschieben — zum Beenden ✓ klicken
+    </span>
+
   </div>
+
+  <!-- ── Main Layout ────────────────────────────────────────────── -->
+  <div class="booking-body">
+
+    <!-- Products -->
+    <div class="products">
+
+      <ng-container *ngFor="let category of visibleCategories">
+        <div class="category-section">
+          <h2 class="category-title">{{ category.name }}</h2>
+
+          <div class="product-list"
+               cdkDropList
+               cdkDropListOrientation="horizontal"
+               [cdkDropListData]="productsForCategory(category._id!)"
+               (cdkDropListDropped)="drop($event)"
+               [class.drag-mode]="dragEnabled">
+
+            <mat-card *ngFor="let product of productsForCategory(category._id!)"
+                      cdkDrag
+                      [cdkDragDisabled]="!dragEnabled"
+                      [class.draggable]="dragEnabled"
+                      (click)="addToCart(product)">
+
+              <!-- Drag handle (only visible in drag mode) -->
+              <div class="drag-handle" cdkDragHandle *ngIf="dragEnabled">
+                <mat-icon>drag_indicator</mat-icon>
+              </div>
+
+              <!-- Drag placeholder -->
+              <div class="drag-placeholder" *cdkDragPlaceholder></div>
+
+              <img mat-card-image [src]="product.image" alt="{{ product.name }}">
+              <mat-card-header>
+                <mat-card-title>{{ product.shortName }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="price">{{ product.price.current | number:'1.2-2' }} €</p>
+                <p>Bestand: <span [ngClass]="getBadgeColor(product)">{{ product.stock.current }}</span></p>
+              </mat-card-content>
+            </mat-card>
+
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Cart -->
+    <div class="cart">
+      <h2>
+        Warenkorb
+        <button *ngIf="cart.length > 0" mat-raised-button color="warn" (click)="reset()">
+          Leeren
+        </button>
+      </h2>
+
+      <table class="cart-table">
+        <tr *ngFor="let item of cart">
+          <td class="cart-name">{{ item.amount }} × {{ item.product.name }}</td>
+          <td class="cart-price">{{ item.product.price * item.amount | number:'1.2-2' }} €</td>
+          <td class="cart-actions">
+            <button mat-icon-button color="primary" (click)="decrementItemAmount(item)">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" (click)="increaseAmount(item)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </table>
+
+      <div class="cart-footer" *ngIf="cart.length > 0">
+        <p>{{ getTotalAmount() }} Artikel</p>
+        <p class="total">{{ getTotalPrice() | number:'1.2-2' }} €</p>
+      </div>
+
+      <p *ngIf="cart.length === 0" class="empty-cart">Warenkorb ist leer</p>
+
+      <button mat-raised-button color="primary" class="checkout-btn"
+              [disabled]="cart.length === 0"
+              (click)="checkout()">
+        <mat-icon>shopping_cart_checkout</mat-icon>
+        Checkout
+      </button>
+
+      <p *ngIf="!selectedStation" class="warn-text">Bitte zuerst eine Station wählen</p>
+    </div>
+
   </div>
 </div>
