@@ -10,7 +10,7 @@ jobs:
       DATABASE_HOST: ${{ secrets.MONGO_DB_HOST_DEV }}
       DATABASE_NAME: ${{ secrets.MONGO_DB_DATABASE_DEV }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: echo Host
       run: echo $DATABASE_HOST
     - name: Echo NAME
@@ -26,7 +26,7 @@ jobs:
     - name: Run the Docker image RestAPI
       run: docker run -d -p 3000:3000 -v "./dev-X509-cert.pem":"/dev-X509-cert.pem" -e DATABASE_CERT_FILE="$DATABASE_CERT_FILE" -e DATABASE_HOST="$DATABASE_HOST" -e DATABASE_NAME="$DATABASE_NAME" api
     - name: Setup Python Version
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
           python-version: 3.12
     - name: Install dependencies in os
