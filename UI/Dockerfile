@@ -1,35 +1,19 @@
-# Stage 1: Build the application
-FROM node:20-alpine as build-step
+# Stage 1: Build — läuft immer auf amd64 (npm output ist plattform-unabhängig)
+FROM --platform=linux/amd64 node:20-alpine AS build-step
 
-# Create and set the working directory
 WORKDIR /app
 
-# Copy only the package.json and package-lock.json initially to take advantage of caching
 COPY package.json package-lock.json ./
+RUN npm ci
 
-# Update npm to the latest version
-RUN npm install -g npm@latest
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application files
 COPY . .
+RUN npm run build
 
-# Build the application for production
-RUN npm run build --prod
+# Stage 2: Runtime — native für Zielplattform (arm64, arm/v7, amd64)
+FROM nginx:1.25.1-alpine AS runtime-image
 
-# Stage 2: Create a lightweight runtime image
-FROM nginx:1.25.1-alpine as runtime-image
-
-# Copy the Nginx configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy the built application from the build stage
 COPY --from=build-step /app/dist/ui /usr/share/nginx/html/
 
-# Expose the default Nginx port (80)
 EXPOSE 80
-
-# Start Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
