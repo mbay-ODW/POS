@@ -86,7 +86,7 @@ jobs:
           file: ./RestAPI/Dockerfile
           # API hat schwere C-Abhängigkeiten (escpos, Pillow, bcrypt) → arm/v7 via QEMU zu langsam
           # Pi 3/4 mit 32-Bit OS: API direkt mit python server.py starten
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
