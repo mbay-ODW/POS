@@ -84,8 +84,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=ci-api
+          cache-to: type=gha,scope=ci-api,mode=max
 
       - name: UI metadata
         id: meta-ui
@@ -105,5 +105,5 @@ jobs:
           push: true
           tags: ${{ steps.meta-ui.outputs.tags }}
           labels: ${{ steps.meta-ui.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=ci-ui
+          cache-to: type=gha,scope=ci-ui,mode=max

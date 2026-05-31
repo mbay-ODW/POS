@@ -79,8 +79,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=release-api
+          cache-to: type=gha,scope=release-api,mode=max
 
       - name: UI image metadata
         id: meta-ui
@@ -102,8 +102,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-ui.outputs.tags }}
           labels: ${{ steps.meta-ui.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=release-ui
+          cache-to: type=gha,scope=release-ui,mode=max
 
   github-release:
     name: Create GitHub Release

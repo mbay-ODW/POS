@@ -1,8 +1,6 @@
 name: "Docker Image Build"
 
 on:
-  push:
-    branches: [main]
   workflow_call:
 
 env:
@@ -39,8 +37,8 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/pos-api:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=docker-images-api
+          cache-to: type=gha,scope=docker-images-api,mode=max
 
   build-ui:
     name: Build & Push UI Image
@@ -72,5 +70,5 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/pos-ui:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=docker-images-ui
+          cache-to: type=gha,scope=docker-images-ui,mode=max

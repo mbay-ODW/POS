@@ -7,8 +7,6 @@ dist/
 logs
 *.log
 npm-debug.log*
-package.json
-package-lock.json
 
 *.env
 
