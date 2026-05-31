@@ -60,7 +60,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatSliderModule } from '@angular/material/slider';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CustomerDisplayComponent } from './customer-display/customer-display.component';
 
 @NgModule({
   declarations: [
@@ -79,6 +81,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     CartComponent,
     NavigationComponent,
     DialogsComponent, DeleteComponent,
+    CustomerDisplayComponent,
   ],
   imports: [
     BrowserModule,
@@ -91,7 +94,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatBadgeModule, MatAutocompleteModule, MatPaginatorModule,
     MatProgressBarModule, MatTableModule, MatSortModule,
     MatToolbarModule, MatSidenavModule, MatSelectModule,
-    MatListModule, MatTooltipModule, MatTabsModule, MatDividerModule, DragDropModule,
+    MatListModule, MatTooltipModule, MatTabsModule, MatDividerModule, DragDropModule, MatSliderModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

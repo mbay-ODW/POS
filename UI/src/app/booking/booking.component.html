@@ -1,9 +1,8 @@
 <div class="booking">
 
-  <!-- ── Station + Sort Bar ────────────────────────────────────── -->
-  <div class="control-bar">
+  <!-- ── Collapsible Control Bar ─────────────────────────────── -->
+  <div class="control-bar" *ngIf="controlBarVisible">
 
-    <!-- Station -->
     <mat-form-field appearance="outline" class="station-field">
       <mat-label>Station</mat-label>
       <mat-select [(value)]="selectedStation" (selectionChange)="onStationChange($event.value)">
@@ -14,7 +13,6 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Sort Mode -->
     <mat-form-field appearance="outline" class="sort-field">
       <mat-label>Sortierung</mat-label>
       <mat-select [(value)]="sortMode" (selectionChange)="onSortChange($event.value)">
@@ -22,13 +20,19 @@
         <mat-option value="name-desc">Name Z → A</mat-option>
         <mat-option value="price-asc">Preis aufsteigend</mat-option>
         <mat-option value="price-desc">Preis absteigend</mat-option>
-        <mat-option value="custom">
-          <mat-icon>drag_indicator</mat-icon> Eigene Reihenfolge
-        </mat-option>
+        <mat-option value="custom">Eigene Reihenfolge</mat-option>
       </mat-select>
     </mat-form-field>
 
-    <!-- Drag Toggle -->
+    <!-- Tile size slider -->
+    <div class="size-slider">
+      <mat-icon>photo_size_select_small</mat-icon>
+      <mat-slider min="90" max="240" step="10" discrete>
+        <input matSliderThumb [value]="tileSize" (valueChange)="onTileSizeChange($event)">
+      </mat-slider>
+      <mat-icon>photo_size_select_large</mat-icon>
+    </div>
+
     <button mat-icon-button
             [class.drag-active]="dragEnabled"
             (click)="toggleDrag()"
@@ -36,18 +40,31 @@
       <mat-icon>{{ dragEnabled ? 'done' : 'drag_indicator' }}</mat-icon>
     </button>
 
-    <span *ngIf="dragEnabled" class="drag-hint">
-      Kacheln verschieben — zum Beenden ✓ klicken
-    </span>
+    <button mat-icon-button
+            [class.pause-active]="pauseMode"
+            (click)="togglePause()"
+            [matTooltip]="pauseMode ? 'Pause beenden' : 'Pause (Kundendisplay)'">
+      <mat-icon>{{ pauseMode ? 'play_arrow' : 'pause' }}</mat-icon>
+    </button>
 
+    <span class="spacer"></span>
+
+    <button mat-icon-button (click)="toggleControlBar()" matTooltip="Leiste ausblenden">
+      <mat-icon>keyboard_arrow_up</mat-icon>
+    </button>
   </div>
 
-  <!-- ── Main Layout ────────────────────────────────────────────── -->
+  <!-- Show handle when collapsed -->
+  <div class="show-bar-handle" *ngIf="!controlBarVisible" (click)="toggleControlBar()">
+    <mat-icon>keyboard_arrow_down</mat-icon>
+    <span>{{ selectedStation?.name }}</span>
+  </div>
+
+  <!-- ── Main Layout ──────────────────────────────────────────── -->
   <div class="booking-body">
 
     <!-- Products -->
     <div class="products">
-
       <ng-container *ngFor="let category of visibleCategories">
         <div class="category-section">
           <h2 class="category-title">{{ category.name }}</h2>
@@ -63,55 +80,51 @@
                       cdkDrag
                       [cdkDragDisabled]="!dragEnabled"
                       [class.draggable]="dragEnabled"
+                      [style.width.px]="tileSize"
                       (click)="addToCart(product)">
 
-              <!-- Drag handle (only visible in drag mode) -->
               <div class="drag-handle" cdkDragHandle *ngIf="dragEnabled">
                 <mat-icon>drag_indicator</mat-icon>
               </div>
-
-              <!-- Drag placeholder -->
               <div class="drag-placeholder" *cdkDragPlaceholder></div>
 
-              <img mat-card-image [src]="product.image" alt="{{ product.name }}">
+              <img mat-card-image [src]="product.image" alt="{{ product.name }}"
+                   [style.height.px]="tileSize * 0.43">
               <mat-card-header>
                 <mat-card-title>{{ product.shortName }}</mat-card-title>
               </mat-card-header>
               <mat-card-content>
                 <p class="price">{{ product.price.current | number:'1.2-2' }} €</p>
-                <p>Bestand: <span [ngClass]="getBadgeColor(product)">{{ product.stock.current }}</span></p>
+                <p class="stock">Bestand: <span [ngClass]="getBadgeColor(product)">{{ product.stock.current }}</span></p>
               </mat-card-content>
             </mat-card>
 
           </div>
         </div>
       </ng-container>
-
     </div>
 
     <!-- Cart -->
     <div class="cart">
       <h2>
         Warenkorb
-        <button *ngIf="cart.length > 0" mat-raised-button color="warn" (click)="reset()">
-          Leeren
-        </button>
+        <button *ngIf="cart.length > 0" mat-raised-button color="warn" (click)="reset()">Leeren</button>
       </h2>
 
-      <table class="cart-table">
-        <tr *ngFor="let item of cart">
-          <td class="cart-name">{{ item.amount }} × {{ item.product.name }}</td>
-          <td class="cart-price">{{ item.product.price * item.amount | number:'1.2-2' }} €</td>
-          <td class="cart-actions">
-            <button mat-icon-button color="primary" (click)="decrementItemAmount(item)">
+      <div class="cart-items">
+        <div *ngFor="let item of cart" class="cart-row">
+          <span class="cart-name">{{ item.amount }} × {{ item.product.name }}</span>
+          <span class="cart-price">{{ item.product.price * item.amount | number:'1.2-2' }} €</span>
+          <div class="cart-actions">
+            <button mat-flat-button class="qty-btn minus" (click)="decrementItemAmount(item)">
               <mat-icon>remove</mat-icon>
             </button>
-            <button mat-icon-button color="primary" (click)="increaseAmount(item)">
+            <button mat-flat-button class="qty-btn plus" (click)="increaseAmount(item)">
               <mat-icon>add</mat-icon>
             </button>
-          </td>
-        </tr>
-      </table>
+          </div>
+        </div>
+      </div>
 
       <div class="cart-footer" *ngIf="cart.length > 0">
         <p>{{ getTotalAmount() }} Artikel</p>
@@ -126,9 +139,20 @@
         <mat-icon>shopping_cart_checkout</mat-icon>
         Checkout
       </button>
-
-      <p *ngIf="!selectedStation" class="warn-text">Bitte zuerst eine Station wählen</p>
     </div>
 
   </div>
+
+  <!-- ── Payment Popup ────────────────────────────────────────── -->
+  <div class="payment-overlay" *ngIf="showPaymentPopup" (click)="dismissPaymentPopup()">
+    <div class="payment-popup" (click)="$event.stopPropagation()">
+      <button mat-icon-button class="popup-close" (click)="dismissPaymentPopup()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon class="popup-icon">payments</mat-icon>
+      <p class="popup-label">Zu kassieren</p>
+      <p class="popup-amount">{{ paymentAmount | number:'1.2-2' }} €</p>
+    </div>
+  </div>
+
 </div>

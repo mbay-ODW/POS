@@ -164,6 +164,13 @@
             <span class="toggle-hint">Verhindert Checkout ohne gewählte Station</span>
           </div>
 
+          <mat-form-field appearance="outline">
+            <mat-label>Zahlbetrag-Popup Dauer (Sekunden)</mat-label>
+            <input matInput type="number" formControlName="checkout_popup_duration" min="0" max="60">
+            <mat-icon matSuffix>payments</mat-icon>
+            <mat-hint>Nach Checkout wird dem Kassierer der Betrag angezeigt (0 = aus, wegklickbar)</mat-hint>
+          </mat-form-field>
+
         </div>
         <div class="save-row">
           <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['pos']">
@@ -212,7 +219,49 @@
   </mat-tab>
 
   <!-- ══════════════════════════════════════════════════════════
-       Tab 5: Weitere Einstellungen (generisch)
+       Tab 5: Kundendisplay
+  ══════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>devices</mat-icon>&nbsp;Kundendisplay
+    </ng-template>
+
+    <div class="tab-content" *ngIf="!tabLoading['display']; else spinner">
+      <p class="tab-desc">Das Kundendisplay (Route <code>/customer-display</code>) zeigt dem Kunden den Live-Warenkorb. Texte und Anzeigedauer hier anpassbar.</p>
+      <form [formGroup]="forms['display']" (ngSubmit)="save('display')">
+        <div class="settings-grid">
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Dankesnachricht (nach Bezahlung)</mat-label>
+            <input matInput formControlName="thank_you_message" placeholder="Vielen Dank für Ihre Bestellung!">
+            <mat-icon matSuffix>celebration</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Dauer der Dankesnachricht (Sekunden)</mat-label>
+            <input matInput type="number" formControlName="thank_you_duration" min="1" max="60">
+            <mat-icon matSuffix>timer</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Pausenmitteilung (wenn Terminal unbesetzt)</mat-label>
+            <input matInput formControlName="pause_message" placeholder="Wir sind gleich für Sie da.">
+            <mat-icon matSuffix>pause_circle</mat-icon>
+            <mat-hint>Wird angezeigt, wenn der Kassierer in der Kasse auf „Pause“ schaltet</mat-hint>
+          </mat-form-field>
+
+        </div>
+        <div class="save-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="tabSaving['display']">
+            <mat-icon>save</mat-icon> {{ tabSaving['display'] ? 'Speichere…' : 'Kundendisplay speichern' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════
+       Tab 6: Weitere Einstellungen (generisch)
   ══════════════════════════════════════════════════════════ -->
   <mat-tab>
     <ng-template mat-tab-label>

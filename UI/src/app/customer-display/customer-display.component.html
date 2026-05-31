@@ -1,0 +1,45 @@
+<div class="display">
+
+  <!-- ── Active: Live cart ────────────────────────────────────── -->
+  <ng-container *ngIf="state === 'active'">
+    <div class="display-header">
+      <img *ngIf="logo" [src]="logo" class="display-logo" alt="Logo">
+      <span class="display-title">{{ systemName }}</span>
+    </div>
+
+    <div class="cart-area" *ngIf="cart.length > 0; else emptyCart">
+      <div class="cart-list">
+        <div *ngFor="let item of cart" class="cart-line">
+          <span class="line-amount">{{ item.amount }}×</span>
+          <span class="line-name">{{ item.product.name }}</span>
+          <span class="line-price">{{ item.product.price * item.amount | number:'1.2-2' }} €</span>
+        </div>
+      </div>
+
+      <div class="cart-total">
+        <span class="total-label">{{ getTotalAmount() }} Artikel</span>
+        <span class="total-value">{{ total | number:'1.2-2' }} €</span>
+      </div>
+    </div>
+
+    <ng-template #emptyCart>
+      <div class="welcome">
+        <mat-icon>storefront</mat-icon>
+        <p>Herzlich willkommen!</p>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <!-- ── Thank you ────────────────────────────────────────────── -->
+  <div class="thankyou-screen" *ngIf="state === 'thankyou'">
+    <mat-icon class="big-icon">check_circle</mat-icon>
+    <p class="thankyou-text">{{ thankYouMessage }}</p>
+  </div>
+
+  <!-- ── Pause ────────────────────────────────────────────────── -->
+  <div class="pause-screen" *ngIf="state === 'pause'">
+    <mat-icon class="big-icon">pause_circle</mat-icon>
+    <p class="pause-text">{{ pauseMessage }}</p>
+  </div>
+
+</div>

@@ -11,11 +11,13 @@ import { StationsComponent } from './stations/stations.component';
 import { StatisticsComponent } from './statistics/statistics.component';
 import { LoginComponent } from './login/login.component';
 import { UsersComponent } from './users/users.component';
+import { CustomerDisplayComponent } from './customer-display/customer-display.component';
 import { AuthGuard } from './guards/auth.guard';
 import { ManagerGuard } from './guards/manager.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'customer-display', component: CustomerDisplayComponent },
   { path: 'bookings',   component: BookingComponent,   canActivate: [AuthGuard] },
   { path: 'preview',    component: PreviewComponent,   canActivate: [AuthGuard] },
   { path: 'home',       component: HomeComponent,      canActivate: [AuthGuard] },

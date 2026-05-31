@@ -15,8 +15,12 @@ export interface AppSettings {
   'bon.logo': string;
   'pos.auto_print': string;
   'pos.require_station': string;
+  'pos.checkout_popup_duration': string;
   'preview.refresh_interval': string;
   'preview.default_vorlauf': string;
+  'display.thank_you_message': string;
+  'display.thank_you_duration': string;
+  'display.pause_message': string;
 }
 
 export const SETTING_DEFAULTS: AppSettings = {
@@ -32,8 +36,12 @@ export const SETTING_DEFAULTS: AppSettings = {
   'bon.logo': '',
   'pos.auto_print': 'true',
   'pos.require_station': 'true',
+  'pos.checkout_popup_duration': '5',
   'preview.refresh_interval': '60',
   'preview.default_vorlauf': '15',
+  'display.thank_you_message': 'Vielen Dank für Ihre Bestellung!',
+  'display.thank_you_duration': '8',
+  'display.pause_message': 'Wir sind gleich für Sie da.',
 };
 
 @Injectable({ providedIn: 'root' })
