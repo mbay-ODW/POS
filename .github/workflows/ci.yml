@@ -19,11 +19,15 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install dependencies
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gcc g++ python3-dev libffi-dev libusb-1.0-0
+
+      - name: Install Python dependencies
         run: |
           pip install --upgrade pip
           pip install -r RestAPI/requirements.txt
           pip install -r RestAPI/tests/requirements-test.txt
+
       - name: Run pytest
         run: pytest RestAPI/tests/ -v --tb=short
 

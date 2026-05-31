@@ -10,7 +10,6 @@ from utils.log import LoggerManager
 from utils.documents import log
 from utils.documents import check_id_is_valid, check_order_exist
 import json
-from utils.print import Printing
 from urllib.parse import urlencode
 
 
@@ -210,6 +209,7 @@ class PrintSpecificOrder(Resource):
                     categories[str(cat['_id'])] = cat['name']
 
             from utils.settings_reader import get_bon_settings
+            from utils.print import Printing
             bon_settings = get_bon_settings(self.Database.db)
 
             printer = Printing()
