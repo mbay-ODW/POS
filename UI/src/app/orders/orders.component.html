@@ -1,75 +1,91 @@
-<div class="mat-elevation-z8">
-  <div class="toolbar" style="display: flex; justify-content: space-between;">
+<div class="orders-page mat-elevation-z2">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
     <h2>Bestellungen</h2>
-    <button mat-raised-button color="primary" (click)="editOrder()">Bestellung hinzufügen</button>
-    <button mat-button (click)="refresh()"><mat-icon>refresh</mat-icon></button>
-  </div>
-
-  <mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-
-
-    <div class="spinner-container">
-      <mat-spinner *ngIf="isLoading"></mat-spinner>
-      </div>
-      
-      <!-- Order ID Column -->
-      <ng-container matColumnDef="orderId">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> Bestellnummer </mat-header-cell>
-        <mat-cell *matCellDef="let order"> {{order._id}} </mat-cell>
-      </ng-container>
-  
-      <!-- Order Details Column -->
-      <ng-container matColumnDef="orderDetails">
-        <mat-header-cell *matHeaderCellDef> Bestelldetails </mat-header-cell>
-        <mat-cell *matCellDef="let order">
-            <table>
-                <tr *ngFor="let detail of order.orders">
-                  <td>{{ detail.amount }}</td> x
-                    <td>{{getProductNameById( detail.product.id )}}</td>
-                </tr>
-            </table>
-        </mat-cell>
-    </ng-container>
-      
-    <ng-container matColumnDef="total">
-      <mat-header-cell *matHeaderCellDef mat-sort-header> Kosten </mat-header-cell>
-      <mat-cell *matCellDef="let order"> {{ order.total | number:'1.2-2' }} €</mat-cell>
-    </ng-container>  
-
-      <!-- Creation Time Column -->
-      <ng-container matColumnDef="creationTime">
-        <mat-header-cell *matHeaderCellDef mat-sort-header> Datum </mat-header-cell>
-        <mat-cell *matCellDef="let order"> {{order.creationTime | date}} </mat-cell>
-      </ng-container>
-      
-      <ng-container matColumnDef="actions">
-        <mat-header-cell *matHeaderCellDef> Aktion </mat-header-cell>
-        <mat-cell *matCellDef="let order">
-          <!-- <button mat-icon-button color="accent" (click)="editOrder(order._id)">
-            <mat-icon>edit</mat-icon>
-          </button> -->
-          <button mat-icon-button color="primary" (click)="printOrder(order._id)">
-            <mat-icon>print</mat-icon>
-          </button>
-          <button mat-icon-button color="primary" (click)="editOrder(order._id!)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="deleteOrder(order._id)">
-            <mat-icon>delete</mat-icon>
-          </button>
-          
-        </mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-  </div>
-  
-  <div class="center-content">
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-  </div>
-    
-    <div class="spinner-container">
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <div class="toolbar-actions">
+      <button mat-raised-button color="primary" (click)="editOrder()">
+        <mat-icon>add</mat-icon> Neue Bestellung
+      </button>
+      <button mat-icon-button (click)="refresh()" matTooltip="Aktualisieren">
+        <mat-icon>refresh</mat-icon>
+      </button>
     </div>
+  </div>
+
+  <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+
+  <!-- Table -->
+  <mat-table [dataSource]="dataSource" matSort *ngIf="!isLoading">
+
+    <!-- Bestelldetails -->
+    <ng-container matColumnDef="orderDetails">
+      <mat-header-cell *matHeaderCellDef>Bestelldetails</mat-header-cell>
+      <mat-cell *matCellDef="let order">
+        <div class="order-items">
+          <span *ngFor="let detail of order.orders" class="order-item">
+            {{ detail.amount }} × {{ detail.product.name }}
+          </span>
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Kosten -->
+    <ng-container matColumnDef="total">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Kosten</mat-header-cell>
+      <mat-cell *matCellDef="let order">
+        <strong>{{ order.total | number:'1.2-2' }} €</strong>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Datum & Uhrzeit -->
+    <ng-container matColumnDef="creationTime">
+      <mat-header-cell *matHeaderCellDef mat-sort-header>Datum & Uhrzeit</mat-header-cell>
+      <mat-cell *matCellDef="let order">
+        <div class="datetime-cell">
+          <span class="date">{{ order.creationTime | date:'dd.MM.yyyy' }}</span>
+          <span class="time">{{ order.creationTime | date:'HH:mm:ss' }}</span>
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Aktionen -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef>Aktionen</mat-header-cell>
+      <mat-cell *matCellDef="let order">
+        <button mat-icon-button color="primary" (click)="printOrder(order._id)" matTooltip="Drucken">
+          <mat-icon>print</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="editOrder(order._id!)" matTooltip="Bearbeiten">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteOrder(order._id)" matTooltip="Löschen">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+
+  <!-- Zusammenfassung + Paginator -->
+  <div class="footer-bar">
+    <div class="summary">
+      <span class="summary-item">
+        <mat-icon>receipt_long</mat-icon>
+        <strong>{{ totalOrders }}</strong> Bestellungen
+      </span>
+      <span class="summary-divider">|</span>
+      <span class="summary-item">
+        <mat-icon>euro</mat-icon>
+        Gesamt: <strong>{{ totalRevenue | number:'1.2-2' }} €</strong>
+      </span>
+    </div>
+    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+                   showFirstLastButtons
+                   class="paginator">
+    </mat-paginator>
+  </div>
+
+</div>

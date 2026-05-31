@@ -2,34 +2,33 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Order } from '../interfaces/order';
 import { OrdersService } from '../services/orders.service';
 import { NotificationService } from '../services/notification.service';
-import { MatDialog } from '@angular/material/dialog';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { DeleteComponent } from '../dialogs/delete/delete.component';
-import { MatDialogConfig } from '@angular/material/dialog';
 import { OrderEditComponent } from './order-edit/order-edit.component';
 import { OrderViewComponent } from './order-view/order-view.component';
 import { ProductsService } from '../services/products.service';
 import { Product } from '../interfaces/product';
 import { PrintService } from '../services/print.service';
 
-
-
 @Component({
-    selector: 'app-orders',
-    templateUrl: './orders.component.html',
-    styleUrls: ['./orders.component.css'],
-    standalone: false
+  selector: 'app-orders',
+  templateUrl: './orders.component.html',
+  styleUrls: ['./orders.component.css'],
+  standalone: false
 })
-
-export class OrdersComponent implements OnInit {
-  displayedColumns: string[] = ['orderDetails', 'total','creationTime','actions'];
+export class OrdersComponent implements OnInit, AfterViewInit {
+  displayedColumns: string[] = ['orderDetails', 'total', 'creationTime', 'actions'];
   dataSource = new MatTableDataSource<Order>();
-  isLoading: boolean = false;
+  isLoading = false;
+  totalOrders = 0;
+  totalRevenue = 0;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort, { static: false }) sort!: MatSort;
+
   orders: Order[] = [];
   products: Product[] = [];
 
@@ -38,7 +37,7 @@ export class OrdersComponent implements OnInit {
     private productService: ProductsService,
     private printService: PrintService,
     private dialog: MatDialog,
-    private notification: NotificationService
+    private notification: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -49,190 +48,104 @@ export class OrdersComponent implements OnInit {
   ngAfterViewInit() {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
+
+    // Custom sort for nested date/number fields
+    this.dataSource.sortingDataAccessor = (item: Order, prop: string) => {
+      switch (prop) {
+        case 'creationTime': return item.creationTime ? new Date(item.creationTime).getTime() : 0;
+        case 'total': return item.total ?? 0;
+        default: return (item as any)[prop];
+      }
+    };
   }
 
   getOrders(): void {
     this.isLoading = true;
     this.orderService.getOrders().subscribe({
       next: (response) => {
+        this.orders = response.data;
         this.dataSource.data = response.data;
+        this.totalOrders = response.data.length;
+        this.totalRevenue = response.data.reduce((sum, o) => sum + (o.total ?? 0), 0);
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Failed to get stations', error);
-        this.notification.error('Error getting orders');
+      error: () => {
+        this.notification.error('Fehler beim Laden der Bestellungen');
         this.isLoading = false;
       }
     });
   }
 
   getProducts(): void {
-    this.isLoading = true;
-    let queryParams = '?';
-    queryParams = queryParams + 'fields=name,shortName,creationTime,category,price'
-    this.productService.getProducts(queryParams).subscribe({
-      next: (response) => {
-        this.products = response.data;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Failed to get stations', error);
-        this.notification.error('Error getting orders');
-        this.isLoading = false;
-      }
+    this.productService.getProducts('?fields=name,shortName,creationTime,category,price').subscribe({
+      next: (response) => { this.products = response.data; },
+      error: () => {}
     });
   }
 
+  getProductNameById(id: string): string {
+    const p = this.products.find(p => p._id === id);
+    return p ? p.name : 'Unbekannt';
+  }
+
+  refresh(): void { this.getOrders(); }
+
+  // ── CRUD ────────────────────────────────────────────────────────
 
   editOrder(id?: string): void {
-    if (id) {
-      this.orderService.getOrderById(id).subscribe(orderItem => {
-        this.openDialog(orderItem, id);
-      });
+    const load$ = id ? this.orderService.getOrderById(id) : null;
+    if (load$) {
+      load$.subscribe(order => this.openDialog(order, id));
     } else {
-      // That's the case for creating a new order
       this.openDialog();
     }
   }
 
   openDialog(order?: Order, id?: string): void {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-    dialogConfig.width = "60%";
-    dialogConfig.maxWidth = '100%';
-    dialogConfig.height = "95%";
-    dialogConfig.data = { orderItem: order, products: this.products };
-
-    const dialogRef = this.dialog.open(OrderEditComponent, dialogConfig);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.isLoading = true;
-        if (id) {
-          this.orderService.updateOrder(id, result).subscribe(
-            (response) => {
-              if (response.status === 200 || response.status === 201){
-              // Update was done
-              this.getOrders();
-              this.notification.info("Erfolgreich bearbeitet")
-              }
-              else{
-              this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
-              console.error(response)
-              }
-              this.isLoading = false;
-              this.getOrders()
-            },
-            error => {
-              // No update
-              this.notification.error(error.error.message)
-              console.error(error)
-              this.isLoading = false;
-            }
-          )
-        } else {
-          // Add a new station
-          this.orderService.addOrder(result).subscribe(
-            (response) => {
-              if (response.status === 200 || response.status === 201){
-              this.getOrders();
-              this.notification.info("Erfolgreich erzeugt")
-              this.isLoading = false;
-              }
-              else{
-                this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
-                console.error(response)
-              }
-              this.isLoading = false;
-              this.getOrders();
-            },
-            error => {
-              this.notification.error(error.error.message)
-              console.error(error)
-              this.isLoading = false;
-            }
-          )
-        }
-      }
+    const ref = this.dialog.open(OrderEditComponent, {
+      disableClose: true, autoFocus: true,
+      width: '60%', maxWidth: '100%', height: '95%',
+      data: { orderItem: order, products: this.products },
+    });
+    ref.afterClosed().subscribe(result => {
+      if (!result) return;
+      this.isLoading = true;
+      const call = id
+        ? this.orderService.updateOrder(id, result)
+        : this.orderService.addOrder(result);
+      call.subscribe({
+        next: () => { this.notification.info(id ? 'Aktualisiert' : 'Erstellt'); this.getOrders(); this.isLoading = false; },
+        error: (e) => { this.notification.error(e.error?.message || 'Fehler'); this.isLoading = false; },
+      });
     });
   }
 
   viewOrder(id: string): void {
-    this.orderService.getOrderById(id).subscribe(orderItem => {
-      this.openViewDialog(orderItem);
+    this.orderService.getOrderById(id).subscribe(order => {
+      this.dialog.open(OrderViewComponent, {
+        data: { orderItem: order }, width: '60%', maxWidth: '100%', height: '95%',
+      });
     });
   }
-
 
   printOrder(id: string): void {
-    this.printService.printOrder("",id).subscribe({
-      next: (response) => {
-        if (response.status === 200 || response.status === 201){
-        this.notification.info("Erfolgreich gedruckt")
-      }
-      else{
-        this.notification.error("Fehler beim Drucken: " + response.statusText)
-      }
+    this.printService.printOrder('', id).subscribe({
+      next: (r) => {
+        if (r.status === 200) this.notification.info('Erfolgreich gedruckt');
+        else this.notification.error('Fehler beim Drucken: ' + r.statusText);
       },
-      error: (error) => {
-        console.error('Failed to get stations', error);
-        this.notification.error('Error getting orders');
-        this.isLoading = false;
-      }
+      error: () => this.notification.error('Drucker nicht erreichbar'),
     });
   }
 
-  openViewDialog(orderItem?: Order) {
-    const dialogConfig = new MatDialogConfig();
-    dialogConfig.disableClose = false;
-    dialogConfig.autoFocus = false;
-    dialogConfig.data = { orderItem: orderItem};
-    dialogConfig.width = "60%";
-    dialogConfig.maxWidth = '100%';
-    dialogConfig.height = "95%";
-    const dialogRef = this.dialog.open(OrderViewComponent, dialogConfig);
-    dialogRef.afterClosed();
-  }
-
-  refresh(): void{
-      this.getOrders()
-  }
-
-  getProductNameById(id: string): string{
-    let name= this.products.find(productItem => productItem._id === id);
-    return name? name.name: 'Unbekannt';
-  }
-
-
   deleteOrder(id: string): void {
-    const type = "diese Bestellung";
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.disableClose = false;
-    dialogConfig.autoFocus = true;
-    dialogConfig.data = { type };
-    const dialogRef = this.dialog.open(DeleteComponent, dialogConfig);
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.orderService.deleteOrder(id).subscribe(
-          (response) => {
-            if (response.status === 204) {
-            this.notification.info("Bestellung erfolgreich gelöscht.")
-            }
-            else{
-              this.notification.info('Fehler mit Code: ' + response.status + ", Text: " + response.statusText);
-              console.error(response) 
-            }
-            this.isLoading = false;
-            this.getOrders();
-          },
-          error => {
-            this.notification.error(error.error.message)
-            console.error(error)
-          }
-        )
-      }
-    })
+    const ref = this.dialog.open(DeleteComponent, { data: { type: 'diese Bestellung' } });
+    ref.afterClosed().subscribe(result => {
+      if (!result) return;
+      this.orderService.deleteOrder(id).subscribe({
+        next: () => { this.notification.info('Bestellung gelöscht'); this.getOrders(); },
+        error: (e) => this.notification.error(e.error?.message || 'Fehler'),
+      });
+    });
   }
 }

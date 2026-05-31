@@ -1,4 +1,4 @@
-pymongo
+pymongo<4.8
 flask
 flask-restx
 flask-expects-json
