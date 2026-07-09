@@ -775,7 +775,11 @@ cd UI && npm run build
 
 ## Produktiv-Deployment
 
-### Raspberry Pi 4 (empfohlen: 64-Bit OS)
+### Raspberry Pi 4 — Setup aus frischem Clone
+
+Der Pi nutzt `docker-compose_pi.yml`: inoffizieller ARM-MongoDB-Build,
+`mongo-express` Web-UI auf `:8081`, und die **API läuft direkt auf dem Host**
+(nicht im Container) für USB-Drucker-Zugriff.
 
 ```bash
 # 1. Docker installieren
@@ -785,23 +789,30 @@ sudo usermod -aG docker $USER
 # 2. Repository klonen
 git clone https://github.com/mbay-ODW/POS.git && cd POS
 
-# 3. Konfiguration
+# 3. Konfiguration aus Vorlage
+cp local.env.example local.env
 nano local.env
-# DATABASE_HOST=mongodb://mongodb:27017
-# DATABASE_NAME=POS
+#   DATABASE_HOST=mongodb://localhost:27017   (API läuft auf dem Host!)
+#   DATABASE_NAME=POS
+#   JWT_SECRET=...eigenes langes Secret...
 
-# 4. Stack starten (ohne api-local wegen USB-Drucker)
-docker compose -f docker-compose_local.yml up -d mongodb redis webapplication-local
+# 4. Container starten (MongoDB + Redis + UI + mongo-express)
+docker compose -f docker-compose_pi.yml up -d
 
-# 5. API direkt starten (mit USB-Zugriff für Drucker)
+# 5. Datenbank nachziehen (optional, falls vorhandene Daten)
+#    Dump in ./Database/ legen oder via mongorestore einspielen
+
+# 6. API direkt auf dem Host starten (USB-Drucker)
 cd RestAPI && pip install -r requirements.txt && python server.py
+```
 
-# 6. Oder: GHCR Image nutzen
-docker run -d --network=host \
-  -e DATABASE_HOST=mongodb://localhost:27017 \
-  -e DATABASE_NAME=POS \
-  --device /dev/ttyUSB0 \
-  ghcr.io/mbay-odw/pos-api:latest
+**Updates einspielen** — dank `docker-compose_pi.yml` + `local.env` (gitignored)
+werden Pi-Einstellungen nie überschrieben:
+
+```bash
+git pull
+docker compose -f docker-compose_pi.yml up -d --build
+cd RestAPI && python server.py
 ```
 
 ### Vorlauf-TV-Screens (Kiosk-Modus)
