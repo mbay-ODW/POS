@@ -3,9 +3,14 @@ from flask_restx import Api
 from flask_cors import CORS
 import os
 import flask_monitoringdashboard as dashboard
-import eventlet
-if not os.getenv("TESTING"):
-    eventlet.monkey_patch()
+# eventlet ist optional: wenn installiert, wird es für WebSockets genutzt und
+# gepatcht. Fehlt es (z.B. auf dem Pi), fällt SocketIO auf 'threading' zurück.
+try:
+    import eventlet
+    if not os.getenv("TESTING"):
+        eventlet.monkey_patch()
+except ImportError:
+    pass
 
 # Setting up Logging for the API Server
 version = "v1"

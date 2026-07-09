@@ -16,5 +16,8 @@ python-dotenv
 get-docker-secret
 flask_monitoringdashboard
 flask-socketio
-eventlet
 bcrypt
+# eventlet: optional. Nur für die Container-Variante (gunicorn eventlet-Worker).
+# Auf dem Pi darf der Build fehlschlagen — der Code fällt dann auf 'threading' zurück.
+# Bewusst als letzte Zeile, damit ein Fehler die anderen Pakete nicht blockiert.
+eventlet
