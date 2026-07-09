@@ -1,3 +1,4 @@
+import os
 from flask_restx import Resource
 from flask import jsonify, make_response, request
 from bson import ObjectId
@@ -5,6 +6,10 @@ from datetime import datetime, timezone, timedelta
 from utils.database import Database
 from utils.log import LoggerManager
 from utils.documents import log
+
+# Zeitzone für die Auswertung. Buchungen liegen in UTC in der DB;
+# Stunde/Tag/Wochentag werden für die Statistik in diese Zone umgerechnet.
+STATS_TZ = os.getenv("STATS_TIMEZONE", "Europe/Berlin")
 
 
 class Statistics(Resource):
@@ -38,7 +43,7 @@ class Statistics(Resource):
             orders_by_hour = list(self.orders.aggregate([
                 {'$match': match},
                 {'$group': {
-                    '_id': {'$hour': '$creationTime'},
+                    '_id': {'$hour': {'date': '$creationTime', 'timezone': STATS_TZ}},
                     'count': {'$sum': 1}
                 }},
                 {'$sort': {'_id': 1}}
@@ -51,7 +56,7 @@ class Statistics(Resource):
             orders_by_day = list(self.orders.aggregate([
                 {'$match': match},
                 {'$group': {
-                    '_id': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$creationTime'}},
+                    '_id': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$creationTime', 'timezone': STATS_TZ}},
                     'count': {'$sum': 1}
                 }},
                 {'$sort': {'_id': 1}}
@@ -63,8 +68,8 @@ class Statistics(Resource):
                 {'$match': match},
                 {'$group': {
                     '_id': {
-                        'weekday': {'$dayOfWeek': '$creationTime'},
-                        'hour': {'$hour': '$creationTime'}
+                        'weekday': {'$dayOfWeek': {'date': '$creationTime', 'timezone': STATS_TZ}},
+                        'hour': {'$hour': {'date': '$creationTime', 'timezone': STATS_TZ}}
                     },
                     'count': {'$sum': 1}
                 }}
