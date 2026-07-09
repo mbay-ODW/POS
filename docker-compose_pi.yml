@@ -1,0 +1,65 @@
+# Raspberry Pi Stack
+# ────────────────────────────────────────────────────────────────
+# Nutzt einen inoffiziellen ARM-MongoDB-Build (offizielles mongo-Image
+# läuft nicht auf dem Pi). Die API läuft NICHT im Container, sondern
+# direkt auf dem Host (python server.py) wegen USB-Zugriff auf Drucker.
+#
+# Start:  docker compose -f docker-compose_pi.yml up -d
+#         cd RestAPI && python server.py
+# ────────────────────────────────────────────────────────────────
+version: "3.7"
+services:
+   mongodb:
+      # Inoffizieller MongoDB 7.0.4 Build für Raspberry Pi 4 (ARM)
+      image: mongodb-raspberrypi4-unofficial-r7.0.4
+      restart: always
+      hostname: mongodb
+      ports:
+         - 27017:27017
+      volumes:
+         - ./Database:/data/db
+      networks:
+         - default-local
+
+   # Web-UI zum Inspizieren der Datenbank (http://<pi>:8081)
+   mongoexpress:
+      image: mongo-express
+      restart: always
+      networks:
+         - default-local
+      ports:
+         - "8081:8081"
+      environment:
+         - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
+
+   redis:
+      image: redis:latest
+      restart: always
+      hostname: redis
+      deploy:
+         restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 5
+            window: 120s
+      networks:
+         - default-local
+
+   webapplication-local:
+      build:
+         context: ./UI
+         dockerfile: Dockerfile_Local
+      restart: always
+      hostname: webapplication-local
+      networks:
+         - default-local
+      ports:
+         - 80:80
+
+   # api-local läuft NICHT im Container — direkt auf dem Host starten:
+   #   cd RestAPI && python server.py
+   # (USB-Drucker /dev/usb/lp0 ist im Container nicht sauber erreichbar)
+
+networks:
+   default-local:
+      driver: bridge

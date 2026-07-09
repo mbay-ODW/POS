@@ -91,10 +91,19 @@ class Printing():
                     display_name = item['product'].get('shortName') or item['product']['name']
                     amount = item['amount']
                     price = item['product'].get('price', 0)
-                    p.set(bold=True)
-                    right = f"{price * amount:.2f} €" if show_prices else ""
-                    p.text(_two_col(f"{amount} x {display_name}", right, w))
-                    p.set(bold=False)
+
+                    # Large, bold item — amount on its own line, name below
+                    p.set(align='left', bold=True, custom_size=True, height=3, width=3)
+                    p.text(f"{amount} x\n")
+                    p.text(f"{display_name}\n")
+                    p.set(normal_textsize=True, bold=False)
+
+                    # Price on its own line (big font is too wide for a second column)
+                    if show_prices:
+                        p.set(align='right', bold=True, double_height=True)
+                        p.text(f"{price * amount:.2f} EUR\n")
+                        p.set(align='left', bold=False, double_height=False)
+
                     if i < len(items) - 1:
                         p.text(_separator("-", w))
 
@@ -105,8 +114,14 @@ class Printing():
 
             # ── Footer ───────────────────────────────────
             total_items = sum(i['amount'] for i in order.get('orders', []))
-            p.set(bold=True, align='left')
-            p.text(_two_col("GESAMT ARTIKEL", total_items, w))
+            p.set(align='left', bold=True, double_height=True)
+            p.text(f"GESAMT: {total_items} Artikel\n")
+            p.set(double_height=False)
+            if show_prices:
+                order_total = order.get('total', 0)
+                p.set(align='left', bold=True, custom_size=True, height=2, width=2)
+                p.text(f"{order_total:.2f} EUR\n")
+                p.set(normal_textsize=True)
             p.set(bold=False)
             if footer_text:
                 p.text(_separator("-", w))
