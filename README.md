@@ -803,16 +803,19 @@ docker compose -f docker-compose_pi.yml up -d
 #    Dump in ./Database/ legen oder via mongorestore einspielen
 
 # 6. API direkt auf dem Host starten (USB-Drucker)
-cd RestAPI && pip install -r requirements.txt && python server.py
+#    Systemabhängigkeiten (escpos/USB, bcrypt, Pillow):
+sudo apt install -y python3-venv python3-dev build-essential libffi-dev libusb-1.0-0
+cd RestAPI
+python3 -m venv venv          # venv anlegen (PEP 668 auf Bookworm)
+source venv/bin/activate       # aktivieren
+pip install --upgrade pip
+pip install -r requirements.txt
+python server.py               # starten
 ```
 
-> **Kein Build auf dem Pi!** `docker-compose_pi.yml` zieht das fertige
-> UI-Image `ghcr.io/mbay-odw/pos-ui:latest` (Multi-Arch, von der CI gebaut).
-> Ist das GHCR-Package privat, einmalig anmelden:
-> ```bash
-> echo <GITHUB_TOKEN> | docker login ghcr.io -u <user> --password-stdin
-> ```
-> (Token mit `read:packages`-Scope, oder das Package auf GitHub public stellen.)
+> **Kein Build auf dem Pi!** `docker-compose_pi.yml` zieht das fertige,
+> öffentliche UI-Image `ghcr.io/mbay-odw/pos-ui:latest` (Multi-Arch arm64 + arm/v7,
+> von der CI gebaut). Kein `docker login` nötig, da das Package public ist.
 
 **Updates einspielen** — nur ziehen, nichts bauen:
 
@@ -820,7 +823,10 @@ cd RestAPI && pip install -r requirements.txt && python server.py
 git pull                                        # Code + API-Updates
 docker compose -f docker-compose_pi.yml pull    # neues UI-Image von GHCR
 docker compose -f docker-compose_pi.yml up -d
-cd RestAPI && python server.py                  # API auf dem Host neu starten
+cd RestAPI
+source venv/bin/activate                        # venv aktivieren
+pip install -r requirements.txt                 # falls neue Abhängigkeiten
+python server.py                                # API auf dem Host neu starten
 ```
 
 ### Vorlauf-TV-Screens (Kiosk-Modus)
