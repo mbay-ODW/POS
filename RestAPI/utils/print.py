@@ -88,26 +88,37 @@ class Printing():
                 p.set(align='left', bold=False)
 
                 for i, item in enumerate(items):
-                    display_name = item['product'].get('shortName') or item['product']['name']
-                    amount = item['amount']
-                    price = item['product'].get('price', 0)
+                    # Pro Artikel absturzsicher: ein fehlerhafter Artikel
+                    # (fehlendes Feld, Sonderzeichen) darf den Rest nicht killen.
+                    try:
+                        prod = item.get('product', {})
+                        display_name = prod.get('shortName') or prod.get('name') or '???'
+                        amount = item.get('amount', 0)
+                        price = prod.get('price', 0) or 0
 
-                    # Large, bold item — amount on its own line, name below
-                    p.set(align='left', bold=True, custom_size=True, height=3, width=3)
-                    p.text(f"{amount} x\n")
-                    p.text(f"{display_name}\n")
-                    # Zurück auf Normalgröße (width/height=1 statt normal_textsize,
-                    # damit es auch mit älteren python-escpos-Versionen läuft)
-                    p.set(align='left', bold=False, custom_size=True, height=1, width=1)
+                        # Large, bold item — amount on its own line, name below
+                        p.set(align='left', bold=True, custom_size=True, height=3, width=3)
+                        p.text(f"{amount} x\n")
+                        p.text(f"{display_name}\n")
+                        # Zurück auf Normalgröße (width/height=1 statt normal_textsize,
+                        # damit es auch mit älteren python-escpos-Versionen läuft)
+                        p.set(align='left', bold=False, custom_size=True, height=1, width=1)
 
-                    # Price on its own line (big font is too wide for a second column)
-                    if show_prices:
-                        p.set(align='right', bold=True, double_height=True)
-                        p.text(f"{price * amount:.2f} EUR\n")
-                        p.set(align='left', bold=False, double_height=False)
+                        # Price on its own line (big font is too wide for a second column)
+                        if show_prices:
+                            p.set(align='right', bold=True, double_height=True)
+                            p.text(f"{price * amount:.2f} EUR\n")
+                            p.set(align='left', bold=False, double_height=False)
 
-                    if i < len(items) - 1:
-                        p.text(_separator("-", w))
+                        if i < len(items) - 1:
+                            p.text(_separator("-", w))
+                    except Exception as item_err:
+                        # Größe/Format sicher zurücksetzen und weitermachen
+                        try:
+                            p.set(align='left', bold=False, custom_size=True, height=1, width=1)
+                        except Exception:
+                            pass
+                        logger.error(f'Print item failed ({item.get("product", {}).get("name", "?")}): {item_err}')
 
                 if idx < len(cat_ids) - 1:
                     p.text(_separator("=", w))
