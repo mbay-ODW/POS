@@ -96,7 +96,9 @@ class Printing():
                     p.set(align='left', bold=True, custom_size=True, height=3, width=3)
                     p.text(f"{amount} x\n")
                     p.text(f"{display_name}\n")
-                    p.set(normal_textsize=True, bold=False)
+                    # Zurück auf Normalgröße (width/height=1 statt normal_textsize,
+                    # damit es auch mit älteren python-escpos-Versionen läuft)
+                    p.set(align='left', bold=False, custom_size=True, height=1, width=1)
 
                     # Price on its own line (big font is too wide for a second column)
                     if show_prices:
@@ -121,7 +123,7 @@ class Printing():
                 order_total = order.get('total', 0)
                 p.set(align='left', bold=True, custom_size=True, height=2, width=2)
                 p.text(f"{order_total:.2f} EUR\n")
-                p.set(normal_textsize=True)
+                p.set(align='left', custom_size=True, height=1, width=1)
             p.set(bold=False)
             if footer_text:
                 p.text(_separator("-", w))
