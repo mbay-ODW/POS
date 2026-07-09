@@ -46,9 +46,13 @@ services:
          - default-local
 
    webapplication-local:
-      build:
-         context: ./UI
-         dockerfile: Dockerfile_Local
+      # Fertiges Multi-Arch-Image von GHCR ziehen — KEIN Build auf dem Pi!
+      # (Das Image wird von der CI für arm64 + arm/v7 gebaut.)
+      # Bei 403/denied: Image ist privat → einmalig anmelden:
+      #   echo <GITHUB_TOKEN> | docker login ghcr.io -u <user> --password-stdin
+      # oder das Package auf GitHub auf "public" stellen.
+      image: ghcr.io/mbay-odw/pos-ui:latest
+      pull_policy: always
       restart: always
       hostname: webapplication-local
       networks:

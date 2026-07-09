@@ -806,13 +806,21 @@ docker compose -f docker-compose_pi.yml up -d
 cd RestAPI && pip install -r requirements.txt && python server.py
 ```
 
-**Updates einspielen** — dank `docker-compose_pi.yml` + `local.env` (gitignored)
-werden Pi-Einstellungen nie überschrieben:
+> **Kein Build auf dem Pi!** `docker-compose_pi.yml` zieht das fertige
+> UI-Image `ghcr.io/mbay-odw/pos-ui:latest` (Multi-Arch, von der CI gebaut).
+> Ist das GHCR-Package privat, einmalig anmelden:
+> ```bash
+> echo <GITHUB_TOKEN> | docker login ghcr.io -u <user> --password-stdin
+> ```
+> (Token mit `read:packages`-Scope, oder das Package auf GitHub public stellen.)
+
+**Updates einspielen** — nur ziehen, nichts bauen:
 
 ```bash
-git pull
-docker compose -f docker-compose_pi.yml up -d --build
-cd RestAPI && python server.py
+git pull                                        # Code + API-Updates
+docker compose -f docker-compose_pi.yml pull    # neues UI-Image von GHCR
+docker compose -f docker-compose_pi.yml up -d
+cd RestAPI && python server.py                  # API auf dem Host neu starten
 ```
 
 ### Vorlauf-TV-Screens (Kiosk-Modus)
