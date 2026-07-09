@@ -14,8 +14,6 @@ fpdf2
 gunicorn<22
 python-dotenv
 get-docker-secret
-flask-caching
-redis
 flask_monitoringdashboard
 flask-socketio
 eventlet

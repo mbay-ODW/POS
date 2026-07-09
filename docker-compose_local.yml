@@ -10,18 +10,6 @@ services:
          - ./Database:/data/db
       networks:
          - default-local
-   redis:
-      image: redis:latest
-      restart: always
-      hostname: redis
-      deploy:
-         restart_policy:
-            condition: on-failure
-            delay: 10s
-            max_attempts: 5
-            window: 120s
-      networks:
-         - default-local
    webapplication-local:
       build:
          context: ./UI

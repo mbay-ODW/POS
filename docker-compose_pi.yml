@@ -21,36 +21,9 @@ services:
       networks:
          - default-local
 
-   # Web-UI zum Inspizieren der Datenbank (http://<pi>:8081)
-   mongoexpress:
-      image: mongo-express
-      restart: always
-      networks:
-         - default-local
-      ports:
-         - "8081:8081"
-      environment:
-         - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017
-
-   redis:
-      image: redis:latest
-      restart: always
-      hostname: redis
-      deploy:
-         restart_policy:
-            condition: on-failure
-            delay: 10s
-            max_attempts: 5
-            window: 120s
-      networks:
-         - default-local
-
    webapplication-local:
       # Fertiges Multi-Arch-Image von GHCR ziehen — KEIN Build auf dem Pi!
-      # (Das Image wird von der CI für arm64 + arm/v7 gebaut.)
-      # Bei 403/denied: Image ist privat → einmalig anmelden:
-      #   echo <GITHUB_TOKEN> | docker login ghcr.io -u <user> --password-stdin
-      # oder das Package auf GitHub auf "public" stellen.
+      # (Das Image wird von der CI für arm64 + arm/v7 gebaut, Package ist public.)
       image: ghcr.io/mbay-odw/pos-ui:latest
       pull_policy: always
       restart: always

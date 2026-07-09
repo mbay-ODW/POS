@@ -15,14 +15,6 @@ import time, os
 from utils.log import LoggerManager
 from functools import wraps
 
-from urllib.parse import urlencode
-
-caching = bool(os.getenv("CACHING", default=False))
-if caching:
-    from utils.cache import CacheManager
-
-    cache = CacheManager.get_cache()
-
 
 class BaseList(Resource):
     logger = LoggerManager().logger
@@ -36,16 +28,6 @@ class BaseList(Resource):
     @validate_query_params
     def get(self, *args, **kwargs):
         try:
-            if caching:
-                self.cache_key = f"{request.path}?{urlencode(sorted(request.args.items()))}"
-                self.logger.debug(
-                    f"Checking if data is in cache for key: {self.cache_key} "
-                )
-                if cache.get(self.cache_key):
-                    self.logger.debug("Getting data from cache")
-                    self.logger.debug(cache.get(self.cache_key))
-                    return cache.get(self.cache_key)
-                self.logger.debug("Data is not in cache") 
             # Merge active filter from query param into self.filter
             active_param = request.args.get("active")
             query_filter = dict(self.filter)
@@ -78,8 +60,6 @@ class BaseList(Resource):
             response['data'] = documents
             total_count = self.DatabaseConnector.count_documents({})
             response['total'] = total_count
-            if caching:
-                cache.set(self.cache_key, make_response(jsonify(response), 200))
             return make_response(jsonify(response), 200)
         except Exception as e:
             self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
@@ -113,9 +93,6 @@ class BaseList(Resource):
             if (id.inserted_id) :
                 self.logger.info(f'Document was created.')
                 self.logger.debug(f'Has the following id: {id.inserted_id}')
-                if caching:
-                    self.logger.debug("Cache cleared")
-                    cache.clear()
                 return make_response(jsonify({"message": "success", "_id": str(id.inserted_id)}), 201)
             else:
                 self.logger.error(f'Document could have not been written to database.')
@@ -141,25 +118,9 @@ class SpecificBase(Resource):
     def get(self, *args, **kwargs):
         try:
             id = kwargs.get("id")
-            if caching:
-                self.cache_key = f"{request.path}?{urlencode(sorted(request.args.items()))}"
-                self.logger.debug(
-                    f"Checking if data is in cache for key: {self.cache_key} "
-                )
-                if cache.get(self.cache_key):
-                    self.logger.debug("Getting data from cache")
-                    self.logger.debug(cache.get(self.cache_key))
-                    return cache.get(self.cache_key)
-                self.logger.debug("Data is not in cache")
             # Get a specific item
             document = self.DatabaseConnector.find_one({'_id': ObjectId(id)})
             self.logger.debug(f'Received the following document from the database: {document}. Returning document and 200 as status_code.')
-            if caching:
-                self.logger.debug("Data added to cache")
-                cache.set(
-                    self.cache_key,
-                    make_response(jsonify(prep_document_for_response(document)), 200),
-                )
             return make_response(jsonify(prep_document_for_response(document)), 200)
         except Exception as e:
             self.logger.error(f'Received the following error: {e}. Can not proceed, returning error message and status_code 500.')
@@ -201,9 +162,6 @@ class SpecificBase(Resource):
             self.logger.debug(result)
             if result.matched_count > 0:
                 self.logger.info(f"Document was updated.")
-                if caching:
-                    self.logger.debug("Cache cleared")
-                    cache.clear()
                 return make_response(jsonify({"message": "success"}), 200)
             else:
                 self.logger.error(f"Document have not been written to database.")
@@ -242,9 +200,6 @@ class SpecificBase(Resource):
             self.logger.debug(result)
             if result.matched_count > 0:
                 self.logger.info(f"Document was updated.")
-                if caching:
-                    self.logger.debug("Cache cleared")
-                    cache.clear()
                 return make_response(jsonify({"message": "success"}), 200)
             else:
                 self.logger.error(f"Document has not been written to database.")
@@ -268,9 +223,6 @@ class SpecificBase(Resource):
             # If delete_count is 1 it can be considered to be deleted.
             if result.deleted_count == 1:
                 self.logger.info(f"Document was deleted.")
-                if caching:
-                    self.logger.debug("Cache cleared")
-                    cache.clear()
                 return make_response(jsonify({"message": "success"}), 204)
             else:
                 # It seems nothing was deleted

@@ -46,15 +46,6 @@ try:
     )
     app.config["DEBUG"] = False
 
-    caching = bool(os.getenv("CACHING", default=False))
-    if caching:
-        logger.debug("Adding cache")
-        from utils.cache import CacheManager
-
-        cache = CacheManager.get_cache(app)
-        # Initialize Cache with your app
-        cache.init_app(app)
-
     api = Api(app, catch_all_404s=True)
     from utils.socketio_instance import socketio
     socketio.init_app(app)
