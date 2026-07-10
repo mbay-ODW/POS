@@ -4,8 +4,9 @@ import { Order } from '../interfaces/order';
 import { StationsService } from '../services/stations.service';
 import { OrdersService } from '../services/orders.service';
 import { WebsocketService } from '../services/websocket.service';
+import { AppSettingsService } from '../services/app-settings.service';
 import { interval, Subscription } from 'rxjs';
-import { startWith, switchMap } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 
 const PREVIEW_STATION_KEY = 'pos_preview_station';
 
@@ -34,6 +35,7 @@ export class PreviewComponent implements OnInit, OnDestroy {
     private stationService: StationsService,
     private orderService: OrdersService,
     private ws: WebsocketService,
+    private appSettings: AppSettingsService,
   ) {}
 
   ngOnInit(): void {
@@ -74,13 +76,17 @@ export class PreviewComponent implements OnInit, OnDestroy {
   private startRealtime(): void {
     this.stopRealtime();
 
-    // WebSocket: reload on every new order event
-    this.ws.connect();
-    this.wsSub = this.ws.onNewOrder().subscribe(() => this.loadOrders());
+    // WebSocket: reload on every new order event (falls verfügbar)
+    try {
+      this.ws.connect();
+      this.wsSub = this.ws.onNewOrder().subscribe(() => this.loadOrders());
+    } catch { /* WebSocket optional — Polling reicht */ }
 
-    // Polling every 60s as fallback/sync
-    this.pollSub = interval(60_000).pipe(
-      startWith(0),
+    // Polling als zuverlässiger Fallback (WebSocket läuft auf dem Pi ohne
+    // eventlet nicht sauber). Intervall aus den Einstellungen, min. 5s.
+    const secs = Math.max(5, Number(this.appSettings.get('preview.refresh_interval')) || 15);
+    this.pollSub = interval(secs * 1000).pipe(
+      startWith(0),   // sofort beim Öffnen laden
     ).subscribe(() => this.loadOrders());
   }
 

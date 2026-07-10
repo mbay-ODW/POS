@@ -1,11 +1,10 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Sort } from '@angular/material/sort';
+import { PageEvent } from '@angular/material/paginator';
 import { Order } from '../interfaces/order';
 import { OrdersService } from '../services/orders.service';
 import { NotificationService } from '../services/notification.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
 import { DeleteComponent } from '../dialogs/delete/delete.component';
 import { OrderEditComponent } from './order-edit/order-edit.component';
 import { OrderViewComponent } from './order-view/order-view.component';
@@ -19,18 +18,19 @@ import { PrintService } from '../services/print.service';
   styleUrls: ['./orders.component.css'],
   standalone: false
 })
-export class OrdersComponent implements OnInit, AfterViewInit {
+export class OrdersComponent implements OnInit {
   displayedColumns: string[] = ['orderDetails', 'total', 'creationTime', 'actions'];
-  dataSource = new MatTableDataSource<Order>();
-  isLoading = false;
-  totalOrders = 0;
-  totalRevenue = 0;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort, { static: false }) sort!: MatSort;
-
   orders: Order[] = [];
   products: Product[] = [];
+  isLoading = false;
+
+  // Server-side pagination + sorting state
+  totalOrders = 0;
+  totalRevenue = 0;
+  pageIndex = 0;
+  pageSize = 25;
+  sortBy = 'creationTime';
+  sortDir = -1; // -1 = absteigend, 1 = aufsteigend
 
   constructor(
     private orderService: OrdersService,
@@ -41,32 +41,19 @@ export class OrdersComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    this.getOrders();
     this.getProducts();
+    this.loadPage();
   }
 
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-
-    // Custom sort for nested date/number fields
-    this.dataSource.sortingDataAccessor = (item: Order, prop: string) => {
-      switch (prop) {
-        case 'creationTime': return item.creationTime ? new Date(item.creationTime).getTime() : 0;
-        case 'total': return item.total ?? 0;
-        default: return (item as any)[prop];
-      }
-    };
-  }
-
-  getOrders(): void {
+  loadPage(): void {
     this.isLoading = true;
-    this.orderService.getOrders().subscribe({
-      next: (response) => {
+    const skip = this.pageIndex * this.pageSize;
+    const q = `?skip=${skip}&pageSize=${this.pageSize}&sortBy=${this.sortBy}&sortDir=${this.sortDir}`;
+    this.orderService.getOrders(q).subscribe({
+      next: (response: any) => {
         this.orders = response.data;
-        this.dataSource.data = response.data;
-        this.totalOrders = response.data.length;
-        this.totalRevenue = response.data.reduce((sum, o) => sum + (o.total ?? 0), 0);
+        this.totalOrders = response.total ?? response.data.length;
+        this.totalRevenue = response.totalRevenue ?? 0;
         this.isLoading = false;
       },
       error: () => {
@@ -74,6 +61,19 @@ export class OrdersComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
       }
     });
+  }
+
+  onSort(sort: Sort): void {
+    if (!sort.direction) { this.sortBy = 'creationTime'; this.sortDir = -1; }
+    else { this.sortBy = sort.active; this.sortDir = sort.direction === 'asc' ? 1 : -1; }
+    this.pageIndex = 0;
+    this.loadPage();
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadPage();
   }
 
   getProducts(): void {
@@ -88,7 +88,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     return p ? p.name : 'Unbekannt';
   }
 
-  refresh(): void { this.getOrders(); }
+  refresh(): void { this.loadPage(); }
 
   // ── CRUD ────────────────────────────────────────────────────────
 
@@ -114,7 +114,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
         ? this.orderService.updateOrder(id, result)
         : this.orderService.addOrder(result);
       call.subscribe({
-        next: () => { this.notification.info(id ? 'Aktualisiert' : 'Erstellt'); this.getOrders(); this.isLoading = false; },
+        next: () => { this.notification.info(id ? 'Aktualisiert' : 'Erstellt'); this.loadPage(); this.isLoading = false; },
         error: (e) => { this.notification.error(e.error?.message || 'Fehler'); this.isLoading = false; },
       });
     });
@@ -143,7 +143,7 @@ export class OrdersComponent implements OnInit, AfterViewInit {
     ref.afterClosed().subscribe(result => {
       if (!result) return;
       this.orderService.deleteOrder(id).subscribe({
-        next: () => { this.notification.info('Bestellung gelöscht'); this.getOrders(); },
+        next: () => { this.notification.info('Bestellung gelöscht'); this.loadPage(); },
         error: (e) => this.notification.error(e.error?.message || 'Fehler'),
       });
     });

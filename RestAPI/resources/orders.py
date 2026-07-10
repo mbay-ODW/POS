@@ -34,14 +34,24 @@ class OrdersList(BaseList):
             skip = int(request.args.get("skip", 0))
             page_size = request.args.get("pageSize")
             sort_by = request.args.get("sortBy", "creationTime")
-            entries = self.DatabaseConnector.find(query_filter)
+            sort_dir = int(request.args.get("sortDir", -1))
+            entries = self.DatabaseConnector.find(query_filter).sort(sort_by, sort_dir)
             if page_size is not None:
-                entries = entries.limit(int(page_size)).skip(skip)
-            entries = entries.sort(sort_by, -1)
+                entries = entries.skip(skip).limit(int(page_size))
             from utils.documents import prep_document_for_response
             documents = [prep_document_for_response(x) for x in entries]
             total_count = self.DatabaseConnector.count_documents(query_filter)
-            return make_response(jsonify({"data": documents, "total": total_count}), 200)
+            # Gesamtumsatz über den ganzen Filter (nicht nur die aktuelle Seite)
+            rev = list(self.DatabaseConnector.aggregate([
+                {"$match": query_filter},
+                {"$group": {"_id": None, "sum": {"$sum": "$total"}}}
+            ]))
+            total_revenue = round(rev[0]["sum"], 2) if rev else 0
+            return make_response(jsonify({
+                "data": documents,
+                "total": total_count,
+                "totalRevenue": total_revenue,
+            }), 200)
         except Exception as e:
             self.logger.error(f'Orders GET error: {e}')
             return make_response(jsonify({"message": str(e)}), 500)

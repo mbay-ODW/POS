@@ -81,6 +81,18 @@ def start():
     collections = read_config(collections_file)
     check_and_create_collections(collections)
     create_default_manager()
+    create_indexes()
+
+
+def create_indexes():
+    """Indizes für schnelle Sortierung/Filterung der Bestellungen."""
+    try:
+        client = Database.get_instance()
+        client.db.orders.create_index([("creationTime", -1)])
+        client.db.orders.create_index([("station_id", 1), ("creationTime", -1)])
+        logger.info("Order-Indizes sichergestellt")
+    except Exception as e:
+        logger.warning(f"Konnte Indizes nicht anlegen: {e}")
 
 
 if __name__ == "__main__":

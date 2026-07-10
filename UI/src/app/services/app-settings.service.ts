@@ -37,7 +37,7 @@ export const SETTING_DEFAULTS: AppSettings = {
   'pos.auto_print': 'true',
   'pos.require_station': 'true',
   'pos.checkout_popup_duration': '5',
-  'preview.refresh_interval': '60',
+  'preview.refresh_interval': '15',
   'preview.default_vorlauf': '15',
   'display.thank_you_message': 'Vielen Dank für Ihre Bestellung!',
   'display.thank_you_duration': '8',

@@ -13,10 +13,10 @@
     </div>
   </div>
 
-  <mat-spinner *ngIf="isLoading" class="spinner"></mat-spinner>
+  <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 
-  <!-- Table -->
-  <mat-table [dataSource]="dataSource" matSort *ngIf="!isLoading">
+  <!-- Table (serverseitige Sortierung/Pagination) -->
+  <mat-table [dataSource]="orders" matSort (matSortChange)="onSort($event)">
 
     <!-- Bestelldetails -->
     <ng-container matColumnDef="orderDetails">
@@ -69,7 +69,7 @@
     <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
   </mat-table>
 
-  <!-- Zusammenfassung + Paginator -->
+  <!-- Zusammenfassung + Paginator (serverseitig) -->
   <div class="footer-bar">
     <div class="summary">
       <span class="summary-item">
@@ -82,7 +82,11 @@
         Gesamt: <strong>{{ totalRevenue | number:'1.2-2' }} €</strong>
       </span>
     </div>
-    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
+    <mat-paginator [length]="totalOrders"
+                   [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
+                   [pageSizeOptions]="[10, 25, 50, 100]"
+                   (page)="onPage($event)"
                    showFirstLastButtons
                    class="paginator">
     </mat-paginator>

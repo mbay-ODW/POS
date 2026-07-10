@@ -39,7 +39,7 @@ const TABS: Record<string, TabConfig> = {
   preview: {
     prefix: 'preview',
     keys: ['preview.refresh_interval', 'preview.default_vorlauf'],
-    defaults: { refresh_interval: 60, default_vorlauf: 15 },
+    defaults: { refresh_interval: 15, default_vorlauf: 15 },
   },
   display: {
     prefix: 'display',
@@ -80,7 +80,7 @@ export class SettingsComponent implements OnInit {
     this.forms['system'] = this.fb.group({ logo: [''], name: [''], currency: [''] });
     this.forms['bon'] = this.fb.group({ logo: [''], name: [''], address: [''], footer: [''], paper_width: ['58'], show_prices: [false], copies: [1] });
     this.forms['pos'] = this.fb.group({ auto_print: [true], require_station: [true], checkout_popup_duration: [5] });
-    this.forms['preview'] = this.fb.group({ refresh_interval: [60], default_vorlauf: [15] });
+    this.forms['preview'] = this.fb.group({ refresh_interval: [15], default_vorlauf: [15] });
     this.forms['display'] = this.fb.group({ thank_you_message: [''], thank_you_duration: [8], pause_message: [''] });
   }
 
