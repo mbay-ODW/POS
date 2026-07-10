@@ -43,6 +43,9 @@ export class BookingComponent implements OnInit, OnDestroy {
   sortMode: SortMode = 'name-asc';
   dragEnabled = false;
   orderedProducts: Product[] = [];
+  // Stabile Gruppen (Kategorie -> Produktliste) fürs Drag-and-Drop.
+  // Jede products-Liste ist genau die cdkDropListData -> korrekte Indizes.
+  groups: { category: Category; products: Product[] }[] = [];
 
   controlBarVisible = true;
   tileSize = 140; // px
@@ -159,6 +162,15 @@ export class BookingComponent implements OnInit, OnDestroy {
     } else {
       this.orderedProducts = this.sortProducts(base);
     }
+    this.buildGroups();
+  }
+
+  /** Baut stabile Kategorie-Gruppen aus orderedProducts (Reihenfolge erhalten). */
+  private buildGroups(): void {
+    this.groups = this.visibleCategories.map(category => ({
+      category,
+      products: this.orderedProducts.filter(p => p.category === category._id),
+    }));
   }
 
   private filteredProducts(): Product[] {
@@ -193,13 +205,16 @@ export class BookingComponent implements OnInit, OnDestroy {
     }
   }
 
-  drop(event: CdkDragDrop<Product[]>): void {
-    moveItemInArray(this.orderedProducts, event.previousIndex, event.currentIndex);
+  /**
+   * Verschiebt innerhalb EINER Kategorie-Gruppe. event.previousIndex /
+   * currentIndex beziehen sich auf group.products — dieselbe Liste, die
+   * cdkDropListData ist. Danach die flache Reihenfolge neu zusammensetzen.
+   */
+  drop(event: CdkDragDrop<Product[]>, group: { category: Category; products: Product[] }): void {
+    moveItemInArray(group.products, event.previousIndex, event.currentIndex);
+    // Flache Gesamtreihenfolge aus allen Gruppen neu aufbauen und speichern
+    this.orderedProducts = this.groups.flatMap(g => g.products);
     this.saveCustomOrder();
-  }
-
-  productsForCategory(categoryId: string): Product[] {
-    return this.orderedProducts.filter(p => p.category === categoryId);
   }
 
   // ── Cart ──────────────────────────────────────────────────────────────────

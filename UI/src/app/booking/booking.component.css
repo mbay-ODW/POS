@@ -91,7 +91,7 @@ mat-card {
   user-select: none;
 }
 mat-card:hover:not(.draggable) { transform: scale(1.04); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-mat-card.draggable { cursor: grab; }
+mat-card.draggable { cursor: grab; touch-action: none; }
 mat-card.draggable:active { cursor: grabbing; }
 mat-card img { width: 100%; object-fit: contain; }
 

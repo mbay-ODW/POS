@@ -65,18 +65,17 @@
 
     <!-- Products -->
     <div class="products">
-      <ng-container *ngFor="let category of visibleCategories">
+      <ng-container *ngFor="let group of groups">
         <div class="category-section">
-          <h2 class="category-title">{{ category.name }}</h2>
+          <h2 class="category-title">{{ group.category.name }}</h2>
 
           <div class="product-list"
                cdkDropList
-               cdkDropListOrientation="horizontal"
-               [cdkDropListData]="productsForCategory(category._id!)"
-               (cdkDropListDropped)="drop($event)"
+               [cdkDropListData]="group.products"
+               (cdkDropListDropped)="drop($event, group)"
                [class.drag-mode]="dragEnabled">
 
-            <mat-card *ngFor="let product of productsForCategory(category._id!)"
+            <mat-card *ngFor="let product of group.products"
                       cdkDrag
                       [cdkDragDisabled]="!dragEnabled"
                       [class.draggable]="dragEnabled"
