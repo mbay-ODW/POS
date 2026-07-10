@@ -7,18 +7,20 @@ Ein vollständiges, selbst gehostetes Point-of-Sale-System für Gastronomie und 
 ## Inhaltsverzeichnis
 
 1. [Überblick](#überblick)
-2. [Architektur](#architektur)
-3. [Tech Stack](#tech-stack)
-4. [Features](#features)
-5. [Repository-Struktur](#repository-struktur)
-6. [Datenmodell](#datenmodell)
-7. [API-Referenz](#api-referenz)
-8. [Konfiguration](#konfiguration)
-9. [Entwicklung (lokal)](#entwicklung-lokal)
-10. [Docker & Deployment](#docker--deployment)
-11. [CI/CD & Releases](#cicd--releases)
-12. [Testing](#testing)
-13. [Produktiv-Deployment](#produktiv-deployment)
+2. [Hardware](#hardware)
+3. [Schnellstart](#schnellstart-für-einen-neuen-betreiber)
+4. [Architektur](#architektur)
+5. [Tech Stack](#tech-stack)
+6. [Features](#features)
+7. [Repository-Struktur](#repository-struktur)
+8. [Datenmodell](#datenmodell)
+9. [API-Referenz](#api-referenz)
+10. [Konfiguration](#konfiguration)
+11. [Entwicklung (lokal)](#entwicklung-lokal)
+12. [Docker & Deployment](#docker--deployment)
+13. [CI/CD & Releases](#cicd--releases)
+14. [Testing](#testing)
+15. [Produktiv-Deployment](#produktiv-deployment)
 
 ---
 
@@ -27,26 +29,82 @@ Ein vollständiges, selbst gehostetes Point-of-Sale-System für Gastronomie und 
 Das System verwaltet Produkte, Kategorien, Kassen-Stationen und Bestellungen. Bestellungen werden an einer Kasse aufgenommen, automatisch per Bon gedruckt und in Echtzeit auf stationsspezifischen TV-Bildschirmen (Vorlauf-Anzeige) dargestellt. Statistiken können zeitlich und nach Station/Produkt ausgewertet werden.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                        Browser                          │
-│   Kasse  │  Vorlauf-TV  │  Statistik  │  Verwaltung    │
-└──────────┴──────────────┴─────────────┴────────────────┘
+┌──────────────┐   ┌──────────────┐   ┌──────────────────┐
+│ Kassen-      │   │ Vorlauf-TV   │   │ Kundendisplay    │
+│ Terminal     │   │ (pro Station)│   │ (zum Kunden)     │
+│ (Touch)      │   │              │   │                  │
+└──────┬───────┘   └──────┬───────┘   └────────┬─────────┘
+       │  Browser (Chromium / beliebig)         │
+       └──────────────────┼─────────────────────┘
                           │ HTTP + WebSocket
-┌─────────────────────────▼───────────────────────────────┐
-│              Flask REST API  (Port 3000)                 │
-│   REST-Endpoints   │   Flask-SocketIO (Echtzeit)        │
-└──────────┬─────────┴──────────────────────────────────┬─┘
-           │                                             │
-    ┌──────▼──────┐                              ┌──────▼──────┐
-    │  MongoDB    │                              │    Redis    │
-    │  Port 27017 │                              │  (Caching)  │
-    └─────────────┘                              └─────────────┘
-           │
-    ┌──────▼──────┐
-    │ ESC/POS     │
-    │ Drucker     │  ← direkt via USB (außerhalb Docker)
-    └─────────────┘
+       ┌──────────────────▼──────────────────┐
+       │   Nginx + Angular-UI (Container)     │  Port 80
+       └──────────────────┬──────────────────┘
+                          │
+       ┌──────────────────▼──────────────────┐
+       │   Flask REST API   (Port 3000)       │  ← auf dem Host (USB-Drucker)
+       │   REST + Flask-SocketIO (Echtzeit)   │
+       └──────┬──────────────────────┬────────┘
+              │                      │
+       ┌──────▼──────┐        ┌──────▼──────────┐
+       │  MongoDB    │        │ ESC/POS-Drucker │
+       │  (Container)│        │ USB (Thermobon) │
+       └─────────────┘        └─────────────────┘
 ```
+
+---
+
+## Hardware
+
+Getestete Referenz-Konfiguration (ein Kassenplatz):
+
+| Komponente | Empfehlung | Hinweise |
+|---|---|---|
+| **Rechner** | Raspberry Pi 4 (4 GB), 64-Bit Raspberry Pi OS | Pi 3 (arm/v7) läuft auch, ist aber spürbar langsamer. Auch jeder x86-Mini-PC/NUC möglich. |
+| **Speicher** | SD-Karte ≥ 32 GB (besser: USB-SSD) | SSD deutlich robuster + schneller für die DB |
+| **Touchscreen** | beliebiger HDMI-Touchmonitor | für das Kassen-Terminal; Bedienung per Finger |
+| **Bondrucker** | Epson TM-T88III (USB) | ESC/POS-kompatibel. IDs im Code: `idVendor=0x0456`, `idProduct=0x0808`. Andere ESC/POS-Drucker gehen mit angepassten IDs/Profil. |
+| **Bonrolle** | Thermopapier 58 mm (oder 80 mm) | Papierbreite in den Einstellungen wählbar |
+| **Vorlauf-TVs** | je Station ein TV/Monitor mit Browser | z.B. günstiger Mini-PC/Fire-Stick/Pi im Kiosk-Modus auf `/preview` |
+| **Kundendisplay** | zweiter Monitor am Kassenplatz | zeigt `/customer-display`; per HDMI-Splitter oder zweitem Ausgang |
+| **Netzwerk** | LAN (empfohlen) oder stabiles WLAN | alle Geräte im selben Netz wie der Pi |
+
+**Wie es zusammenhängt:**
+- **Ein Pi** betreibt DB + UI (Container) und die API (direkt, wegen USB-Drucker).
+- Der **Drucker** hängt per USB am Pi.
+- **Kassen-Terminal, Vorlauf-TVs und Kundendisplay** sind einfach Browser (auf dem Pi selbst oder anderen Geräten im Netz), die die jeweilige Seite öffnen.
+- Wichtig: Kasse und Kundendisplay synchronisieren über `localStorage` → müssen im **selben Browser/Gerät** laufen (z.B. zwei Bildschirme am Pi).
+
+---
+
+## Schnellstart (für einen neuen Betreiber)
+
+```bash
+# 1. Voraussetzungen auf dem Pi
+curl -fsSL https://get.docker.com | sh && sudo usermod -aG docker $USER
+# ab-/anmelden, damit die docker-Gruppe greift
+
+# 2. Repo holen
+git clone https://github.com/mbay-ODW/POS.git && cd POS
+
+# 3. Konfiguration
+cp local.env.example .env      # .env liest die Host-API
+nano .env                       # DATABASE_HOST=mongodb://localhost:27017, JWT_SECRET setzen
+
+# 4. UI + DB starten (fertige Images, KEIN Bauen)
+docker compose -f docker-compose_pi.yml up -d
+
+# 5. API einrichten + starten (USB-Drucker)
+sudo apt install -y python3-venv python3-dev build-essential libffi-dev libusb-1.0-0 libjpeg-dev zlib1g-dev
+cd RestAPI && python3 -m venv venv && source venv/bin/activate
+pip install --upgrade pip && pip install -r requirements.txt
+python server.py
+```
+
+Danach **UI im Browser** unter `http://<pi-ip>` öffnen. Erst-Login:
+**`manager` / `manager123`** → sofort unter *Einstellungen → Benutzer* ändern.
+
+Details, Autostart und Troubleshooting: siehe [Produktiv-Deployment](#produktiv-deployment).
 
 ---
 
@@ -60,14 +118,17 @@ Single-Page-Application, ausgeliefert über Nginx. Kommuniziert mit der REST-API
 
 | Route | Komponente | Beschreibung |
 |---|---|---|
+| `/login` | `LoginComponent` | Anmeldung (JWT) |
 | `/bookings` | `BookingComponent` | Kasse — Produkte nach Station, Warenkorb, Checkout |
 | `/preview` | `PreviewComponent` | TV-Vorlauf — Echtzeit-Anzeige offener Bestellungen |
-| `/statistics` | `StatisticsComponent` | Auswertungen mit Charts und Heatmap |
-| `/products` | `ProductsComponent` | Produktverwaltung |
-| `/orders` | `OrdersComponent` | Bestellübersicht und -verwaltung |
-| `/categories` | `CategoriesComponent` | Kategorieverwaltung |
-| `/stations` | `StationsComponent` | Stationsverwaltung |
-| `/settings` | `SettingsComponent` | Systemeinstellungen |
+| `/customer-display` | `CustomerDisplayComponent` | Kundendisplay — Live-Warenkorb, Danke-/Pausentext (Vollbild) |
+| `/statistics` | `StatisticsComponent` | Auswertungen mit Charts und Heatmap (nur Manager) |
+| `/products` | `ProductsComponent` | Produktverwaltung (nur Manager) |
+| `/orders` | `OrdersComponent` | Bestellübersicht, serverseitig paginiert (nur Manager) |
+| `/categories` | `CategoriesComponent` | Kategorieverwaltung (nur Manager) |
+| `/stations` | `StationsComponent` | Stationsverwaltung (nur Manager) |
+| `/users` | `UsersComponent` | Benutzerverwaltung (nur Manager) |
+| `/settings` | `SettingsComponent` | Systemeinstellungen, 5 Tabs (nur Manager) |
 | `/home` | `HomeComponent` | Startseite |
 
 **Dienste (`/services`):**
@@ -86,7 +147,7 @@ Single-Page-Application, ausgeliefert über Nginx. Kommuniziert mit der REST-API
 
 ### Backend (Flask / Python 3.12)
 
-REST-API auf Basis von Flask-RESTX. Alle Endpunkte erben von `BaseList` (Collection) bzw. `SpecificBase` (einzelnes Dokument) — generische GET/POST/PUT/PATCH/DELETE-Implementierung mit optionalem Redis-Caching.
+REST-API auf Basis von Flask-RESTX. Alle Endpunkte erben von `BaseList` (Collection) bzw. `SpecificBase` (einzelnes Dokument) — generische GET/POST/PUT/PATCH/DELETE-Implementierung.
 
 **Schichten:**
 
@@ -97,9 +158,8 @@ utils/
   database.py           ← MongoDB-Singleton (lokal + Atlas)
   documents.py          ← Dekoratoren, Validierung, Serialisierung
   print.py              ← ESC/POS Bon-Druck (kategorisiert, mit Station)
-  socketio_instance.py  ← Flask-SocketIO Singleton (eventlet)
+  socketio_instance.py  ← Flask-SocketIO Singleton (optional; Fallback threading/Polling)
   log.py                ← Rotating File Logger, CI-resilient
-  cache.py              ← Redis-Cache via Flask-Caching
   limiter.py            ← Rate Limiting via Flask-Limiter
   initialize.py         ← DB-Startup-Checks
   authentication.py     ← JWT-Hilfsfunktionen
@@ -107,7 +167,7 @@ utils/
 
 ### Echtzeit (WebSocket)
 
-Bei jeder neuen Bestellung emittiert `OrdersList.post()` ein `new_order`-Event via Flask-SocketIO. Die Vorlauf-Anzeige empfängt dieses Event sofort — kein Polling nötig. Als Fallback greift ein 60-Sekunden-Intervall.
+Bei jeder neuen Bestellung emittiert `OrdersList.post()` ein `new_order`-Event via Flask-SocketIO. Die Vorlauf-Anzeige empfängt dieses Event sofort. Als robuster Fallback (v.a. auf dem Pi ohne eventlet) pollt sie zusätzlich alle 15 s (einstellbar unter *Einstellungen → Vorlauf*).
 
 ```
 Kasse → POST /api/v1/orders
@@ -165,7 +225,6 @@ Der ESC/POS-Drucker (Epson TM-T88III via USB, idVendor=0x0456, idProduct=0x0808)
 | eventlet | latest | Async-Worker für SocketIO |
 | PyMongo | latest | MongoDB-Treiber |
 | Flask-Limiter | latest | Rate Limiting |
-| Flask-Caching | latest | Redis-Cache |
 | python-escpos | latest | Bondrucker-Ansteuerung |
 | gunicorn | <22 | WSGI-Server (eventlet-Worker) |
 | PyJWT | latest | JWT-Authentifizierung |
@@ -176,7 +235,6 @@ Der ESC/POS-Drucker (Epson TM-T88III via USB, idVendor=0x0456, idProduct=0x0808)
 | Technologie | Zweck |
 |---|---|
 | MongoDB 6+ | Primäre Datenbank (lokale Instanz oder Atlas) |
-| Redis | Response-Caching |
 | Docker / Compose | Containerisierung |
 | Traefik | Reverse Proxy + TLS (Produktion) |
 | Authelia | Authentifizierung (Produktion) |
@@ -280,7 +338,6 @@ POS/
 │   │   ├── print.py                # ESC/POS Bondrucker (kategorisiert + Stationsname)
 │   │   ├── socketio_instance.py    # Flask-SocketIO Singleton (eventlet async_mode)
 │   │   ├── log.py                  # Rotating File Logger (CI-resilient: try/except)
-│   │   ├── cache.py                # Redis-Cache Wrapper (Flask-Caching)
 │   │   ├── limiter.py              # Rate Limiter (Flask-Limiter)
 │   │   ├── initialize.py           # DB-Startup-Checks
 │   │   ├── authentication.py       # JWT-Hilfsfunktionen
@@ -362,7 +419,7 @@ POS/
 ├── Database/                       # Lokales MongoDB-Datenverzeichnis (gitignored)
 ├── Logs/                           # Anwendungs-Logs (gitignored)
 ├── docker-compose.yml              # Produktiv-Stack (Traefik, Secrets, 2 Replicas)
-├── docker-compose_local.yml        # Lokaler Dev-Stack (MongoDB + Redis + UI + API)
+├── docker-compose_local.yml        # Lokaler Dev-Stack (MongoDB + UI + API)
 ├── docker-compose_testing.yml      # Test-Stack
 ├── run.sh                          # Start-Skript (./run.sh production|testing)
 ├── local.env                       # Lokale Env-Variablen (gitignored!)
@@ -568,7 +625,6 @@ Verbindung: `ws://<host>:3000` (socket.io)
 | `DATABASE_NAME` | Datenbankname | `POS` | `Production` |
 | `DATABASE_CERT_FILE` | X.509-Zertifikat (Atlas) | nicht nötig | `/run/secrets/DATABASE_CERT_FILE` |
 | `LOG_LEVEL` | Logging-Level | `DEBUG` | `WARNING` |
-| `CACHING` | Redis aktivieren | leer | `true` |
 | `FLASK_MONITORING_DASHBOARD_CONFIG` | Dashboard-Config | `./flask_config.cfg` | |
 
 > `local.env` ist in `.gitignore` — **niemals Credentials committen**.
@@ -589,7 +645,7 @@ Verbindung: `ws://<host>:3000` (socket.io)
 
 ### Voraussetzungen
 
-- Docker Desktop (für MongoDB + Redis)
+- Docker Desktop (für MongoDB)
 - Node.js 20+ und npm
 - Python 3.12+
 
@@ -641,8 +697,8 @@ docker compose -f docker-compose_local.yml down
 ### 4. Drucker lokal (ohne Container)
 
 ```bash
-# Nur DB + Cache im Container
-docker compose -f docker-compose_local.yml up -d mongodb redis
+# Nur DB im Container
+docker compose -f docker-compose_local.yml up -d mongodb
 
 # API direkt starten (mit USB-Zugriff)
 cd RestAPI && python server.py
@@ -671,7 +727,7 @@ cd RestAPI && python server.py
 
 | Datei | Beschreibung |
 |---|---|
-| `docker-compose_local.yml` | Lokaler Dev-Stack: MongoDB, Redis, UI, API |
+| `docker-compose_local.yml` | Lokaler Dev-Stack: MongoDB, UI, API |
 | `docker-compose_testing.yml` | Test-Umgebung |
 | `docker-compose.yml` | Produktion: Traefik, Authelia, 2 Replicas, Docker Secrets |
 
@@ -777,9 +833,9 @@ cd UI && npm run build
 
 ### Raspberry Pi 4 — Setup aus frischem Clone
 
-Der Pi nutzt `docker-compose_pi.yml`: inoffizieller ARM-MongoDB-Build,
-`mongo-express` Web-UI auf `:8081`, und die **API läuft direkt auf dem Host**
-(nicht im Container) für USB-Drucker-Zugriff.
+Der Pi nutzt `docker-compose_pi.yml`: inoffizieller ARM-MongoDB-Build +
+das fertige UI-Image von GHCR (kein Bauen auf dem Pi). Die **API läuft direkt
+auf dem Host** (nicht im Container) für USB-Drucker-Zugriff.
 
 ```bash
 # 1. Docker installieren
@@ -790,13 +846,14 @@ sudo usermod -aG docker $USER
 git clone https://github.com/mbay-ODW/POS.git && cd POS
 
 # 3. Konfiguration aus Vorlage
-cp local.env.example local.env
-nano local.env
+#    Die auf dem Host laufende API liest .env (nicht local.env!)
+cp local.env.example .env
+nano .env
 #   DATABASE_HOST=mongodb://localhost:27017   (API läuft auf dem Host!)
-#   DATABASE_NAME=POS
+#   DATABASE_NAME=POS                          (muss zum DB-Namen der Daten passen)
 #   JWT_SECRET=...eigenes langes Secret...
 
-# 4. Container starten (MongoDB + Redis + UI + mongo-express)
+# 4. Container starten (MongoDB + UI)
 docker compose -f docker-compose_pi.yml up -d
 
 # 5. Datenbank nachziehen (optional, falls vorhandene Daten)
@@ -829,19 +886,70 @@ pip install -r requirements.txt                 # falls neue Abhängigkeiten
 python server.py                                # API auf dem Host neu starten
 ```
 
-### Vorlauf-TV-Screens (Kiosk-Modus)
+### API-Autostart (systemd)
+
+Damit die API beim Booten automatisch startet (und nach Absturz neu startet),
+statt sie manuell im Terminal zu starten — `/etc/systemd/system/pos-api.service`:
+
+```ini
+[Unit]
+Description=POS REST API
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/POS/RestAPI
+ExecStart=/home/pi/POS/RestAPI/venv/bin/python server.py
+EnvironmentFile=/home/pi/POS/.env
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ```bash
-# Chromium Vollbild auf Raspberry Pi
-chromium-browser --kiosk --noerrdialogs --disable-infobars http://localhost/preview
+sudo systemctl daemon-reload
+sudo systemctl enable --now pos-api
+sudo systemctl status pos-api          # Status prüfen
+journalctl -u pos-api -f               # Live-Log
+```
+
+> Läuft die API per systemd, braucht der Nutzer USB-Druckerrechte:
+> `sudo usermod -aG lp,dialout pi` (einmal, dann neu starten).
+> Pfade (`pi`, `/home/pi/...`) ggf. an deinen Benutzer anpassen.
+
+### Rollen & Benutzer
+
+Beim ersten Start legt die API automatisch ein Manager-Konto an
+(`manager` / `manager123`, Passwort via `DEFAULT_MANAGER_PASSWORD` überschreibbar).
+
+| Rolle | Darf |
+|---|---|
+| **manager** | alles: Kasse, Vorlauf + Produkte, Kategorien, Stationen, Bestellungen, Statistik, Einstellungen, Benutzerverwaltung |
+| **personal** | nur Kasse + Vorlauf |
+
+Manager legt weiteres Personal unter *Einstellungen → Benutzer* an. **Standard-Passwort sofort ändern!**
+
+### Kiosk-Modus (TV-Screens & Kundendisplay)
+
+```bash
+# Vorlauf-TV (pro Station):
+chromium-browser --kiosk --noerrdialogs --disable-infobars http://<pi-ip>/preview
+
+# Kundendisplay (am Kassenplatz):
+chromium-browser --kiosk --noerrdialogs --disable-infobars http://<pi-ip>/customer-display
 
 # Autostart via ~/.config/autostart/kiosk.desktop
 [Desktop Entry]
 Type=Application
-Exec=chromium-browser --kiosk http://localhost/preview
+Exec=chromium-browser --kiosk http://<pi-ip>/preview
 ```
 
-Jeder TV wählt beim ersten Aufruf seine Station — die Auswahl wird in `localStorage` gespeichert und bleibt nach Neustart bestehen.
+Jeder Vorlauf-TV wählt beim ersten Aufruf seine Station — die Auswahl wird in `localStorage` gespeichert und bleibt nach Neustart bestehen.
+
+> **Kundendisplay-Hinweis:** Kasse und Kundendisplay tauschen den Live-Warenkorb über `localStorage` aus und müssen daher im **selben Browser** laufen (z.B. zweiter Monitor am Pi per HDMI, nicht ein separates Netzwerkgerät).
 
 ### MongoDB-Version-Kompatibilität
 
