@@ -53,6 +53,7 @@ export class BookingComponent implements OnInit, OnDestroy {
   // Checkout popup
   showPaymentPopup = false;
   paymentAmount = 0;
+  isCheckingOut = false;
   private popupTimer?: ReturnType<typeof setTimeout>;
 
   // Pause mode
@@ -72,10 +73,13 @@ export class BookingComponent implements OnInit, OnDestroy {
     this.sortMode = (localStorage.getItem(SORT_KEY) as SortMode) || 'name-asc';
     this.tileSize = Number(localStorage.getItem(TILE_SIZE_KEY)) || 140;
 
+    // Nach jedem der drei Ladevorgänge neu aufbauen — egal in welcher
+    // Reihenfolge sie eintreffen, der letzte Aufruf hat alle Daten.
     this.stationService.getStations().subscribe((r) => {
       this.stations = [ALL_STATION, ...r.data];
       const savedId = localStorage.getItem(STATION_KEY);
       this.selectedStation = this.stations.find(s => s._id === savedId) ?? ALL_STATION;
+      this.rebuildOrder();
     });
 
     this.productService.getProducts('?active=true').subscribe((r) => {
@@ -85,6 +89,7 @@ export class BookingComponent implements OnInit, OnDestroy {
 
     this.categoryService.getCategories().subscribe((r) => {
       this.categories = r.data;
+      this.rebuildOrder();
     });
 
     this.broadcastDisplay('active');
@@ -274,6 +279,11 @@ export class BookingComponent implements OnInit, OnDestroy {
   // ── Checkout ──────────────────────────────────────────────────────────────
 
   checkout(): void {
+    // Guard gegen Doppelklick: keine zweite Bestellung, solange die erste läuft
+    if (this.isCheckingOut || this.cart.length === 0) return;
+    this.isCheckingOut = true;
+
+    const amountAtCheckout = this.total;   // festhalten, bevor reset() 0 setzt
     const order: Order = {
       orders: this.cart,
       total: this.total,
@@ -298,19 +308,21 @@ export class BookingComponent implements OnInit, OnDestroy {
       })
     ).subscribe(
       () => {
-        // Show payment popup
+        // Show payment popup (Betrag vor reset() gemerkt)
         const popupSecs = Number(this.appSettings.get('pos.checkout_popup_duration')) || 5;
-        this.paymentAmount = this.total;
+        this.paymentAmount = amountAtCheckout;
         this.showPaymentPopup = true;
         this.popupTimer = setTimeout(() => this.showPaymentPopup = false, popupSecs * 1000);
 
-        // Broadcast thank-you to customer display
         this.broadcastDisplay('thankyou');
-
         this.notificationService.info('Bestellung erfolgreich');
         this.reset();
+        this.isCheckingOut = false;
       },
-      (error) => console.error('Checkout error:', error)
+      (error) => {
+        console.error('Checkout error:', error);
+        this.isCheckingOut = false;
+      }
     );
   }
 

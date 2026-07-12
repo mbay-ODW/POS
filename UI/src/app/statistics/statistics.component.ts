@@ -67,8 +67,12 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       from: [this.toDateString(thirtyDaysAgo)],
       to:   [this.toDateString(today)],
       station_id: [''],
+      product_id: [''],
     });
   }
+
+  /** Vollständige Produktliste für das Dropdown (bleibt bei Produktfilter erhalten). */
+  productOptions: { id: string; name: string }[] = [];
 
   ngOnInit(): void {
     this.stationService.getStations().subscribe(r => this.stations = r.data);
@@ -79,7 +83,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   load(): void {
     this.isLoading = true;
-    const { from, to, station_id } = this.filterForm.value;
+    const { from, to, station_id, product_id } = this.filterForm.value;
     const params: any = {};
     if (from) params.from = new Date(from).toISOString();
     if (to) {
@@ -88,18 +92,28 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       params.to = d.toISOString();
     }
     if (station_id) params.station_id = station_id;
+    if (product_id) params.product_id = product_id;
 
     this.statsService.getStatistics(params).subscribe({
       next: (d) => {
         this.data = d;
+        // Dropdown-Optionen nur ohne Produktfilter aktualisieren, damit die
+        // Liste nicht auf das eine gefilterte Produkt zusammenschrumpft.
+        if (!product_id) {
+          this.productOptions = d.products.map(p => ({ id: p.id, name: p.name }));
+        }
         this.buildHeatmap(d);
         this.isLoading = false;
         this.cdr.detectChanges();
-        // wait one tick for canvas to render
         setTimeout(() => this.renderCharts(d), 0);
       },
       error: () => { this.isLoading = false; }
     });
+  }
+
+  get selectedProductName(): string {
+    const id = this.filterForm.value.product_id;
+    return this.productOptions.find(p => p.id === id)?.name ?? '';
   }
 
   private buildHeatmap(d: StatisticsData): void {

@@ -133,10 +133,10 @@
       <p *ngIf="cart.length === 0" class="empty-cart">Warenkorb ist leer</p>
 
       <button mat-raised-button color="primary" class="checkout-btn"
-              [disabled]="cart.length === 0"
+              [disabled]="cart.length === 0 || isCheckingOut"
               (click)="checkout()">
         <mat-icon>shopping_cart_checkout</mat-icon>
-        Checkout
+        {{ isCheckingOut ? 'Wird verarbeitet…' : 'Checkout' }}
       </button>
     </div>
 

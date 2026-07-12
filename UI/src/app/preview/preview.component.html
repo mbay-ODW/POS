@@ -27,27 +27,60 @@
       <mat-icon>storefront</mat-icon>
       {{ selectedStation.name }}
     </div>
+
+    <!-- Live-Uhr -->
+    <div class="tv-clock">{{ now | date:'HH:mm:ss' }}</div>
+
     <div class="tv-meta">
       <span>Vorlauf: {{ vorlauf }} Min</span>
-      <span *ngIf="lastUpdated">· {{ lastUpdated | date:'HH:mm:ss' }}</span>
+      <span>· {{ orderCount }} Bestellung(en)</span>
     </div>
+
+    <!-- Ansicht umschalten -->
+    <div class="view-toggle">
+      <button [class.active]="viewMode === 'aggregated'" (click)="setViewMode('aggregated')" title="Nach Produkt">
+        <mat-icon>view_list</mat-icon>
+      </button>
+      <button [class.active]="viewMode === 'orders'" (click)="setViewMode('orders')" title="Nach Bestellung">
+        <mat-icon>grid_view</mat-icon>
+      </button>
+    </div>
+
     <button mat-icon-button class="config-btn" (click)="showConfig()" title="Station wechseln">
       <mat-icon>settings</mat-icon>
     </button>
   </header>
 
-  <div class="tv-content" *ngIf="aggregatedItems.length > 0; else noOrders">
+  <!-- Aggregierte Ansicht: Menge je Produkt -->
+  <div class="tv-content" *ngIf="viewMode === 'aggregated' && aggregatedItems.length > 0">
     <div class="item-row" *ngFor="let item of aggregatedItems">
       <span class="item-name">{{ item.name }}</span>
       <span class="item-amount">{{ item.amount }}</span>
     </div>
   </div>
 
-  <ng-template #noOrders>
-    <div class="no-orders">
-      <mat-icon>check_circle_outline</mat-icon>
-      <p>Keine offenen Bestellungen im Vorlauf</p>
+  <!-- Bestellungsbezogene Ansicht: eine Kachel pro Bestellung -->
+  <div class="orders-grid" *ngIf="viewMode === 'orders' && orders.length > 0">
+    <div class="order-tile" *ngFor="let order of orders">
+      <div class="order-tile-head">
+        <span class="order-nr">#{{ shortId(order) }}</span>
+        <span class="order-time">{{ order.creationTime | date:'HH:mm' }}</span>
+      </div>
+      <div class="order-tile-items">
+        <div class="order-line" *ngFor="let item of order.orders">
+          <span class="ol-amount">{{ item.amount }}×</span>
+          <span class="ol-name">{{ item.product.name }}</span>
+        </div>
+      </div>
     </div>
-  </ng-template>
+  </div>
+
+  <!-- Leerzustand -->
+  <div class="no-orders"
+       *ngIf="(viewMode === 'aggregated' && aggregatedItems.length === 0) ||
+              (viewMode === 'orders' && orders.length === 0)">
+    <mat-icon>check_circle_outline</mat-icon>
+    <p>Keine offenen Bestellungen im Vorlauf</p>
+  </div>
 
 </div>

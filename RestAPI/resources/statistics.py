@@ -28,6 +28,8 @@ class Statistics(Resource):
             from_str = request.args.get('from')
             to_str = request.args.get('to')
 
+            product_id = request.args.get('product_id')
+
             match = {}
             if station_id:
                 match['station_id'] = station_id
@@ -39,9 +41,15 @@ class Statistics(Resource):
                     time_filter['$lte'] = datetime.fromisoformat(to_str.replace('Z', '+00:00'))
                 match['creationTime'] = time_filter
 
+            # Für Stunde/Tag/Heatmap zusätzlich nach Produkt filterbar
+            # (zeigt, WANN ein bestimmtes Produkt gut lief).
+            time_match = dict(match)
+            if product_id:
+                time_match['orders.product.id'] = product_id
+
             # ── Orders by hour of day ────────────────────────────────────
             orders_by_hour = list(self.orders.aggregate([
-                {'$match': match},
+                {'$match': time_match},
                 {'$group': {
                     '_id': {'$hour': {'date': '$creationTime', 'timezone': STATS_TZ}},
                     'count': {'$sum': 1}
@@ -54,7 +62,7 @@ class Statistics(Resource):
 
             # ── Orders by day ────────────────────────────────────────────
             orders_by_day = list(self.orders.aggregate([
-                {'$match': match},
+                {'$match': time_match},
                 {'$group': {
                     '_id': {'$dateToString': {'format': '%Y-%m-%d', 'date': '$creationTime', 'timezone': STATS_TZ}},
                     'count': {'$sum': 1}
@@ -65,7 +73,7 @@ class Statistics(Resource):
             # ── Heatmap: weekday × hour ───────────────────────────────────
             # $dayOfWeek: 1=Sun … 7=Sat → remap to 0=Mon … 6=Sun
             heatmap_raw = list(self.orders.aggregate([
-                {'$match': match},
+                {'$match': time_match},
                 {'$group': {
                     '_id': {
                         'weekday': {'$dayOfWeek': {'date': '$creationTime', 'timezone': STATS_TZ}},
@@ -84,25 +92,39 @@ class Statistics(Resource):
                 })
 
             # ── Products totals ───────────────────────────────────────────
+            # Gruppierung nach Produkt-ID (nicht Name!), damit ein umbenanntes
+            # Produkt nicht doppelt auftaucht. Aktueller Name wird danach aus
+            # der products-Collection aufgelöst.
             products_totals = list(self.orders.aggregate([
                 {'$match': match},
                 {'$unwind': '$orders'},
                 {'$group': {
-                    '_id': {
-                        'id': '$orders.product.id',
-                        'name': '$orders.product.name',
-                        'shortName': '$orders.product.shortName'
-                    },
+                    '_id': '$orders.product.id',
                     'total_amount': {'$sum': '$orders.amount'},
-                    'total_revenue': {'$sum': {'$multiply': ['$orders.product.price', '$orders.amount']}}
+                    'total_revenue': {'$sum': {'$multiply': ['$orders.product.price', '$orders.amount']}},
+                    'order_ids': {'$addToSet': '$_id'},
+                    'fallback_name': {'$first': '$orders.product.name'},
+                    'fallback_short': {'$first': '$orders.product.shortName'},
                 }},
                 {'$sort': {'total_amount': -1}},
-                {'$limit': 20}
             ]))
+            # Aktuelle Namen auflösen
+            prod_ids = [p['_id'] for p in products_totals if p['_id']]
+            name_map = {}
+            if prod_ids:
+                try:
+                    for pr in self.Database.db.products.find(
+                        {'_id': {'$in': [ObjectId(pid) for pid in prod_ids if pid]}}
+                    ):
+                        name_map[str(pr['_id'])] = pr.get('shortName') or pr.get('name')
+                except Exception:
+                    pass
             products = [
                 {
-                    'name': p['_id'].get('shortName') or p['_id']['name'],
+                    'id': p['_id'],
+                    'name': name_map.get(str(p['_id']), p.get('fallback_short') or p.get('fallback_name') or 'Unbekannt'),
                     'total_amount': p['total_amount'],
+                    'order_count': len(p.get('order_ids', [])),
                     'total_revenue': round(p['total_revenue'], 2)
                 }
                 for p in products_totals

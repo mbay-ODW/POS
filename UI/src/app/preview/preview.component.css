@@ -69,9 +69,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   padding: 16px 32px;
   background: #1a1a2e;
   border-bottom: 3px solid #1976d2;
+  flex-wrap: wrap;
 }
 
 .tv-station-name {
@@ -153,3 +155,69 @@
 .no-orders p {
   font-size: 1.5rem;
 }
+
+/* ── Live-Uhr ─────────────────────────────────── */
+.tv-clock {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+/* ── Ansicht-Umschalter ───────────────────────── */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 4px;
+}
+.view-toggle button {
+  background: transparent;
+  border: none;
+  color: #777;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.view-toggle button.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+/* ── Bestellungs-Kacheln ──────────────────────── */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.order-tile {
+  background: #1a1a1a;
+  border-radius: 10px;
+  border-left: 5px solid #1976d2;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-tile-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 8px;
+}
+.order-nr { font-size: 1.1rem; font-weight: 700; color: #90caf9; }
+.order-time { font-size: 1.4rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+
+.order-tile-items { display: flex; flex-direction: column; gap: 6px; }
+.order-line { display: flex; gap: 10px; font-size: 1.5rem; }
+.ol-amount { color: #90caf9; font-weight: 700; min-width: 48px; }
+.ol-name { color: #eee; }
